@@ -1,6 +1,6 @@
 # Data Civilizer 2.0
 
-1. Clone the DC2 repository
+### Clone the DC2 repository
 ```
 # clone using https
 git clone --recursive https://github.com/elkindi/dc2.git
