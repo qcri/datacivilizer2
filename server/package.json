@@ -1,0 +1,32 @@
+{
+  "name": "dc2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.17.0",
+    "topological-sort": "^0.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elkindi/dc2.git"
+  },
+  "keywords": [
+    "data",
+    "cleaning",
+    "workflow",
+    "system",
+    "debugging"
+  ],
+  "author": "elkindi rezig",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elkindi/dc2/issues"
+  },
+  "homepage": "https://github.com/elkindi/dc2#readme"
+}
