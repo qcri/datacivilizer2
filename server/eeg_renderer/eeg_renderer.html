@@ -6,6 +6,7 @@
 </div>
 </body>
 <script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
 <script src="data3.js"></script>
 <script src="lpf.js"></script>
 <script>
@@ -175,8 +176,23 @@
         .attr("viewBox", viewBox + width + " " + height)
         .style("display", "inline-block");
 
-    eegLabelRendering(outersvg, data_series[0], width, height, montage);
-    eegRendering(eegsvg, data_series[1], width, height, {}, 1.0, montage);
+    $.ajax({
+        url: '/viz2',
+        type: 'GET',
+        // dataType: 'text',
+        // data: {"pathJSON": "./Data/data_json.json"},
+        data: {"pathJSON": "./Data/out_-1.json"},
+        dataType: 'json',
+        success: function (dataArray) {
+            console.log("success iFrame");
+            var data_series = dataArray;
+            if (data_series.length > 0) {
+                eegLabelRendering(outersvg, data_series[0], width, height, montage);
+                eegRendering(eegsvg, data_series[1], width, height, {}, 1.0, montage);
+            }
+        }
+    });
+
 
 </script>
 </html>

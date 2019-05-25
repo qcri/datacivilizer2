@@ -438,43 +438,23 @@
             window.location = window.location.href + "download_output?" + node_key; //add "download..." to the URL (get)
         }
 
-        function visualizeInput(e, obj) {
-            console.log(obj.part.adornedPart.data.key);
-            var node_key = obj.part.adornedPart.data.key;
-            window.location = window.location.href + "download_output?" + node_key;
-        }
-
-        //todo getData
-        // get the data here, and set data_series (json)
         function visualizeOutput(e, obj) {
-            $.ajax({
-                url: '/viz2',
-                type: 'GET',
-                dataType: 'text',
-                data: {"pathJSON": "./Data/data_json.json"},
-                dataType: 'json',
-                success: function (dataIn) {
-                    console.log("success!");
-                    console.log(dataIn);
-                }
-            });
+            var node_key = obj.part.adornedPart.data.key;
+            console.log("node key");
+            console.log(node_key);
+            console.log("node key ---");
 
-            // var target = document.getElementById("workBench");
-            // var newFrame = document.createElement("iframe");
-            // // <iframe id="iframeViz" src="viz" height="620" width="50%"></iframe>
-            // newFrame.setAttribute("id", "iframeViz");
-            // newFrame.setAttribute("src", "viz");
-            // newFrame.setAttribute("height", "620");
-            // newFrame.setAttribute("width", "50%");
-            // target.appendChild(newFrame);
-
-
-            console.log("iFrame refresh");
-            // data = [];
-            // console.log(data);
             var iframe = document.getElementById('iframeViz');
-            iframe.setAttribute("src", "viz");
-            iframe.src = iframe.src;
+
+
+            $.get('/setViz',
+                {"pathJSON": "./Data/out_" + node_key + ".json"})
+                .done(function (response) {
+                    console.log("ajax call");
+                    // console.log("msg: " + msg);
+                    iframe.setAttribute("src", "viz");
+                    iframe.src = iframe.src;
+                });
         }
 
         function request_pipeline(p) {
