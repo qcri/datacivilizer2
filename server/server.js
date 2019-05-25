@@ -18,28 +18,20 @@ var dataVizPath = "";
 const {TopologicalSort} = require('topological-sort');
 app.use(express.json());
 
-app.get('/viz', function (request, response) {
+app.get('/vizFrame', function (request, response) {
     response.sendfile(path.resolve('./eeg_renderer/eeg_renderer.html'));
 });
 
 app.get('/setViz', function (request, response) {
-    console.log("--- setViz ---");
     dataVizPath = request.query.pathJSON;
-    console.log(dataVizPath);
-    console.log("---------------");
-    response.sendfile(path.resolve('./eeg_renderer/lpf.js'));
-    // response.send("dataVizPath");
+    response.send("ok");
 });
 
-app.get('/viz2', function (request, response) {
-    // var path = request.query.pathJSON;
-    // var rawdata = fs.readFileSync(path);
-    // var data_series = JSON.parse(rawdata);
+app.get('/vizData', function (request, response) {
     var rawdata = fs.readFileSync(dataVizPath);
     var data_series = JSON.parse(rawdata);
     console.log("data")
     response.send(data_series)
-    // response.sendfile(path.resolve('./eeg_renderer/eeg_renderer.html'));
 });
 
 app.get('/lpf.js', function (request, response) {

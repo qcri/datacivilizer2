@@ -440,19 +440,12 @@
 
         function visualizeOutput(e, obj) {
             var node_key = obj.part.adornedPart.data.key;
-            console.log("node key");
-            console.log(node_key);
-            console.log("node key ---");
-
             var iframe = document.getElementById('iframeViz');
-
 
             $.get('/setViz',
                 {"pathJSON": "./Data/out_" + node_key + ".json"})
                 .done(function (response) {
-                    console.log("ajax call");
-                    // console.log("msg: " + msg);
-                    iframe.setAttribute("src", "viz");
+                    iframe.setAttribute("src", "vizFrame");
                     iframe.src = iframe.src;
                 });
         }
