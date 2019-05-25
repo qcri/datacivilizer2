@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<div id="eegdiv" style="text-align: center">
+    <svg id="outersvg"></svg>
+</div>
+</body>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="data3.js"></script>
+<script src="lpf.js"></script>
+<script>
+
+    var eegRendering = function (svg, data, width, height, params, magnitude, montage) {
+
+        if (typeof magnitude != "number")
+            magnitude = 1;
+
+        // create a new g
+        var g = svg.append("g");
+
+        // prepare raw data
+        var segNum = data.length;
+        var numPoints = 400;
+        var numChannels = (montage == 2 ? 24 : 23);
+        var m1 = [8, 4, 0, 13, 11, 6, 16, 18, -1, 10, 2, 15, -1, 9, 5, 1, 14, 12, 7, 17, 19, -1, 3];
+        var m2First = [8, 6, 16, 18, -1, 9, 7, 17, 19, -1, 8, 4, 0, 13, -1, 9, 5, 1, 14, -1, 10, 2, -1, 3];
+        var m2Second = [6, 16, 18, 11, -1, 7, 17, 19, 12, -1, 4, 0, 13, 11, -1, 5, 1, 14, 12, -1, 2, 15, -1, -1];
+
+        var raw = [];
+        //var lpf = new LPF(0.2);
+        for (var i = 0; i < segNum; i++) {
+            // console.log(i);
+            var curSeg = [];
+            for (var k = 0; k < numChannels; k++) {
+                var curSegChn = [];
+                if (montage == 1 || montage == 3) {
+                    if (m1[k] < 0)
+                        curSegChn = Array.apply(null, Array(numPoints)).map(Number.prototype.valueOf, 0);
+                    else
+                    // console.log(data);
+                        curSegChn = data[i][m1[k] + 4].split(",");
+                } else if (montage == 2) {
+                    if (m2First[k] < 0 && m2Second[k] < 0)
+                        curSegChn = Array.apply(null, Array(numPoints)).map(Number.prototype.valueOf, 0);
+                    else if (m2Second[k] < 0)
+                        curSegChn = data[i][m2First[k] + 4].split(",");
+                    else {
+                        var firstArray = data[i][m2First[k] + 4].split(",");
+                        var secondArray = data[i][m2Second[k] + 4].split(",");
+                        for (var p = 0; p < numPoints; p++)
+                            curSegChn.push(firstArray[p] - secondArray[p])
+                    }
+                }
+                for (var p = 0; p < numPoints; p++)
+                    curSegChn[p] = +curSegChn[p];
+                //curSegChn = lpf.smoothArray(curSegChn);
+                curSeg.push(curSegChn);
+            }
+            raw.push(curSeg);
+        }
+        ;
+
+        // if montage is 3, subtract avg
+        if (montage == 3)
+            for (var i = 0; i < segNum; i++)
+                for (var j = 0; j < numPoints; j++) {
+                    var sum = 0, count = 0;
+                    for (var k = 0; k < numChannels - 1; k++)
+                        if (m1[k] > 0)
+                            sum += (+raw[i][k][j]), count++;
+                    var avg = sum / count;
+                    for (var k = 0; k < numChannels - 1; k++)
+                        if (m1[k] > 0)
+                            raw[i][k][j] = raw[i][k][j] - avg;
+                }
+
+        // cook data
+        var pixelPerSeg = 250;
+        var channelHeight = height / numChannels;
+        var channelMargin = 5;
+        var minV = -500, maxV = 500;
+        var dataset = [];
+        for (var k = 0; k < numChannels; k++) {
+            var startingY = k * channelHeight;
+            for (var i = 0; i < segNum; i++) {
+                var curSeg = [];
+                var curSegChn = [];
+                for (var j = 0; j < numPoints; j++)
+                    curSegChn.push(+raw[i][k][j]);
+                for (var j = 0; j < numPoints; j++) {
+                    if (curSegChn[j] > maxV)
+                        curSegChn[j] = maxV;
+                    else if (curSegChn[j] < minV)
+                        curSegChn[j] = minV;
+                    curSegChn[j] *= magnitude;
+                    curSeg.push({
+                        "x": pixelPerSeg * (+data[i][3]) + j * pixelPerSeg / numPoints,
+                        "y": d3.scaleLinear().domain([minV, maxV])
+                            .range([0, channelHeight - channelMargin])(curSegChn[j]) + startingY
+                    });
+                }
+                dataset.push(curSeg);
+            }
+        }
+
+        // console.log(data);
+
+        // d3 line object
+        var line = d3.line()
+            .x(function (d) {
+                return d.x;
+            })
+            .y(function (d) {
+                return d.y;
+            });
+
+        // create
+        for (var i = 0; i < numChannels; i++) {
+            if (montage == 2 && m2First[i] < 0)
+                continue;
+            if (montage == 1 || montage == 3)
+                if (m1[i] < 0)
+                    continue;
+            for (var j = 0; j < segNum; j++) {
+                g.append('path')
+                    .attr('class', 'line')
+                    .attr('d', line(dataset[j + i * segNum]))
+                    .attr('fill', 'none')
+                    .attr('stroke-width', 1)
+                    .attr('stroke', 'black')
+                    .node().__data__ = data[j];
+            }
+        }
+    };
+
+    var eegLabelRendering = function (svg, data, width, height, montage) {
+
+        g = svg.append("g");
+
+        var channel_name;
+        var numChannels = (montage == 2 ? 24 : 23);
+        if (montage == 1)
+            channel_name = ["Fp1", "F3", "C3", "P3", "O1", "F7", "T3", "T5", "", "Fz", "Cz", "Pz", "", "Fp2", "F4", "C4", "P4", "O2", "F8", "T4", "T6", "", "EKG"];
+        else if (montage == 2)
+            channel_name = ["Fp1-F7", "F7-T3", "T3-T5", "T5-O1", "", "Fp2-F8", "F8-T4", "T4-T6", "T6-O2", "", "Fp1-F3", "F3-C3", "C3-P3", "P3-O1", "", "Fp2-F4", "F4-C4", "C4-P4", "P4-O2", "", "Fz-Cz", "Cz-Pz", "", "EKG"];
+        else if (montage == 3)
+            channel_name = ["Fp1-AVE", "F3-AVE", "C3-AVE", "P3-AVE", "O1-AVE", "F7-AVE", "T3-AVE", "T5-AVE", "", "Fz-AVE", "Cz-AVE", "Pz-AVE", "", "Fp2-AVE", "F4-AVE", "C4-AVE", "P4-AVE", "O2-AVE", "F8-AVE", "T4-AVE", "T6-AVE", "", "EKG"];
+
+        var layerHeight = (height) / numChannels;
+        g.selectAll("g")
+            .data(channel_name)
+            .enter()
+            .append("text")
+            .attr("font-size", "15px")
+            .attr("x", 30)
+            .attr("y", function (d, i) {
+                return layerHeight / 2 + i * layerHeight;
+            })
+            .text(function (d) {
+                return d;
+            });
+    };
+
+    var width = 1000;
+    var height = 1000;
+    var montage = 1;
+    var outersvg = d3.select("#outersvg")
+        .attr("width", width + 50)
+        .attr("height", height);
+    var eegsvg = outersvg.append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("x", 50)
+        .attr("y", 0)
+        .attr("viewBox", viewBox + width + " " + height)
+        .style("display", "inline-block");
+
+    eegLabelRendering(outersvg, data_series[0], width, height, montage);
+    eegRendering(eegsvg, data_series[1], width, height, {}, 1.0, montage);
+
+</script>
+</html>

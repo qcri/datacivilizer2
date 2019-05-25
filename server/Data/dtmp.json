@@ -1,0 +1,22 @@
+{
+  "data":[
+    {
+      "name":"Krunal",
+      "age":25,
+      "city":"Rajkot",
+      "degree": "BE"
+    },
+    {
+      "name":"Ankit",
+      "age":23,
+      "city":"Rajkot",
+      "degree": "MCA"
+    },
+    {
+      "name":"Nehal",
+      "age":30,
+      "city":"Rajkot",
+      "degree": "BE"
+    }
+  ]
+}
