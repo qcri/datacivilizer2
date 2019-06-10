@@ -47,7 +47,7 @@ app.get('/data3.js', function (request, response) {
 });
 
 app.get('/data_from_file', function (request, response) {
-    response.sendfile(path.resolve('./Data/data_json.json'));
+    response.sendfile(path.resolve('./Data/data_json_new.json'));
 });
 
 app.get('/go.js', function (request, response) {

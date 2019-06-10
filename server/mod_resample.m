@@ -37,7 +37,8 @@ if Fs~=200
     Fs = 200;
 end
 
-
+%dlmwrite([pwd, '/Data/resample.txt'], data);
+dlmwrite([pwd, '/Data/', arg2, '.txt'], data);
 save([pwd, '/Data/', arg2], 'data', 'startTime', 'Fs');
 
 end

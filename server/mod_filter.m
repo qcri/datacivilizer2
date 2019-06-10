@@ -36,5 +36,6 @@ end
 ekg = filter(B1, A1, ekg);
 ekg = filter(B2, A2, ekg);
 
+dlmwrite([pwd, '/Data/', arg2, '.txt'], data);
 save([pwd, '/Data/', arg2], 'data', 'startTime', 'Fs');
 end

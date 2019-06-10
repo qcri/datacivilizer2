@@ -8,17 +8,17 @@ clear;
 clc; 
 format compact; 
  
-addpath([pwd, '\Callbacks\'])
+addpath([pwd, '/Callbacks/'])
 
 %%%% Step 1 Load your data %%%%
-load([pwd, '\Data\SampleData2.mat'])
+load([pwd, '/Data/SampleData2.mat'])
 % data [5xN] 5 channels [Fp1; Fp2; Fpz; F7; F8]
 % t: time number vector in unit [days]
 % Fs: sampling rate
 
 %%%% Step 2 Get binary segmentation %%%%    
 [z,a,e,s]=fcn_IdentifyArtifact(data,Fs);
-save([pwd, '\Data\output_binary.mat'],'z','a','e','t','Fs'); 
+save([pwd, '/Data/output_binary.mat'],'z','a','e','t','Fs'); 
 
 
 %%%% Step 3 Compute the BSP  %%%%
@@ -28,7 +28,7 @@ sig=(1e-6)/3; z0=log(1); z1=z0; sig0=sig; W0=sig; W1=W0;
 %Nt=[]; An=[]; tn=[]; an=[]; tmin=inf; tmax=0; tt=[];
   
 % get data -- t,z,a [t is in actual time, dt in days]
-load([pwd, '\Data\output_binary.mat'])
+load([pwd, '/Data/output_binary.mat'])
 
 % prepare the current chunk of data for bsp algorithm
 nsec=1; 
@@ -70,4 +70,6 @@ if (isnan(z1)||isnan(W1)); W1=1; z1=1; end
 [W1,z1, bsp]=fcnGetBSP_WithMissingData(Nt,N,W1,z1,sig); 
 
 
- 
+dlmwrite([pwd, '/Data/out.txt'], bsp);
+save([pwd, '/Data/output_binary2.mat'],'W1','z1','bsp'); 
+

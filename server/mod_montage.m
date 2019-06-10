@@ -27,5 +27,6 @@ eeg_mon = eeg;                                          % monopolar montage %
 eeg_bi = fcn_LBipolar(eeg);                             % L-bipolar montage %
 eeg_car = eeg - repmat(mean(eeg, 1), size(eeg, 1), 1);  % common average ref. montage %
 
+dlmwrite([pwd, '/Data/', arg2, '.txt'], data);
 save([pwd, '/Data/', arg2], 'data', 'startTime', 'Fs');
 end

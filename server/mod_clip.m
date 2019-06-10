@@ -37,5 +37,6 @@ eeg_bi(eeg_bi<-500) = -500;
 eeg_car(eeg_car>500)  = 500;
 eeg_car(eeg_car<-500) = -500;
 
+dlmwrite([pwd, '/Data/', arg2, '.txt'], data);
 save([pwd, '/Data/', arg2], 'data', 'startTime', 'Fs');
 end

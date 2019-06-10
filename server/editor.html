@@ -442,8 +442,15 @@
             var node_key = obj.part.adornedPart.data.key;
             var iframe = document.getElementById('iframeViz');
 
+            console.log("visualizing: \"./Data/out_" + node_key + ".json\"");
+
             $.get('/setViz',
+                // todo this is the code for getting the viz of the box:
                 {"pathJSON": "./Data/out_" + node_key + ".json"})
+                // this was test ok:
+                // {"pathJSON": "./Data/data_json.json"})
+                // todo this is tets of the data from matlab -- generated with the Jupyter notebook
+                // {"pathJSON": "./Data/tmp_final_stuct.json"})
                 .done(function (response) {
                     iframe.setAttribute("src", "vizFrame");
                     iframe.src = iframe.src;
@@ -479,6 +486,7 @@
     function send() {
         saveDiagramProperties();
         console.log(myDiagram.model.toJson());
+
         $.ajax({
             url: '/run',
             type: 'post',

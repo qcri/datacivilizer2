@@ -79,7 +79,9 @@
         var pixelPerSeg = 250;
         var channelHeight = height / numChannels;
         var channelMargin = 5;
-        var minV = -500, maxV = 500;
+        // var minV = -500, maxV = 500;
+        // todo this is the scale for the visualization
+        var minV = -50, maxV = 50;
         var dataset = [];
         for (var k = 0; k < numChannels; k++) {
             var startingY = k * channelHeight;
@@ -165,6 +167,7 @@
     var width = 1000;
     var height = 1000;
     var montage = 1;
+    // var montage = 3;
     var outersvg = d3.select("#outersvg")
         .attr("width", width + 50)
         .attr("height", height);
@@ -181,7 +184,8 @@
         type: 'GET',
         // dataType: 'text',
         // data: {"pathJSON": "./Data/data_json.json"},
-        data: {"pathJSON": "./Data/out_-1.json"},
+        // data: {"pathJSON": "./Data/out_-1.json"},
+        data: {"pathJSON": "empty_field"},
         dataType: 'json',
         success: function (dataArray) {
             console.log("success iFrame");
