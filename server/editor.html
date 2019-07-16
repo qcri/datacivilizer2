@@ -18,6 +18,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <script id="code">
         function init() {
+
             if (window.goSamples) goSamples(); // init for these samples -- you don't need to call this
             var GOJS = go.GraphObject.make; // for conciseness in defining templates
 
@@ -408,7 +409,6 @@
                     });
         }
 
-
         // Show the diagram's model in JSON format that the user may edit
         function save() {
             saveDiagramProperties(); // do this first, before writing to JSON
@@ -482,23 +482,60 @@
 </head>
 
 <body onload="init()">
+<script src="/versioningUtils.js"></script>
 <script type="text/javascript">
+
+    var maxModelId = 0;
+
+    var maxSize = 1000;
+    var hashTable = new Array(maxSize);
+    var runCounter = [];
+
+    // saveModelVersions(); // Use this to reset hash table and model id's
+
+    getModelVersions();
+
     function send() {
         saveDiagramProperties();
         console.log(myDiagram.model.toJson());
+        modelJsonString = myDiagram.model.toJson();
+
+        modelHash = getHash(modelJsonString, maxSize);
+
+        if (hashTable[modelHash] === undefined || hashTable[modelHash] === null) {
+            modelId = maxModelId;
+            runNo = 1;
+            maxModelId += 1;
+            hashTable[modelHash] = modelId;
+            runCounter[modelId] = runNo;
+        } else {
+            modelId = hashTable[modelHash];
+            runCounter[modelId] += 1;
+            runNo = runCounter[modelId];
+        }
+
+        saveModelVersions();
+
+        console.log(modelHash);
+        console.log(modelId);
+        console.log(runNo);
+
+        modelJson = JSON.parse(modelJsonString);
+        modelJson['modelId'] = modelId;
+        modelJson['runNo'] = runNo;
+        modelJsonString = JSON.stringify(modelJson);
 
         $.ajax({
             url: '/run',
             type: 'post',
             processData: false,
-            dataType: 'json',
-            data: myDiagram.model.toJson(),
+            data: modelJsonString,
             contentType: "application/json; charset=utf-8",
             success: function (data) {
                 console.log("success!");
             }
         });
-    }
+    };
 </script>
 <script>
     function handleFile(files) {
@@ -557,6 +594,9 @@
 </div>
 <br> <br>
 <div id="sample">
+    <!---
+    <h4>Model Id: <textarea id="modelId" readonly="true" rows="1" cols="1">1</textarea></h4>
+    --->
     <div id="workBench" style="width: 100%; display: flex; justify-content: space-between">
         <div id="myPaletteDiv"
              style="width: 10%; margin-right: 2px; background-color: whitesmoke; border: solid 1px black"></div>

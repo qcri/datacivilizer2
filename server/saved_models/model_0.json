@@ -1,0 +1,64 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-85.57291793823242 -309"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "source",
+            "path": "SampleData1.mat",
+            "key": -1,
+            "loc": "-19.572917938232422 -262"
+        },
+        {
+            "text": "Filter",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_filter",
+            "key": -3,
+            "loc": "-40.645835876464844 -170"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -1,
+            "to": -3,
+            "fromPort": "",
+            "toPort": "T",
+            "points": [
+                -19.572917938232422,
+                -242,
+                -19.572917938232422,
+                -232,
+                -19.572917938232422,
+                -216,
+                -40.645835876464844,
+                -216,
+                -40.645835876464844,
+                -200,
+                -40.645835876464844,
+                -190
+            ]
+        }
+    ],
+    "modelId": 0,
+    "runs": [
+        {
+            "runNo": 1,
+            "metrics": {}
+        },
+        {
+            "runNo": 2,
+            "metrics": {
+                "mod_filter_-3": {
+                    "f1_score": 3000
+                }
+            }
+        }
+    ]
+}

@@ -66,6 +66,10 @@ app.get('/DataInspector.css', function (request, response) {
     response.sendfile(path.resolve('../extensions/DataInspector.css'));
 });
 
+app.get('/versioningUtils.js', function (request, response) {
+    response.sendfile(path.resolve('./versioningUtils.js'));
+});
+
 
 /**
  * Runs a DC2 pipeline
@@ -80,16 +84,18 @@ app.get('/DataInspector.css', function (request, response) {
  *    3.2/ get output file path from module
  *    3.3/ pass output file (and possible other files) as input file(s) to the next module
  */
-
 function run_pipeline(pipeline, in_map) {
 
-
+    console.log("Pipeline in 'run_pipeline':");
     console.log(pipeline);
 
     //create output map
     var out_map = new Map();
 
     console.log("loop");
+
+    const metric_file_name = "metric_temp.json";
+    var metrics = {};
 
     for (var node_id of pipeline.keys()) {
         console.log(pipeline.get(node_id).node.cmd);
@@ -118,19 +124,67 @@ function run_pipeline(pipeline, in_map) {
         //push output file name
         args.push(out_map[node_id]);
 
+        //push metric file name
+        args.push(metric_file_name);
+
         //run module
         console.log("running ", cmd_name, args);
+
+        fs.writeFileSync(metric_file_name, JSON.stringify({}));
 
         require('child_process').execSync(
             'python ' + args.join(' '), {stdio: 'inherit'}
         );
 
+        var obj = JSON.parse(fs.readFileSync(metric_file_name, 'utf8'));
+        const module_name = pipeline.get(node_id).node.cmd + "_" + pipeline.get(node_id).node.key;
+        console.log(obj);
+        if (!(Object.entries(obj).length === 0 && obj.constructor === Object)) {
+            metrics[module_name] = obj;
+        }
+        fs.unlinkSync(metric_file_name);
+
+        console.log("run finished.");
 
     }
 
+    console.log("Metrics");
+    console.log(metrics);
 
+    return metrics;
 }
 
+function retreive_metrics(metric_file_name) {
+    // TODO
+    return [];
+}
+
+function get_sortOp(pipeline) {
+
+    console.log(pipeline.linkDataArray);
+
+    //top sorting
+    const nodes = new Map();
+
+    console.log("nodes")
+    console.log(pipeline.nodeDataArray);
+
+    //get nodes
+    for (var id in pipeline.nodeDataArray) {
+        nodes.set(pipeline.nodeDataArray[id].key, pipeline.nodeDataArray[id]);
+
+    }
+
+    console.log(nodes);
+
+    const sortOp = new TopologicalSort(nodes);
+
+    for (var edge in pipeline.linkDataArray) {
+        sortOp.addEdge(pipeline.linkDataArray[edge].from, pipeline.linkDataArray[edge].to);
+    }
+
+    return sortOp;
+}
 
 //map each module to its set of input sources (ds operator or out file)
 function get_input_map(nodes) {
@@ -164,58 +218,94 @@ function get_input_map(nodes) {
     return in_map;
 }
 
+// Load previous runs from the file containing the model
+function load_runs(pipeline) {
+
+    const modelId = pipeline.modelId;
+    const filename = "saved_models/" + "model_" + modelId + ".json";
+
+    var obj = JSON.parse(fs.readFileSync(filename, 'utf8'));
+    pipeline['runs'] = obj.runs;
+
+    return JSON.stringify(pipeline);
+}
+
+// Save metrics from a new run in the file containing the model
+function save_run(pipeline, runNo, runMetrics) {
+
+    pipeline['runs'].push({'runNo' : runNo, 'metrics' : runMetrics});
+
+    const modelId = pipeline.modelId;
+    const filename = "saved_models/" + "model_" + modelId + ".json"
+
+    obj = JSON.stringify(pipeline, null, 4);
+
+    console.log("Writing model to JSON file");
+    fs.writeFile(filename, obj, 'utf8', function (err) {
+        if (err) {
+            console.log("An error occured while writing JSON Object to File.");
+            return console.log(err);
+        }
+        console.log("JSON file has been saved.");
+    });
+}
 
 app.post('/run', function (request, response) {
     console.log("running pipeline requested");
     console.log(request.body);
 
     //parse JSON file
-    var obj = JSON.stringify(request.body);
+    var modelString = JSON.stringify(request.body);
+    var pipeline = JSON.parse(modelString);
 
-    //console.log(JSON.stringify(request.body, null, 4));
+    const runNo = pipeline.runNo;
 
-    var pipeline = JSON.parse(obj);
+    delete pipeline.runNo;
 
-    console.log(pipeline.linkDataArray);
-
-    //top sorting
-    const nodes = new Map();
-
-    console.log("nodes")
-    console.log(pipeline.nodeDataArray);
-
-    //get nodes
-    for (var id in pipeline.nodeDataArray) {
-        nodes.set(pipeline.nodeDataArray[id].key, pipeline.nodeDataArray[id]);
-
+    if (runNo != 1) {
+        modelString = load_runs(pipeline);
+        console.log(modelString);
+        pipeline = JSON.parse(modelString);
+    } else {
+        pipeline['runs'] = [];
     }
 
-    console.log(nodes);
-
-    const sortOp = new TopologicalSort(nodes);
-
-    for (var edge in pipeline.linkDataArray) {
-        //console.log("adding edge: ", pipeline.linkDataArray[edge].from, " ", pipeline.linkDataArray[edge].to)
-        sortOp.addEdge(pipeline.linkDataArray[edge].from, pipeline.linkDataArray[edge].to);
-    }
-
+    // get parameters for run
+    var sortOp = get_sortOp(pipeline);
     const sorted = sortOp.sort();
-    Keys = [...sorted.keys()];
-
-    console.log(sortOp.nodes);
-
-    //var n = sorted.get(-1);
-
-    //console.log(n.node);
-
-    console.log("Sorted?");
-    console.log(Keys);
-
-    //link inputs
     var input_map = get_input_map(sortOp.nodes);
 
-    run_pipeline(sorted, input_map);
+    // run the pipeline and return metrics
+    var runMetrics = run_pipeline(sorted, input_map);
 
+    // save the run with the pipeline
+    save_run(pipeline, runNo, runMetrics);
+
+    response.end();
+});
+
+app.post('/saveModelVersions', function (request, response) {
+    console.log("saving versioning data");
+
+    //parse JSON file
+    var obj = JSON.stringify(request.body, null, 4);
+
+    console.log("Writing versioning data to JSON file");
+    fs.writeFile("versioningData.json", obj, 'utf8', function (err) {
+        if (err) {
+            console.log("An error occured while writing JSON Object to File.");
+            return console.log(err);
+        }
+        console.log("JSON file has been saved.");
+    });
+
+    response.end();
+});
+
+app.get('/getModelVersions', function (request, response) {
+    console.log("loading versioning data");
+
+    response.sendfile(path.resolve("versioningData.json"));
 
 });
 
