@@ -1,0 +1,99 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-650 -277.5"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Resample",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_resample",
+            "resample_frequency": 200,
+            "key": -2,
+            "loc": "-549 -171"
+        },
+        {
+            "text": "Filter",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_filter",
+            "notch_frequency": 60,
+            "high_pass_frequency": 0.5,
+            "low_pass_frequency": 40,
+            "key": -3,
+            "loc": "-549 -94"
+        },
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "SampleData1.mat",
+            "key": -1,
+            "loc": "-549 -252.5"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -2,
+            "to": -3,
+            "fromPort": "B",
+            "toPort": "T",
+            "points": [
+                -549,
+                -151,
+                -549,
+                -141,
+                -549,
+                -132.5,
+                -549,
+                -132.5,
+                -549,
+                -124,
+                -549,
+                -114
+            ]
+        },
+        {
+            "from": -1,
+            "to": -2,
+            "fromPort": "B",
+            "toPort": "T",
+            "points": [
+                -549,
+                -231,
+                -549,
+                -221,
+                -549,
+                -211,
+                -549,
+                -211,
+                -549,
+                -201,
+                -549,
+                -191
+            ]
+        }
+    ],
+    "modelId": 1,
+    "parameters": {
+        "resample_frequency": 200,
+        "notch_frequency": 60,
+        "high_pass_frequency": 0.5,
+        "low_pass_frequency": 40,
+        "path": "SampleData1.mat"
+    },
+    "runs": [
+        {
+            "runNo": 1,
+            "metrics": {
+                "mod_filter_-3": {
+                    "f1_score": 3000
+                }
+            }
+        }
+    ]
+}

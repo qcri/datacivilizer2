@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<%
+    var param;
+    for (var paramNo in parameters) {
+        param = parameters[paramNo];
+%>
+    <a onclick="switchSelect(this)" data-selected="false" data-type="parameter" data-value="<%= param %>"><%= param %></a>
+<%
+    }
+%>

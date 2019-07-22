@@ -1,4 +1,4 @@
-function [z,a,e,s]=fcn_IdentifyArtifact(data,Fs);
+function [z,a,e,s]=fcn_IdentifyArtifact(data,Fs)
  
 %% find artifacts and suppressions
 % z = 1 --> suppression, z=0 --> not suppression

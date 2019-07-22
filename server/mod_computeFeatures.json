@@ -1,0 +1,48 @@
+{
+    "cmd_path": "mod_computeFeatures.py",
+    "num_inputs": 2,
+    "num_outputs": 1,
+    "num_parameters": 8,
+    "parameters": [
+        {
+            "name": "delta_low",
+            "type": "number",
+            "default_value": 1
+        },
+        {
+            "name": "delta_high",
+            "type": "number",
+            "default_value": 4
+        },
+        {
+            "name": "theta_low",
+            "type": "number",
+            "default_value": 4
+        },
+        {
+            "name": "theta_high",
+            "type": "number",
+            "default_value": 8
+        },
+        {
+            "name": "alpha_low",
+            "type": "number",
+            "default_value": 8
+        },
+        {
+            "name": "alpha_high",
+            "type": "number",
+            "default_value": 12
+        },
+        {
+            "name": "beta_low",
+            "type": "number",
+            "default_value": 12
+        },
+        {
+            "name": "beta_high",
+            "type": "number",
+            "default_value": 18
+        }
+    ]
+}

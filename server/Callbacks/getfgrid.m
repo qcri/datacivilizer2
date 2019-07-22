@@ -13,14 +13,14 @@ function [f,findx]=getfgrid(Fs,nfft,fpass)
 % between 0 and 500 (i.e. Fs/2) Hz. Now if fpass=[0 100], findx will
 % contain the indices in the frequency grid corresponding to frequencies <
 % 100 Hz. In the case fpass=[0 500], findx=[1 512].
-if nargin < 3; error('Need all arguments'); end;
+if nargin < 3; error('Need all arguments'); end
 df=Fs/nfft;
 f=0:df:Fs; % all possible frequencies
 f=f(1:nfft);
-if length(fpass)~=1;
+if length(fpass)~=1
    findx=find(f>=fpass(1) & f<=fpass(end));
 else
    [fmin,findx]=min(abs(f-fpass));
    clear fmin
-end;
+end
 f=f(findx);

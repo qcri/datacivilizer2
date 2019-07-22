@@ -67,19 +67,19 @@ for n=1:2
     J=mtfftc(datawin,taps,nfft,Fs);
     J=J(findx,:,:);
     s=squeeze(mean(conj(J).*J,2)); 
-    if trialave; s=squeeze(mean(s,2));end;
+    if trialave; s=squeeze(mean(s,2));end
     S(n,:,:)=s;
 end
 %Run all subsequent in parallel
 % parfor n=3:nw-1;
-for n=3:nw-1;
+for n=3:nw-1
     indx=winstart(n):winstart(n)+Nwin-1;
     datawin=detrend(data(indx,:));
     datawin=change_row_to_column(datawin);
     J=mtfftc(datawin,taps,nfft,Fs);
     J=J(findx,:,:);
     s=squeeze(mean(conj(J).*J,2));
-    if trialave; s=squeeze(mean(s,2));end;
+    if trialave; s=squeeze(mean(s,2));end
     S(n,:,:)=s;
 end
 

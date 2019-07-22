@@ -17,16 +17,16 @@ function data=change_row_to_column(data)
 %
 
 dtmp=[];
-if isstruct(data);
+if isstruct(data)
    C=length(data);
-   if C==1;
+   if C==1
       fnames=fieldnames(data);
       eval(['dtmp=data.' fnames{1} ';'])
       data=dtmp(:);
    end
 else
   [N,C]=size(data);
-  if N==1 || C==1;
+  if N==1 || C==1
     data=data(:);
-  end;
-end;
+  end
+end

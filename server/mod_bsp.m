@@ -1,16 +1,25 @@
 
-function [] = mod_bsp(arg1, arg2)
+function [] = mod_bsp(in_file, out_file)
 
 addpath([pwd, '/Callbacks/']);
 
 %%%% Step 3 Compute the BSP  %%%%
 % initialize bsp algorithm
-sig=(1e-6)/3; z0=log(1); z1=z0; sig0=sig; W0=sig; W1=W0;
+sig=(1e-6)/3; 
+z0=log(1); 
+z1=z0; 
+sig0=sig; 
+W0=sig; 
+W1=W0;
 
 %Nt=[]; An=[]; tn=[]; an=[]; tmin=inf; tmax=0; tt=[];
   
 % get data -- t,z,a [t is in actual time, dt in days]
-load([pwd, '/Data/',arg1])
+tmp = load([pwd, '/Data/',in_file]);
+z = tmp.z;
+a = tmp.a;
+t = tmp.t;
+Fs = tmp.Fs;
 
 % prepare the current chunk of data for bsp algorithm
 nsec=1; 
@@ -51,5 +60,5 @@ nn=min(500,length(Nt));
 if (isnan(z1)||isnan(W1)); W1=1; z1=1; end
 [W1,z1, bsp]=fcnGetBSP_WithMissingData(Nt,N,W1,z1,sig); 
 
-save([pwd, '/Data/',arg2],'W1','z1','bsp'); 
+save([pwd, '/Data/',out_file],'W1','z1','bsp'); 
 

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<div class="model_div_container">
+    <div class="model" onclick="on_click_model(<%= model.modelId %>)">
+        <div class="model_section section_model">
+            <div class="section_elem"> Model <%= model.modelId %> </div>
+            <div class="section_elem"> Amount of runs:  <%= model.runs_amount %> </div>
+        </div>
+        <div class="model_section section_filter">
+            <%
+                if (filter_parameters.length == 0) {
+            %>
+                <div class="section_elem"> No filter </div>
+            <%
+                } else {
+                    for (var i in filter_parameters) {
+                        var param = filter_parameters[i]
+            %>
+                    <div class="section_elem"> <%= param %>: <%= model.parameters[param] %> </div>
+            <%
+                    }
+                }
+            %>
+        </div>
+        <div class="model_section section_filter">
+            <%
+                if (filter_metrics.length == 0) {
+            %>
+                <div class="section_elem"> No filter </div>
+            <%
+                } else {
+                    for (var i in filter_metrics) {
+                        var metric = filter_metrics[i]
+            %>
+                    <div class="section_elem"> <%= metric %>: <%= metric_values[metric] %> </div>
+            <%
+                    }
+                }
+            %>
+        </div>
+        <div onclick="var event = arguments[0] || window.event; see_more(event, <%= model.modelId %>)" class="model_see_more">See more</div>
+        <div id="add_<%= model.modelId %>" class="model_add">
+            <div class="parameters_list">
+                <div class="param_elem param_header"> Model parameters: </div>
+                <% 
+                    for (var param in model.parameters) {
+                %>
+                    <div class="param_elem"> <%= param %>: <%= model.parameters[param] %> </div>
+                <%
+                    } 
+                %>
+            </div>
+            <div class="metric_table_div">
+                <table class="metric_table">
+                    <tr>
+                        <th rowspan="2">runs</th>
+                        <%
+                            for (var i = 0; i < modules.length; i++) {
+                        %>
+                            <th colspan="<%= metrics[modules[i]].length %>"> <%= modules[i].substring(4, modules[i].length-3) %> </th>
+                        <%
+                            }
+                        %>
+                    </tr>
+                    <tr>
+                        <%
+                            for (var i = 0; i < modules.length; i++) {
+                        %>
+                            <%
+                                for (var j = 0; j < metrics[modules[i]].length; j++) {
+                            %>
+                                <th> <%= metrics[modules[i]][j] %> </th>
+                            <%
+                                }
+                            %>
+                        <%
+                            }
+                        %>
+                    </tr>
+                    <%
+                        for (var i in runs) {
+                            var run = runs[i];
+                    %>
+                        <tr>
+                            <td> <%= run.runNo %> </td>
+                            <%
+                                for (var i = 0; i < modules.length; i++) {
+                                    var module = modules[i];
+                                    if (run.metrics[module] != undefined) {
+                            %>
+                                <%
+                                    for (var j = 0; j < metrics[modules[i]].length; j++) {
+                                %>
+                                    <td> <%= run.metrics[modules[i]][metrics[modules[i]][j]] %> </td>
+                                <%
+                                    }
+                                %>
+                            <%
+                                    } else {
+                            %>
+                                <%
+                                    for (var j = 0; j < metrics[modules[i]].length; j++) {
+                                %>
+                                    <td></td>
+                                <%
+                                    }
+                                %>
+                            <%
+                                    }
+                                }
+                            %>
+                        </tr>
+                    <%
+                        }
+                    %>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,23 +2,20 @@
 % - compute EEG featrues;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [] = mod_computeFeatures(arg1, arg2)
-
+function [] = mod_computeFeatures(in_file_1, in_file_2, out_file, delta_low, delta_high, theta_low, theta_high, alpha_low, alpha_high, beta_low, beta_high)
 
 addpath([pwd, '/Callbacks/']);
 
-fileName = arg1;
-
 % Step1 - read data %
-tmp = load([pwd, '/Data/', fileName]);
-eeg = tmp.data(1:19, :);               % EEG %
-ekg = tmp.data(21, :)-tmp.data(20, :); % EKG %
-To = datetime(tmp.startTime, 'Inputformat', 'MM-dd-yyyy hh:mm:ss'); % strating timestamp of EEG %
-Fs = tmp.Fs; % sampling rate %
-data = tmp.data;
-startTime = tmp.startTime;
+tmp = load([pwd, '/Data/', in_file_1]);
 
-tmp = load([pwd, '/Data/', arg2]);
+eeg = tmp.eeg;
+ekg = tmp.ekg;
+channels = tmp.channels;
+startTime = tmp.startTime;
+Fs = tmp.Fs;                % sampling rate %
+
+tmp = load([pwd, '/Data/', in_file_2]);
 Sdata = tmp.Sdata;
 stimes = tmp.stimes;
 sfreqs = tmp.sfreqs;
@@ -34,8 +31,7 @@ end
 A = sum(A, 1);
 
 % Step 3. compute features  %
-featureArray = fcn_computeAllFeatures(eeg, Fs, A, Sdata, sfreqs);
+featureArray = fcn_computeAllFeatures(eeg, Fs, A, Sdata, sfreqs, delta_low, delta_high, theta_low, theta_high, alpha_low, alpha_high, beta_low, beta_high);
 
-save([pwd, '/Data/feature_',arg2],'featureArray')
-
+save([pwd, '/Data/feature_',out_file],'featureArray')
 end

@@ -1,0 +1,23 @@
+{
+    "cmd_path": "mod_filter.py",
+    "num_inputs": 1,
+    "num_outputs": 1,
+    "num_parameters": 3,
+    "parameters": [
+        {
+            "name": "notch_frequency",
+            "type": "number",
+            "default_value": 60
+        },
+        {
+            "name": "high_pass_frequency",
+            "type": "number",
+            "default_value": 0.5
+        },
+        {
+            "name": "low_pass_frequency",
+            "type": "number",
+            "default_value": 40
+        }
+    ]
+}

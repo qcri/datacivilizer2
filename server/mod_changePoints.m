@@ -2,32 +2,30 @@
 % - detect changepoints;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [] = mod_changePoints(arg1, arg2)
+function [] = mod_changePoints(in_file, out_file, thr)
 
-
-fileName = arg1;
- 
-tmp = load([pwd, '/Data/', fileName]);
+% Step1 - read data %
+tmp = load([pwd, '/Data/', in_file]);
 
 Sdata = cell2mat(flipud(tmp.Sdata(:, 2)));
 stimes = tmp.stimes;
 sfreqs = tmp.sfreqs;
 col = [-10 25];
 
-% step1. Compute total power %
+% step2. Compute total power %
 P  = sum(pow2db(Sdata+eps), 1)/4;
 
-% step2. Smooth %
+% step3. Smooth %
 P_ = smooth(P, 5,'sgolay');
 
-% step3. Clip at 1000dB %
+% step4. Clip at 1000dB %
 P_(P_>1000) = 1000;
 P_(P_<-1000) = -1000;
-thr = .5;
+% thr = .5; %
 
 [icp, ~] = findchangepts(P_, 'Statistic', 'mean','MinThreshold',thr*var(P_));
 
-% step4. Display %
+% step5. Display %
 verbose = 1;
 if verbose 
     close all
@@ -55,7 +53,7 @@ if verbose
     hold off
     box on
 
-    saveas(f, arg2);
+    saveas(f, out_file);
 
 end
 

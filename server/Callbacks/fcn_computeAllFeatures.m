@@ -1,4 +1,4 @@
-function [featureArray, isOutlier, timings] = fcn_computeAllFeatures(data, Fs, A, Sdata, sfreqs)
+function [featureArray, isOutlier, timings] = fcn_computeAllFeatures(data, Fs, A, Sdata, sfreqs, delta_low, delta_high, theta_low, theta_high, alpha_low, alpha_high, beta_low, beta_high)
         
         % L-bipolar %
         data_bi = fcn_LBipolar(data);
@@ -40,7 +40,7 @@ function [featureArray, isOutlier, timings] = fcn_computeAllFeatures(data, Fs, A
                 for j = 1:4
                     spe_seg{j, 1} = Sdata{j, 2}(:, to_s:t1_s);
                 end
-                featureSeto = fcn_featureSeto(eeg_seg,spe_seg,sfreqs, Fs);
+                featureSeto = fcn_featureSeto(eeg_seg,spe_seg,sfreqs, Fs, delta_low, delta_high, theta_low, theta_high, alpha_low, alpha_high, beta_low, beta_high);
                 
                 % Set 2 - Network and BSI feature set %
                 seg = data(:, to:t1);

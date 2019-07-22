@@ -42,16 +42,16 @@ function getHash(modelString, maxSize) {
     links = model.linkDataArray;
 
     for (var nodeId in nodes) {
-        delete model.nodeDataArray[nodeId].figure;
-        delete model.nodeDataArray[nodeId].fill;
-        delete model.nodeDataArray[nodeId].loc;
-        delete model.nodeDataArray[nodeId].text;
+        delete nodes[nodeId].figure;
+        delete nodes[nodeId].fill;
+        delete nodes[nodeId].loc;
+        delete nodes[nodeId].text;
     }
 
     for (var linkId in links) {
-        delete model.linkDataArray[linkId].points;
-        delete model.linkDataArray[linkId].fromPort;
-        delete model.linkDataArray[linkId].toPort;
+        delete links[linkId].points;
+        delete links[linkId].fromPort;
+        delete links[linkId].toPort;
     }
 
     return Math.abs(murmurhash3_32_gc(JSON.stringify(model),1) % maxSize);

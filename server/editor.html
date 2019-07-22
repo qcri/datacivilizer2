@@ -14,9 +14,17 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <link rel='stylesheet' href='/DataInspector.css'/>
+    <link rel="stylesheet" type="text/css" href="./visualizer.css" />
     <script src="/DataInspector.js"></script>
+    <script src="/ejs_production.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <script id="code">
+
+        var models = {};
+        var modules_info;
+        var filter_parameters = [];
+        var filter_metrics = [];
+
         function init() {
 
             if (window.goSamples) goSamples(); // init for these samples -- you don't need to call this
@@ -382,21 +390,29 @@
                                 text: "Data source",
                                 figure: "RoundedRectangle",
                                 fill: "lightgreen",
-                                cmd: "source",
+                                cmd: "mod_source",
                                 path: "SampleData1.mat"
                             },
-                            {text: "Resample", figure: "RoundedRectangle", fill: "white", cmd: "mod_resample"},
-                            {text: "Filter", figure: "RoundedRectangle", fill: "white", cmd: "mod_filter"},
-                            {text: "Montage", figure: "RoundedRectangle", fill: "white", cmd: "mod_montage"},
+                            {text: "Resample", figure: "RoundedRectangle", fill: "white", cmd: "mod_resample", resample_frequency: 200},
+                            {text: "Filter", figure: "RoundedRectangle", fill: "white", cmd: "mod_filter", notch_frequency: 60, high_pass_frequency: 0.5, low_pass_frequency: 40},
+                            {text: "Montage", figure: "RoundedRectangle", fill: "white", cmd: "mod_montage", montage_type: "monopolar"},
                             {text: "Clip", figure: "RoundedRectangle", fill: "white", cmd: "mod_clip"},
-                            {text: "Spectogram", figure: "RoundedRectangle", fill: "white", cmd: "mod_spectrogram"},
+                            {text: "Spectogram", figure: "RoundedRectangle", fill: "white", cmd: "mod_spectrogram", nw: 2},
                             {
                                 text: "EEG features",
                                 figure: "RoundedRectangle",
                                 fill: "white",
-                                cmd: "mod_computeFeatures"
+                                cmd: "mod_computeFeatures",
+                                delta_low: 1,
+                                delta_high: 4,
+                                theta_low: 4,
+                                theta_high: 8,
+                                alpha_low: 8,
+                                alpha_high: 12,
+                                beta_low: 12,
+                                beta_high: 18
                             },
-                            {text: "Change pts", figure: "RoundedRectangle", fill: "white", cmd: "mod_changePoints"},
+                            {text: "Change pts", figure: "RoundedRectangle", fill: "white", cmd: "mod_changePoints", threshold: 0.5},
                             {
                                 text: "Binary seg",
                                 figure: "RoundedRectangle",
@@ -407,36 +423,42 @@
 
                         ])
                     });
-        }
+        };
 
         // Show the diagram's model in JSON format that the user may edit
         function save() {
             saveDiagramProperties(); // do this first, before writing to JSON
             document.getElementById("mySavedModel").value = myDiagram.model.toJson();
             myDiagram.isModified = false;
-        }
+        };
 
         function load() {
             myDiagram.model = go.Model.fromJson(document.getElementById("mySavedModel").value);
+            loadDiagramProperties(); // do this after the Model.modelData has been brought into memory
+        };
+
+        function load_diagram(model) {
+            console.log("Loading diagram for model " + model.modelId);
+            myDiagram.model = go.Model.fromJson(model);
             loadDiagramProperties(); // do this after the Model.modelData has been brought into memory
         }
 
         function saveDiagramProperties() {
             myDiagram.model.modelData.position = go.Point.stringify(myDiagram.position);
 
-        }
+        };
 
         function loadDiagramProperties(e) {
             // set Diagram.initialPosition, not Diagram.position, to handle initialization side-effects
             var pos = myDiagram.model.modelData.position;
             if (pos) myDiagram.initialPosition = go.Point.parse(pos);
-        }
+        };
 
         function requestOutputFile(e, obj) {
             console.log(obj.part.adornedPart.data.key);
             var node_key = obj.part.adornedPart.data.key;
             window.location = window.location.href + "download_output?" + node_key; //add "download..." to the URL (get)
-        }
+        };
 
         function visualizeOutput(e, obj) {
             var node_key = obj.part.adornedPart.data.key;
@@ -455,7 +477,7 @@
                     iframe.setAttribute("src", "vizFrame");
                     iframe.src = iframe.src;
                 });
-        }
+        };
 
         function request_pipeline(p) {
 
@@ -475,9 +497,212 @@
                     document.getElementById("mySavedModel").value = myDiagram.model.toJson();
                 }
             });
+        };
 
+        function open_visualizer() {
+            document.getElementById("editor").style.width = "50%";
+            document.getElementById("visualizer").style.width = "50%";
+            document.getElementById("open_visualizer").style.display = "none";
+            document.getElementById("close_visualizer").style.display = "initial";
+            myDiagram.requestUpdate();
+            myPalette.requestUpdate();
+            load_models();
+        };
 
+        function close_visualizer() {
+            document.getElementById("editor").style.width = "100%";
+            document.getElementById("visualizer").style.width = "0%";
+            document.getElementById("open_visualizer").style.display = "initial";
+            document.getElementById("close_visualizer").style.display = "none";
+            myDiagram.requestUpdate();
+            myPalette.requestUpdate();
+        };
+
+        function load_models() {
+            console.log("Loading models");
+            $.ajax({
+                url: '/models',
+                type: 'get',
+                success: function (data) {
+                    models_data = data.models;
+                    modules_info = data.modules_info;
+                    models = {};
+                    for (var i = 0; i< models_data.length; i++) {
+                        model = JSON.parse(models_data[i]);
+                        models[model.modelId] = model;
+                    }
+                    set_parameter_filter();
+                    set_metric_filter();
+
+                    display_models();
+                }
+            });
+        };
+
+        function set_parameter_filter() {
+            $('.parameters').html("");
+            var parameters = [];
+            var _module;
+            var num_parameters;
+            for (var module_name in modules_info) {
+                module_info = JSON.parse(modules_info[module_name]);
+                num_parameters = module_info.num_parameters;
+                for (var i = 0; i < num_parameters; i++) {
+                    parameters.push(module_info.parameters[i].name);
+                }
+            }
+            var html = new EJS({url : '/parameters.ejs'}).render({'parameters': parameters});
+            $('.parameters').append($(html));
+        };
+
+        function set_metric_filter() {
+            $('.metrics').html("");
+            var metrics = [];
+            var model;
+            var runs;
+            for (var modelId in models) {
+                model = models[modelId];
+                runs = model.runs;
+                for (var runId in runs) {
+                    run = runs[runId];
+                    run_modules = run.metrics;
+                    for (var _module in run_modules) {
+                        module_metrics = run.metrics[_module];
+                        for (var metric in module_metrics) {
+                            if (!metrics.includes(metric)) {
+                                metrics.push(metric);
+                            }
+                        }
+                    }
+                }
+            }
+            var html = new EJS({url : '/metrics.ejs'}).render({'metrics': metrics});
+            $('.metrics').append($(html));
         }
+
+        function filter_model(model) {
+            var model_params = model.parameters;
+            if (model_params == undefined && filter_parameters.length > 0) {
+                return true;
+            }
+            for (var paramNo in filter_parameters) {
+                var param = filter_parameters[paramNo];
+                if (!(param in model_params)) {
+                    return true;
+                }
+            }
+            for (var metricNo in filter_metrics) {
+                var metric = filter_metrics[metricNo];
+                var has_metric = false;
+                for (var runId in model.runs) {
+                    for (var _module in model.runs[runId].metrics) {
+                        if (metric in model.runs[runId].metrics[_module]) {
+                            has_metric = true;
+                        }
+                    }
+                }
+                if (!has_metric) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        function display_models() {
+            $('.models').html("");
+            var model;
+            for (var modelId in models) {
+                model = models[modelId];
+                if (filter_model(model)) {
+                    continue;
+                }
+                var runs = model.runs;
+                var obj = get_modules_and_metrics(runs);
+                var metrics = obj.metrics;
+                model['runs_amount'] = obj.runs_amount;
+                var html = new EJS({url : '/model.ejs'}).render({'model': model, 'filter_parameters': filter_parameters, 'filter_metrics': filter_metrics, 'runs': runs, 'modules': obj.modules, 'metrics' : metrics, 'metric_values': obj.metric_values});
+                $('.models').append($(html));
+            }
+        };
+
+        function get_modules_and_metrics(runs) {
+            var modules = [];
+            var metrics = {};
+            var metric_values = {};
+            var runs_amount = 0;
+            for (var runId in runs) {
+                runs_amount += 1;
+                run = runs[runId];
+                run_modules = run.metrics;
+                for (var _module in run_modules) {
+                    if (!modules.includes(_module)) {
+                        modules.push(_module);
+                        metrics[_module] = [];
+                    }
+                    module_metrics = run.metrics[_module];
+                    for (var metric in module_metrics) {
+                        if (!metrics[_module].includes(metric)) {
+                            metrics[_module].push(metric);
+                        }
+                        metric_values[metric] = module_metrics[metric];
+                    }
+                }
+            }
+            return {'modules': modules, 'metrics': metrics, 'runs_amount': runs_amount, 'metric_values': metric_values};
+        };
+
+        function on_click_model(modelId) {
+            model = models[modelId];
+            load_diagram(model);
+        };
+
+        function see_more(event, modelId) {
+            var addId = "add_" + modelId;
+            var display = document.getElementById(addId).style.display;
+            if (display == "flex") {
+                document.getElementById(addId).style.display = "none";
+            } else {
+                document.getElementById(addId).style.display = "flex";
+            }
+            event.stopPropagation();
+        };
+
+        function switchSelect(x) {
+            if (x.dataset.selected == 'true') {
+                x.dataset.selected = 'false';
+                x.style.backgroundColor = "rgb(241, 241, 241)";
+            } else {
+                x.dataset.selected = 'true';
+                x.style.backgroundColor = "rgb(221, 221, 221)";
+            }
+            updateFilters(x);
+        };
+
+        function updateFilters(x) {
+            if (x.dataset.selected == 'true') {
+                if (x.dataset.type == 'parameter') {
+                    filter_parameters.push(x.dataset.value);
+                } else {
+                    filter_metrics.push(x.dataset.value);
+                }
+            } else {
+                if (x.dataset.type == 'parameter') {
+                    for( var i = filter_parameters.length - 1; i >= 0; i--){ 
+                        if (filter_parameters[i] === x.dataset.value) {
+                        filter_parameters.splice(i, 1);
+                        }
+                    }
+                } else {
+                    for( var i = filter_metrics.length - 1; i >= 0; i--){ 
+                        if (filter_metrics[i] === x.dataset.value) {
+                            filter_metrics.splice(i, 1);
+                        }
+                    }
+                }
+            }
+            display_models();
+        };
+
     </script>
 </head>
 
@@ -490,6 +715,7 @@
     var maxSize = 1000;
     var hashTable = new Array(maxSize);
     var runCounter = [];
+    var newId = false;
 
     // saveModelVersions(); // Use this to reset hash table and model id's
 
@@ -505,16 +731,13 @@
         if (hashTable[modelHash] === undefined || hashTable[modelHash] === null) {
             modelId = maxModelId;
             runNo = 1;
-            maxModelId += 1;
             hashTable[modelHash] = modelId;
             runCounter[modelId] = runNo;
+            newId = true;
         } else {
             modelId = hashTable[modelHash];
-            runCounter[modelId] += 1;
-            runNo = runCounter[modelId];
+            runNo = runCounter[modelId] + 1;
         }
-
-        saveModelVersions();
 
         console.log(modelHash);
         console.log(modelId);
@@ -533,6 +756,14 @@
             contentType: "application/json; charset=utf-8",
             success: function (data) {
                 console.log("success!");
+                if (newId) {
+                    maxModelId += 1;
+                    newId = false;
+                }
+                hashTable[modelHash] = modelId;
+                runCounter[modelId] = runNo;
+                saveModelVersions();
+                load_models();
             }
         });
     };
@@ -580,57 +811,91 @@
     }
 
 </script>
-<div class="btn-group">
-    <h4>Load pre-defined pipelines</h4>
-    <button type="button" class="btn btn-default" onclick="request_pipeline('main_A')">main_A</button>
-    <button type="button" class="btn btn-default" onclick="request_pipeline('main_B')">main_B</button>
-    <button type="button" class="btn btn-default" onclick="request_pipeline('main_C')">main_C</button>
-    <button type="button" class="btn btn-default" onclick="request_pipeline('main_D')">main_D</button>
-    <button type="button" class="btn btn-default" onclick="request_pipeline('main_E')">main_E</button>
-    <button type="button" class="btn btn-default" onclick="request_pipeline('main_F')">main_F</button>
-    <button type="button" class="btn btn-success" onclick="send()">Execute</button>
-    <h4>Load pipeline from file</h4>
-    <input type="file" id="input" class="form-control-file" onchange="handleFile(this.files)">
-</div>
-<br> <br>
-<div id="sample">
-    <!---
-    <h4>Model Id: <textarea id="modelId" readonly="true" rows="1" cols="1">1</textarea></h4>
-    --->
-    <div id="workBench" style="width: 100%; display: flex; justify-content: space-between">
-        <div id="myPaletteDiv"
-             style="width: 10%; margin-right: 2px; background-color: whitesmoke; border: solid 1px black"></div>
-        <div id="myDiagramDiv" style="flex-grow: 0; height: 620px; width: 40%; border: solid 1px black"></div>
-        <iframe id="iframeViz" height="620" width="50%"></iframe>
-    </div>
-    <span style="display: inline-block; vertical-align: top;">
-            Selected Part:<br/>
-            <div id="myInspectorDiv" class="inspector"> </div><br/>
-        </span>
-    <div>
-        <div>
-            <button id="SaveButton" onclick="save()">Save</button>
-            <button onclick="load()">Load</button>
-            Diagram Model saved in JSON format:
+<div class="global_div">
+    <div id="editor" style="float: left; width: 100%;">
+        <div style="width: 100%">
+            <div class="btn-group">
+                <h4>Load pre-defined pipelines</h4>
+                <button type="button" class="btn btn-default" onclick="request_pipeline('main_A')">main_A</button>
+                <button type="button" class="btn btn-default" onclick="request_pipeline('main_B')">main_B</button>
+                <button type="button" class="btn btn-default" onclick="request_pipeline('main_C')">main_C</button>
+                <button type="button" class="btn btn-default" onclick="request_pipeline('main_D')">main_D</button>
+                <button type="button" class="btn btn-default" onclick="request_pipeline('main_E')">main_E</button>
+                <button type="button" class="btn btn-default" onclick="request_pipeline('main_F')">main_F</button>
+                <button type="button" class="btn btn-success" onclick="send()">Execute</button>
+            </div>
+            <div>
+                <h4>Load pipeline from file</h4>
+                <div>
+                    <input type="file" id="input" class="form-control-file" onchange="handleFile(this.files)">
+                    <br>
+                    <button id="open_visualizer" type="button" class="btn btn-default" onclick="open_visualizer()" style="display: initial;">Open Visualizer</button>
+                    <button id="close_visualizer" type="button" class="btn btn-default" onclick="close_visualizer()" style="display: none;">Close Visualizer</button>
+                </div>
+            </div>
         </div>
-        <table>
-            <tr>
-                <td>Filename to Save As:</td>
-                <td><input id="inputFileNameToSaveAs"></input></td>
-                <td>
-                    <button onclick="saveTextAsFile()">Save Text to File</button>
-                </td>
-            </tr>
-        </table>
-        <textarea id="mySavedModel" style="width:100%;height:300px">
-{ "class": "go.GraphLinksModel",
-  "linkFromPortIdProperty": "fromPort",
-  "linkToPortIdProperty": "toPort",
-  "nodeDataArray": [
- ],
-  "linkDataArray": [
- ]}
-    </textarea>
+        <br>
+        <div id="sample">
+            <div id="workBench" style="width: 100%; display: flex; justify-content: space-between">
+                <div id="myPaletteDiv"
+                     style="width: 10%; margin-right: 2px; background-color: whitesmoke; border: solid 1px black"></div>
+                <div id="myDiagramDiv" style="flex-grow: 0; height: 620px; width: 40%; border: solid 1px black"></div>
+                <iframe id="iframeViz" height="620" width="50%"></iframe>
+            </div>
+            <span style="display: inline-block; vertical-align: top;">
+                    Selected Part:<br/>
+                    <div id="myInspectorDiv" class="inspector"> </div><br/>
+                </span>
+            <div>
+                <div>
+                    <button id="SaveButton" onclick="save()">Save</button>
+                    <button onclick="load()">Load</button>
+                    Diagram Model saved in JSON format:
+                </div>
+                <table>
+                    <tr>
+                        <td>Filename to Save As:</td>
+                        <td><input id="inputFileNameToSaveAs"></input></td>
+                        <td>
+                            <button onclick="saveTextAsFile()">Save Text to File</button>
+                        </td>
+                    </tr>
+                </table>
+                <textarea id="mySavedModel" style="width:100%;height:300px">
+        { "class": "go.GraphLinksModel",
+          "linkFromPortIdProperty": "fromPort",
+          "linkToPortIdProperty": "toPort",
+          "nodeDataArray": [
+         ],
+          "linkDataArray": [
+         ]}
+            </textarea>
+            </div>
+        </div>
+    </div>
+    <div id="visualizer" class="visualizer">
+        <div id="model_table" class="model_table">
+            <div class="models_headings">
+                <div class="model_heading heading_models">
+                    <button class="dropbtn" disabled="">Models</button>
+                </div>
+                <div class="model_heading heading_parameters dropdown">
+                    <div class="dropdown-container" style="width: 100%;">
+                        <button class="dropbtn">Parameter filter</button>
+                        <div class="parameters dropdown-content"></div>
+                    </div>
+                </div>
+                <div class="model_heading heading_parameters dropdown">
+                    <div class="dropdown-container" style="width: 100%;">
+                        <button class="dropbtn">Metrics filter</button>
+                        <div class="metrics dropdown-content"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="models_container">
+                <div id="models" class="models"></div>
+            </div>
+        </div>
     </div>
 </div>
 </body>

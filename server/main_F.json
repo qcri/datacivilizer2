@@ -3,11 +3,11 @@
   "linkToPortIdProperty": "toPort",
   "modelData": {"position":"-856 -277.5"},
   "nodeDataArray": [ 
-{"text":"Resample", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_resample", "key":-2, "loc":"-549 -171"},
-{"text":"Filter", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_filter", "key":-3, "loc":"-549 -94"},
-{"text":"Montage", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_montage", "key":-4, "loc":"-549 -7"},
+{"text":"Resample", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_resample", "resample_frequency": 200, "key":-2, "loc":"-549 -171"},
+{"text":"Filter", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_filter", "notch_frequency": 60, "high_pass_frequency": 0.5, "low_pass_frequency": 40, "key":-3, "loc":"-549 -94"},
+{"text":"Montage", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_montage", "montage_type": "monopolar", "key":-4, "loc":"-549 -7"},
 {"text":"Clip", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_clip", "key":-5, "loc":"-549 86"},
-{"text":"Data source", "figure":"RoundedRectangle", "fill":"lightgreen", "cmd":"source", "path":"SampleData1.mat", "key":-1, "loc":"-549 -252.5"}
+{"text":"Data source", "figure":"RoundedRectangle", "fill":"lightgreen", "cmd":"mod_source", "path":"SampleData1.mat", "key":-1, "loc":"-549 -252.5"}
  ],
   "linkDataArray": [ 
 {"from":-2, "to":-3, "fromPort":"B", "toPort":"T", "points":[-549,-151,-549,-141,-549,-132.5,-549,-132.5,-549,-124,-549,-114]},

@@ -6,39 +6,27 @@
 % - clip;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [] = mod_resample(arg1, arg2)
-
-%disp(arg1);
-
-%clc
-%close all
-%clear
-
-
-
+function [] = mod_resample(in_file, out_file, resample_freq)
 
 addpath([pwd, '/Callbacks/']);
 
-fileName = arg1;
-
 % Step1 - read data %
-tmp = load([pwd, '/Data/', fileName]);
-eeg = tmp.data(1:19, :);               % EEG %
-ekg = tmp.data(21, :)-tmp.data(20, :); % EKG %
-To = datetime(tmp.startTime, 'Inputformat', 'MM-dd-yyyy hh:mm:ss'); % strating timestamp of EEG %
-Fs = tmp.Fs; % sampling rate %
-data = tmp.data;
+tmp = load([pwd, '/Data/', in_file]);
+
+eeg = tmp.eeg;
+ekg = tmp.ekg;
+channels = tmp.channels;
 startTime = tmp.startTime;
+Fs = tmp.Fs;                % sampling rate %
 
 % Step2 - resample %
-if Fs~=200
-    eeg = resample(eeg', 200, Fs)';  
-    ekg = resample(ekg', 200, Fs)';
-    Fs = 200;
+if Fs~=resample_freq
+    eeg = resample(eeg', resample_freq, Fs)';  
+    ekg = resample(ekg', resample_freq, Fs)';
+    Fs = resample_freq;
 end
 
-%dlmwrite([pwd, '/Data/resample.txt'], data);
-dlmwrite([pwd, '/Data/', arg2, '.txt'], data);
-save([pwd, '/Data/', arg2], 'data', 'startTime', 'Fs');
-
+data = cat(1,eeg,ekg);
+dlmwrite([pwd, '/Data/', out_file, '.txt'], data);
+save([pwd, '/Data/', out_file], 'eeg', 'ekg', 'channels', 'startTime', 'Fs');
 end

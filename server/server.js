@@ -18,6 +18,10 @@ var dataVizPath = "";
 const {TopologicalSort} = require('topological-sort');
 app.use(express.json());
 
+app.get('/', function (request, response) {
+    response.sendfile(path.resolve('./editor.html'));
+});
+
 app.get('/vizFrame', function (request, response) {
     response.sendfile(path.resolve('./eeg_renderer/eeg_renderer.html'));
 });
@@ -70,6 +74,26 @@ app.get('/versioningUtils.js', function (request, response) {
     response.sendfile(path.resolve('./versioningUtils.js'));
 });
 
+app.get('/ejs_production.js', function (request, response) {
+    response.sendfile(path.resolve('./ejs_production.js'));
+});
+
+app.get('/model.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/model.ejs'));
+});
+
+app.get('/parameters.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/parameters.ejs'));
+});
+
+app.get('/metrics.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/metrics.ejs'));
+});
+
+app.get('/visualizer.css', function (request, response) {
+    response.sendfile(path.resolve('./visualizer.css'));
+});
+
 
 /**
  * Runs a DC2 pipeline
@@ -97,32 +121,50 @@ function run_pipeline(pipeline, in_map) {
     const metric_file_name = "metric_temp.json";
     var metrics = {};
 
+
     for (var node_id of pipeline.keys()) {
         console.log(pipeline.get(node_id).node.cmd);
 
-        var cmd_name = pipeline.get(node_id).node.cmd;
-
-        if (pipeline.get(node_id).node.hasOwnProperty('path')) {
-            console.log('data source detected ', pipeline.get(node_id));
-            out_map[node_id] = pipeline.get(node_id).node.path;
-            continue;
-        }
+        var node = pipeline.get(node_id).node;
+        var cmd_name = node.cmd;
+        var json_file = cmd_name + ".json";
+        var module_info = JSON.parse(fs.readFileSync(json_file, 'utf8'));
+        var cmd_path = module_info.cmd_path;
+        var num_params = module_info.num_parameters;
+        var params = module_info.parameters;
 
         if (cmd_name == "mod_changePoints")
             out_map[node_id] = "out_" + node_id + ".jpg";
-
-        else out_map[node_id] = "out_" + node_id + ".mat";
+        else
+            out_map[node_id] = "out_" + node_id + ".mat";
 
         //get input files list
         var args = [];
-        args.push(cmd_name + ".py");
+        args.push(cmd_path);
 
-        for (var n of in_map[node_id]) {
-            args.push(out_map[n]);
+        if (cmd_name == "mod_source")
+            args.push(node.path)
+        else {
+            for (var n of in_map[node_id]) {
+                args.push(out_map[n]);
+            }
         }
 
         //push output file name
         args.push(out_map[node_id]);
+
+        for (var i=0; i<num_params; i++) {
+            var param_type = params[i].type;
+            var param = node[params[i].name];
+            var found_type = typeof(param);
+            if (found_type == param_type) {
+                args.push(node[params[i].name]);
+            } else {
+                console.log("Wrong type for parameter " + params[i].name + ", expected " + param_type + ", found " + found_type);
+                console.log("Using default value");
+                args.push(params[i].default_value);
+            }
+        }
 
         //push metric file name
         args.push(metric_file_name);
@@ -137,8 +179,7 @@ function run_pipeline(pipeline, in_map) {
         );
 
         var obj = JSON.parse(fs.readFileSync(metric_file_name, 'utf8'));
-        const module_name = pipeline.get(node_id).node.cmd + "_" + pipeline.get(node_id).node.key;
-        console.log(obj);
+        const module_name = node.cmd + "_" + node.key;
         if (!(Object.entries(obj).length === 0 && obj.constructor === Object)) {
             metrics[module_name] = obj;
         }
@@ -148,15 +189,7 @@ function run_pipeline(pipeline, in_map) {
 
     }
 
-    console.log("Metrics");
-    console.log(metrics);
-
     return metrics;
-}
-
-function retreive_metrics(metric_file_name) {
-    // TODO
-    return [];
 }
 
 function get_sortOp(pipeline) {
@@ -241,13 +274,26 @@ function save_run(pipeline, runNo, runMetrics) {
     obj = JSON.stringify(pipeline, null, 4);
 
     console.log("Writing model to JSON file");
-    fs.writeFile(filename, obj, 'utf8', function (err) {
-        if (err) {
-            console.log("An error occured while writing JSON Object to File.");
-            return console.log(err);
+    fs.writeFileSync(filename, obj, 'utf8');
+};
+
+function get_model_params(model) {
+    var module_array = model.nodeDataArray;
+    var _module;
+    var parameters = {}
+    for (var i in module_array) {
+        _module = module_array[i];
+        delete _module.key;
+        delete _module.cmd;
+        delete _module.figure;
+        delete _module.fill;
+        delete _module.loc;
+        delete _module.text;
+        for (var j in _module) {
+            parameters[j] = _module[j];
         }
-        console.log("JSON file has been saved.");
-    });
+    }
+    return parameters;
 }
 
 app.post('/run', function (request, response) {
@@ -257,6 +303,7 @@ app.post('/run', function (request, response) {
     //parse JSON file
     var modelString = JSON.stringify(request.body);
     var pipeline = JSON.parse(modelString);
+    var pipelineCopy = JSON.parse(modelString);
 
     const runNo = pipeline.runNo;
 
@@ -268,6 +315,12 @@ app.post('/run', function (request, response) {
         pipeline = JSON.parse(modelString);
     } else {
         pipeline['runs'] = [];
+    }
+
+    if (!('parameters' in pipeline)) {
+        console.log("Computing pipeline parameters")
+        var parameters = get_model_params(pipelineCopy);
+        pipeline['parameters'] = parameters;
     }
 
     // get parameters for run
@@ -291,13 +344,7 @@ app.post('/saveModelVersions', function (request, response) {
     var obj = JSON.stringify(request.body, null, 4);
 
     console.log("Writing versioning data to JSON file");
-    fs.writeFile("versioningData.json", obj, 'utf8', function (err) {
-        if (err) {
-            console.log("An error occured while writing JSON Object to File.");
-            return console.log(err);
-        }
-        console.log("JSON file has been saved.");
-    });
+    fs.writeFileSync("versioningData.json", obj, 'utf8');
 
     response.end();
 });
@@ -307,6 +354,35 @@ app.get('/getModelVersions', function (request, response) {
 
     response.sendfile(path.resolve("versioningData.json"));
 
+});
+
+app.get('/models', function(request, response) {
+    console.log("Loading models")
+
+    var models = [];
+
+    var dir_name = './saved_models/';
+    fs.readdirSync(dir_name).forEach(handle_model_file);
+    
+    function handle_model_file(file_name) {
+        const pathname = dir_name + file_name;
+        var obj = JSON.parse(fs.readFileSync(pathname, 'utf8'));
+        models.push(JSON.stringify(obj));
+    };
+
+    var modules_info = {};
+
+    dir_name = './';
+    var regex = /^mod_.*\.json$/;
+    fs.readdirSync(dir_name).filter(fn => regex.test(fn)).forEach(handle_module_file);
+    
+    function handle_module_file(file_name) {
+        const pathname = dir_name + file_name;
+        var obj = JSON.parse(fs.readFileSync(pathname, 'utf8'));
+        modules_info[file_name.substring(0,file_name.length-5)] = JSON.stringify(obj);
+    };
+
+    response.send({'models': models, 'modules_info': modules_info});
 });
 
 app.get('/request_pipeline', function (request, response) {
@@ -347,12 +423,6 @@ app.get('/download_output', function (request, response) {
     var readStream = fs.createReadStream(file_name);
     // We replaced all the event handlers with a simple call to readStream.pipe()
     readStream.pipe(response);
-});
-
-
-app.get('/', function (request, response) {
-    response.sendfile('./editor.html');
-
 });
 
 var server = app.listen(8080, function () {

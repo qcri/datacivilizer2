@@ -1,6 +1,6 @@
 import matlab.engine
 import sys
-from mod_util import transform_to_tensor
+from utils.mod_util import transform_to_tensor
 
 eng = matlab.engine.start_matlab()
 

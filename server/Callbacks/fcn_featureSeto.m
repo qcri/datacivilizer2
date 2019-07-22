@@ -1,4 +1,4 @@
-function features = fcn_featureSeto(data,Sdata,sfreqs, Fs)
+function features = fcn_featureSeto(data,Sdata,sfreqs, Fs, delta_low, delta_high, theta_low, theta_high, alpha_low, alpha_high, beta_low, beta_high)
 
 
 % Input data: EEG segment
@@ -67,10 +67,10 @@ for k = 1: 4 % 4 regional groups
 
         % band power
         x_total = bandpower(seg_s,sfreqs,[sfreqs(1) sfreqs(end)],'psd')+eps;  % dimonimator %
-        x_delta = bandpower(seg_s,sfreqs,[1 4],'psd');   % vec
-        x_theta = bandpower(seg_s,sfreqs,[4 8],'psd');
-        x_alpha = bandpower(seg_s,sfreqs,[8 12],'psd');
-        x_beta = bandpower(seg_s,sfreqs,[12 18],'psd');
+        x_delta = bandpower(seg_s,sfreqs,[delta_low delta_high],'psd');   % vec, [1 4]%
+        x_theta = bandpower(seg_s,sfreqs,[theta_low theta_high],'psd');   % [4 8]     %
+        x_alpha = bandpower(seg_s,sfreqs,[alpha_low alpha_high],'psd');  % [8 12]    %
+        x_beta = bandpower(seg_s,sfreqs,[beta_low beta_high],'psd');  % [12 18]   %
         
         r_delta = x_delta./x_total;   
         r_theta = x_theta./x_total;    
