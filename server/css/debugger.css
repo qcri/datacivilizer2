@@ -1,0 +1,124 @@
+.debugger {
+    display: none;
+    float: left;
+    width: 0%;
+    height: 100%;
+    white-space: nowrap;
+    overflow: auto;
+}
+
+.debugger_container {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 442px;
+    align-content: center;
+}
+
+.debugger_scrollmenu {
+    margin: 10px 10px 0px 10px;
+    font-weight: bold;
+    height: 32px;
+    overflow: auto;
+    white-space: nowrap;
+}
+
+.debugger_scrollmenu::-webkit-scrollbar { 
+    display: none;
+}
+
+.debugger_tab {
+    text-align: center;
+    background-color: gray;
+    padding: 5px 20px;
+    border: 1px solid lightgray;
+    border-bottom: none;
+    border-radius: 7px 7px 0px 0px;
+    display: inline-block;
+    cursor: pointer;
+    width: 190px;
+}
+
+.debugger_tab:hover {
+    background-color: lightgray;
+}
+
+.debugger_tab.active {
+  background-color: #f1f1f1;
+}
+
+.debugger_models {
+    margin: 0 10px;
+    border: 1px solid lightgray;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.debugger_model {
+    display: inline-block;
+}
+
+.debugger_modules_header {
+    margin: 10px 10px;
+    padding: 0 20px;
+    width: calc(100% - 20px);
+    background-color: lightgray;
+    border: 1px solid gray;
+    border-radius: 5px;
+    display: inline-block;
+    text-align: center;
+}
+
+.debugger_module_header {
+    margin: 0px 5px;
+    width: 100%;
+    display: inline-block;
+    text-align: center;
+    text-decoration: underline;
+}
+
+.progress_bar_container {
+    margin: 10px;
+    height: 25px;
+    align-content: center;
+}
+
+.progress_bar {
+    width: 400px;
+    height: 25px;
+    white-space: nowrap;
+}
+
+.progress_bar_split {
+    height: 25px;
+    float: left;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.progress_bar_horizontal {
+    margin: 5px 0px;
+    height: 15px;
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+    border-right: none;
+    float: left;
+    display: inline-block;
+}
+
+.progress_bar_vertical {
+    height: 25px;
+    width: 10px;
+    border: 1px solid gray;
+    border-radius: 2px;
+    float: left;
+    display: inline-block;
+}
+
+.progress_bar_split:hover .done {
+    background-color: gray;
+}
+
+.progress_bar_split .done {
+    background-color: lightgray;
+}

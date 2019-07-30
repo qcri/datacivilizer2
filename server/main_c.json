@@ -3,9 +3,9 @@
   "linkToPortIdProperty": "toPort",
   "modelData": {"position":"-767 -287"},
   "nodeDataArray": [ 
-{"text":"Data source", "figure":"RoundedRectangle", "fill":"lightgreen", "cmd":"mod_source", "path":"SampleData1.mat", "key":-1, "loc":"-584 -262"},
-{"text":"Spectogram", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_spectrogram", "nw": 2, "key":-6, "loc":"-584 -156"},
-{"text":"Change pts", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_changePoints", "threshold": 0.5, "key":-8, "loc":"-584 -49"}
+{"text":"Data source", "figure":"RoundedRectangle", "fill":"lightgreen", "cmd":"mod_source", "path":"SampleData1.mat", "key":-1, "loc":"-584 -262", "splits": ""},
+{"text":"Spectogram", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_spectrogram", "nw": 2, "key":-6, "loc":"-584 -156", "splits": ""},
+{"text":"Change pts", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_changePoints", "threshold": 0.5, "key":-8, "loc":"-584 -49", "splits": ""}
  ],
   "linkDataArray": [ 
 {"from":-1, "to":-6, "fromPort":"B", "toPort":"T", "points":[-584,-242,-584,-232,-584,-209,-584,-209,-584,-186,-584,-176]},

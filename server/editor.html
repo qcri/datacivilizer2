@@ -15,11 +15,31 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <link rel='stylesheet' href='/DataInspector.css'/>
     <link rel="stylesheet" type="text/css" href="./visualizer.css" />
+    <link rel="stylesheet" type="text/css" href="./debugger.css" />
+    <script src="/visualizerUtils.js"></script>
+    <script src="/debuggerUtils.js"></script>
     <script src="/DataInspector.js"></script>
     <script src="/ejs_production.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <script id="code">
 
+        var source = new EventSource('./registerEditor');
+
+        source.onmessage = function (event) {
+            console.log(JSON.parse(event.data).data);
+        };
+
+        source.addEventListener('split_update', (e) => {
+            update_running_pipeline(JSON.parse(event.data));
+        });
+
+        source.addEventListener('finish_run', (e) => {
+            finish_running_pipeline(JSON.parse(event.data));
+        });
+
+        var visualizer_is_open = false
+        var debugger_is_open = false
+        var running_models = []
         var models = {};
         var modules_info;
         var filter_parameters = [];
@@ -391,13 +411,14 @@
                                 figure: "RoundedRectangle",
                                 fill: "lightgreen",
                                 cmd: "mod_source",
-                                path: "SampleData1.mat"
+                                path: "SampleData1.mat",
+                                splits: ""
                             },
-                            {text: "Resample", figure: "RoundedRectangle", fill: "white", cmd: "mod_resample", resample_frequency: 200},
-                            {text: "Filter", figure: "RoundedRectangle", fill: "white", cmd: "mod_filter", notch_frequency: 60, high_pass_frequency: 0.5, low_pass_frequency: 40},
-                            {text: "Montage", figure: "RoundedRectangle", fill: "white", cmd: "mod_montage", montage_type: "monopolar"},
-                            {text: "Clip", figure: "RoundedRectangle", fill: "white", cmd: "mod_clip"},
-                            {text: "Spectogram", figure: "RoundedRectangle", fill: "white", cmd: "mod_spectrogram", nw: 2},
+                            {text: "Resample", figure: "RoundedRectangle", fill: "white", cmd: "mod_resample", resample_frequency: 200, splits: ""},
+                            {text: "Filter", figure: "RoundedRectangle", fill: "white", cmd: "mod_filter", notch_frequency: 60, high_pass_frequency: 0.5, low_pass_frequency: 40, splits: ""},
+                            {text: "Montage", figure: "RoundedRectangle", fill: "white", cmd: "mod_montage", montage_type: "monopolar", splits: ""},
+                            {text: "Clip", figure: "RoundedRectangle", fill: "white", cmd: "mod_clip", splits: ""},
+                            {text: "Spectogram", figure: "RoundedRectangle", fill: "white", cmd: "mod_spectrogram", nw: 2, splits: ""},
                             {
                                 text: "EEG features",
                                 figure: "RoundedRectangle",
@@ -410,16 +431,18 @@
                                 alpha_low: 8,
                                 alpha_high: 12,
                                 beta_low: 12,
-                                beta_high: 18
+                                beta_high: 18,
+                                splits: ""
                             },
-                            {text: "Change pts", figure: "RoundedRectangle", fill: "white", cmd: "mod_changePoints", threshold: 0.5},
+                            {text: "Change pts", figure: "RoundedRectangle", fill: "white", cmd: "mod_changePoints", threshold: 0.5, splits: ""},
                             {
                                 text: "Binary seg",
                                 figure: "RoundedRectangle",
                                 fill: "white",
-                                cmd: "mod_binarySegmentation"
+                                cmd: "mod_binarySegmentation",
+                                splits: ""
                             },
-                            {text: "BSP", figure: "RoundedRectangle", fill: "white", cmd: "mod_bsp"},
+                            {text: "BSP", figure: "RoundedRectangle", fill: "white", cmd: "mod_bsp", splits: ""},
 
                         ])
                     });
@@ -461,18 +484,15 @@
         };
 
         function visualizeOutput(e, obj) {
+            console.log(obj.part.adornedPart.data.key);
+
             var node_key = obj.part.adornedPart.data.key;
             var iframe = document.getElementById('iframeViz');
 
             console.log("visualizing: \"./Data/out_" + node_key + ".json\"");
 
             $.get('/setViz',
-                // todo this is the code for getting the viz of the box:
                 {"pathJSON": "./Data/out_" + node_key + ".json"})
-                // this was test ok:
-                // {"pathJSON": "./Data/data_json.json"})
-                // todo this is tets of the data from matlab -- generated with the Jupyter notebook
-                // {"pathJSON": "./Data/tmp_final_stuct.json"})
                 .done(function (response) {
                     iframe.setAttribute("src", "vizFrame");
                     iframe.src = iframe.src;
@@ -499,210 +519,75 @@
             });
         };
 
+        function open_debugger() {
+            document.getElementById("editor").style.width = "60%";
+            document.getElementById("debugger").style.width = "40%";
+            document.getElementById("debugger").style.display = "inline-block";
+            document.getElementById("visualizer").style.width = "0%";
+            document.getElementById("visualizer").style.display = "none";
+            document.getElementById("open_visualizer").style.display = "inline-block";
+            document.getElementById("close_visualizer").style.display = "none";
+            document.getElementById("open_debugger").style.display = "none";
+            document.getElementById("close_debugger").style.display = "inline-block";
+            debugger_is_open = true;
+            myDiagram.requestUpdate();
+            myPalette.requestUpdate();
+        };
+
+        function close_debugger() {
+            if (visualizer_is_open) {
+                document.getElementById("editor").style.width = "50%";
+                document.getElementById("visualizer").style.width = "50%";
+                document.getElementById("visualizer").style.display = "inline-block";
+                document.getElementById("open_visualizer").style.display = "none";
+                document.getElementById("close_visualizer").style.display = "inline-block";
+                load_models();
+            } else {
+                document.getElementById("editor").style.width = "100%";
+            }
+            document.getElementById("debugger").style.width = "0%";
+            document.getElementById("debugger").style.display = "none";
+            document.getElementById("open_debugger").style.display = "inline-block";
+            document.getElementById("close_debugger").style.display = "none";
+            debugger_is_open = false;
+            myDiagram.requestUpdate();
+            myPalette.requestUpdate();
+        };
+
         function open_visualizer() {
             document.getElementById("editor").style.width = "50%";
+            document.getElementById("debugger").style.width = "0%";
+            document.getElementById("debugger").style.display = "none";
             document.getElementById("visualizer").style.width = "50%";
+            document.getElementById("visualizer").style.display = "inline-block";
             document.getElementById("open_visualizer").style.display = "none";
-            document.getElementById("close_visualizer").style.display = "initial";
+            document.getElementById("close_visualizer").style.display = "inline-block";
+            document.getElementById("open_debugger").style.display = "inline-block";
+            document.getElementById("close_debugger").style.display = "none";
+            visualizer_is_open = true;
             myDiagram.requestUpdate();
             myPalette.requestUpdate();
             load_models();
         };
 
         function close_visualizer() {
-            document.getElementById("editor").style.width = "100%";
+            if (debugger_is_open) {
+                document.getElementById("editor").style.width = "60%";
+                document.getElementById("debugger").style.width = "40%";
+                document.getElementById("debugger").style.display = "inline-block";
+                document.getElementById("open_debugger").style.display = "none";
+                document.getElementById("close_debugger").style.display = "inline-block";
+            } else {
+                document.getElementById("editor").style.width = "100%";
+            }
             document.getElementById("visualizer").style.width = "0%";
-            document.getElementById("open_visualizer").style.display = "initial";
+            document.getElementById("visualizer").style.display = "none";
+            document.getElementById("open_visualizer").style.display = "inline-block";
             document.getElementById("close_visualizer").style.display = "none";
+            visualizer_is_open = false;
             myDiagram.requestUpdate();
             myPalette.requestUpdate();
         };
-
-        function load_models() {
-            console.log("Loading models");
-            $.ajax({
-                url: '/models',
-                type: 'get',
-                success: function (data) {
-                    models_data = data.models;
-                    modules_info = data.modules_info;
-                    models = {};
-                    for (var i = 0; i< models_data.length; i++) {
-                        model = JSON.parse(models_data[i]);
-                        models[model.modelId] = model;
-                    }
-                    set_parameter_filter();
-                    set_metric_filter();
-
-                    display_models();
-                }
-            });
-        };
-
-        function set_parameter_filter() {
-            $('.parameters').html("");
-            var parameters = [];
-            var _module;
-            var num_parameters;
-            for (var module_name in modules_info) {
-                module_info = JSON.parse(modules_info[module_name]);
-                num_parameters = module_info.num_parameters;
-                for (var i = 0; i < num_parameters; i++) {
-                    parameters.push(module_info.parameters[i].name);
-                }
-            }
-            var html = new EJS({url : '/parameters.ejs'}).render({'parameters': parameters});
-            $('.parameters').append($(html));
-        };
-
-        function set_metric_filter() {
-            $('.metrics').html("");
-            var metrics = [];
-            var model;
-            var runs;
-            for (var modelId in models) {
-                model = models[modelId];
-                runs = model.runs;
-                for (var runId in runs) {
-                    run = runs[runId];
-                    run_modules = run.metrics;
-                    for (var _module in run_modules) {
-                        module_metrics = run.metrics[_module];
-                        for (var metric in module_metrics) {
-                            if (!metrics.includes(metric)) {
-                                metrics.push(metric);
-                            }
-                        }
-                    }
-                }
-            }
-            var html = new EJS({url : '/metrics.ejs'}).render({'metrics': metrics});
-            $('.metrics').append($(html));
-        }
-
-        function filter_model(model) {
-            var model_params = model.parameters;
-            if (model_params == undefined && filter_parameters.length > 0) {
-                return true;
-            }
-            for (var paramNo in filter_parameters) {
-                var param = filter_parameters[paramNo];
-                if (!(param in model_params)) {
-                    return true;
-                }
-            }
-            for (var metricNo in filter_metrics) {
-                var metric = filter_metrics[metricNo];
-                var has_metric = false;
-                for (var runId in model.runs) {
-                    for (var _module in model.runs[runId].metrics) {
-                        if (metric in model.runs[runId].metrics[_module]) {
-                            has_metric = true;
-                        }
-                    }
-                }
-                if (!has_metric) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        function display_models() {
-            $('.models').html("");
-            var model;
-            for (var modelId in models) {
-                model = models[modelId];
-                if (filter_model(model)) {
-                    continue;
-                }
-                var runs = model.runs;
-                var obj = get_modules_and_metrics(runs);
-                var metrics = obj.metrics;
-                model['runs_amount'] = obj.runs_amount;
-                var html = new EJS({url : '/model.ejs'}).render({'model': model, 'filter_parameters': filter_parameters, 'filter_metrics': filter_metrics, 'runs': runs, 'modules': obj.modules, 'metrics' : metrics, 'metric_values': obj.metric_values});
-                $('.models').append($(html));
-            }
-        };
-
-        function get_modules_and_metrics(runs) {
-            var modules = [];
-            var metrics = {};
-            var metric_values = {};
-            var runs_amount = 0;
-            for (var runId in runs) {
-                runs_amount += 1;
-                run = runs[runId];
-                run_modules = run.metrics;
-                for (var _module in run_modules) {
-                    if (!modules.includes(_module)) {
-                        modules.push(_module);
-                        metrics[_module] = [];
-                    }
-                    module_metrics = run.metrics[_module];
-                    for (var metric in module_metrics) {
-                        if (!metrics[_module].includes(metric)) {
-                            metrics[_module].push(metric);
-                        }
-                        metric_values[metric] = module_metrics[metric];
-                    }
-                }
-            }
-            return {'modules': modules, 'metrics': metrics, 'runs_amount': runs_amount, 'metric_values': metric_values};
-        };
-
-        function on_click_model(modelId) {
-            model = models[modelId];
-            load_diagram(model);
-        };
-
-        function see_more(event, modelId) {
-            var addId = "add_" + modelId;
-            var display = document.getElementById(addId).style.display;
-            if (display == "flex") {
-                document.getElementById(addId).style.display = "none";
-            } else {
-                document.getElementById(addId).style.display = "flex";
-            }
-            event.stopPropagation();
-        };
-
-        function switchSelect(x) {
-            if (x.dataset.selected == 'true') {
-                x.dataset.selected = 'false';
-                x.style.backgroundColor = "rgb(241, 241, 241)";
-            } else {
-                x.dataset.selected = 'true';
-                x.style.backgroundColor = "rgb(221, 221, 221)";
-            }
-            updateFilters(x);
-        };
-
-        function updateFilters(x) {
-            if (x.dataset.selected == 'true') {
-                if (x.dataset.type == 'parameter') {
-                    filter_parameters.push(x.dataset.value);
-                } else {
-                    filter_metrics.push(x.dataset.value);
-                }
-            } else {
-                if (x.dataset.type == 'parameter') {
-                    for( var i = filter_parameters.length - 1; i >= 0; i--){ 
-                        if (filter_parameters[i] === x.dataset.value) {
-                        filter_parameters.splice(i, 1);
-                        }
-                    }
-                } else {
-                    for( var i = filter_metrics.length - 1; i >= 0; i--){ 
-                        if (filter_metrics[i] === x.dataset.value) {
-                            filter_metrics.splice(i, 1);
-                        }
-                    }
-                }
-            }
-            display_models();
-        };
-
     </script>
 </head>
 
@@ -717,7 +602,7 @@
     var runCounter = [];
     var newId = false;
 
-    // saveModelVersions(); // Use this to reset hash table and model id's
+    saveModelVersions(); // Use this to reset hash table and model id's, preferrably destroy alll saved models before
 
     getModelVersions();
 
@@ -730,15 +615,17 @@
 
         if (hashTable[modelHash] === undefined || hashTable[modelHash] === null) {
             modelId = maxModelId;
+            maxModelId += 1;
             runNo = 1;
             hashTable[modelHash] = modelId;
             runCounter[modelId] = runNo;
-            newId = true;
         } else {
             modelId = hashTable[modelHash];
-            runNo = runCounter[modelId] + 1;
+            runCounter[modelId] += 1;
+            runNo = runCounter[modelId];
         }
 
+        saveModelVersions();
         console.log(modelHash);
         console.log(modelId);
         console.log(runNo);
@@ -747,6 +634,7 @@
         modelJson['modelId'] = modelId;
         modelJson['runNo'] = runNo;
         modelJsonString = JSON.stringify(modelJson);
+        saveModel(modelJsonString);
 
         $.ajax({
             url: '/run',
@@ -756,14 +644,8 @@
             contentType: "application/json; charset=utf-8",
             success: function (data) {
                 console.log("success!");
-                if (newId) {
-                    maxModelId += 1;
-                    newId = false;
-                }
-                hashTable[modelHash] = modelId;
-                runCounter[modelId] = runNo;
-                saveModelVersions();
-                load_models();
+                add_model_to_debugger(data);
+                open_debugger();
             }
         });
     };
@@ -831,6 +713,8 @@
                     <br>
                     <button id="open_visualizer" type="button" class="btn btn-default" onclick="open_visualizer()" style="display: initial;">Open Visualizer</button>
                     <button id="close_visualizer" type="button" class="btn btn-default" onclick="close_visualizer()" style="display: none;">Close Visualizer</button>
+                    <button id="open_debugger" type="button" class="btn btn-default" onclick="open_debugger()" style="display: initial;">Open Debugger</button>
+                    <button id="close_debugger" type="button" class="btn btn-default" onclick="close_debugger()" style="display: none;">Close Debugger</button>
                 </div>
             </div>
         </div>
@@ -895,6 +779,12 @@
             <div class="models_container">
                 <div id="models" class="models"></div>
             </div>
+        </div>
+    </div>
+    <div id="debugger" class="debugger">
+        <div class="debugger_container">
+            <div id="debugger_scrollmenu" class="debugger_scrollmenu"></div>
+            <div id="debugger_models" class="debugger_models"></div>
         </div>
     </div>
 </div>

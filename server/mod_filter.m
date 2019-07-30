@@ -8,13 +8,15 @@
 
 function [] = mod_filter(in_file, out_file, notch_freq, high_pass_freq, low_pass_freq)
 
+tic;
+
 addpath([pwd, '/Callbacks/']);
 
 % Step1 - read data %
 tmp = load([pwd, '/Data/', in_file]);
 
-eeg = tmp.eeg;
-ekg = tmp.ekg;
+eeg = tmp.data(1:19,:);
+ekg = tmp.data(20,:);
 channels = tmp.channels;
 startTime = tmp.startTime;
 Fs = tmp.Fs;                % sampling rate %
@@ -36,5 +38,8 @@ ekg = filter(B2, A2, ekg);
 
 data = cat(1,eeg,ekg);
 dlmwrite([pwd, '/Data/', out_file, '.txt'], data);
-save([pwd, '/Data/', out_file], 'eeg', 'ekg', 'channels', 'startTime', 'Fs');
+save([pwd, '/Data/', out_file], 'data', 'channels', 'startTime', 'Fs');
+
+toc;
+
 end

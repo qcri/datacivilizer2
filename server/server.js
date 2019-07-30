@@ -11,9 +11,51 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var fs = require('fs');
+const { spawn } = require('child_process');
 
 var dataVizPath = "";
+var running_models = [];
+var paused_models = [];
+var connection;
 
+
+var Connection = (function () {
+    function Connection(res) {
+          console.log(" sseMiddleware construct connection for response ");
+   
+        this.res = res;
+    }
+    Connection.prototype.setup = function () {
+        console.log("set up SSE stream for response");
+        this.res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+        });
+    };
+    Connection.prototype.send = function (data) {
+        console.log("send event to SSE stream "+JSON.stringify(data));
+        this.res.write("data: " + JSON.stringify(data) + "\n\n");
+    };
+    Connection.prototype.sendSplitUpdate = function (data) {
+        console.log("send event to SSE stream "+JSON.stringify(data));
+        this.res.write("event: split_update\ndata: " + JSON.stringify(data) + "\n\n");
+    };
+    Connection.prototype.finish_run = function (data) {
+        console.log("send event to SSE stream "+JSON.stringify(data));
+        this.res.write("event: finish_run\ndata: " + JSON.stringify(data) + "\n\n");
+    };
+    return Connection;
+}());
+
+app.get('/registerEditor', function(req,res){
+    console.log("Editor is connecting");
+    var sseConnection = new Connection(res);
+    res.sseConnection = sseConnection;
+    sseConnection.setup();
+    connection = sseConnection;
+    connection.send({'data': 'Connection established'});
+});
 
 const {TopologicalSort} = require('topological-sort');
 app.use(express.json());
@@ -74,6 +116,14 @@ app.get('/versioningUtils.js', function (request, response) {
     response.sendfile(path.resolve('./versioningUtils.js'));
 });
 
+app.get('/visualizerUtils.js', function (request, response) {
+    response.sendfile(path.resolve('./visualizerUtils.js'));
+});
+
+app.get('/debuggerUtils.js', function (request, response) {
+    response.sendfile(path.resolve('./debuggerUtils.js'));
+});
+
 app.get('/ejs_production.js', function (request, response) {
     response.sendfile(path.resolve('./ejs_production.js'));
 });
@@ -90,10 +140,21 @@ app.get('/metrics.ejs', function (request, response) {
     response.sendfile(path.resolve('./ejs/metrics.ejs'));
 });
 
-app.get('/visualizer.css', function (request, response) {
-    response.sendfile(path.resolve('./visualizer.css'));
+app.get('/debugger_tab.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/debugger_tab.ejs'));
 });
 
+app.get('/debugger_model.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/debugger_model.ejs'));
+});
+
+app.get('/visualizer.css', function (request, response) {
+    response.sendfile(path.resolve('./css/visualizer.css'));
+});
+
+app.get('/debugger.css', function (request, response) {
+    response.sendfile(path.resolve('./css/debugger.css'));
+});
 
 /**
  * Runs a DC2 pipeline
@@ -108,28 +169,25 @@ app.get('/visualizer.css', function (request, response) {
  *    3.2/ get output file path from module
  *    3.3/ pass output file (and possible other files) as input file(s) to the next module
  */
-function run_pipeline(pipeline, in_map) {
-
-    console.log("Pipeline in 'run_pipeline':");
-    console.log(pipeline);
+function run_pipeline(modelId, runNo, pipeline_map, in_map) {
 
     //create output map
     var out_map = new Map();
 
-    console.log("loop");
+    args = ["debugger.py"];
+    var num_modules = pipeline_map.size;
+    args.push(modelId);
+    args.push(runNo);
+    args.push(num_modules);
 
-    const metric_file_name = "metric_temp.json";
-    var metrics = {};
-
-
-    for (var node_id of pipeline.keys()) {
-        console.log(pipeline.get(node_id).node.cmd);
-
-        var node = pipeline.get(node_id).node;
+    for (var node_id of pipeline_map.keys()) {
+        var node = pipeline_map.get(node_id).node;
         var cmd_name = node.cmd;
         var json_file = cmd_name + ".json";
         var module_info = JSON.parse(fs.readFileSync(json_file, 'utf8'));
         var cmd_path = module_info.cmd_path;
+        var num_inputs = module_info.num_inputs;
+        var num_outputs = module_info.num_outputs;
         var num_params = module_info.num_parameters;
         var params = module_info.parameters;
 
@@ -138,84 +196,67 @@ function run_pipeline(pipeline, in_map) {
         else
             out_map[node_id] = "out_" + node_id + ".mat";
 
-        //get input files list
-        var args = [];
-        args.push(cmd_path);
+        // get input files list
+        var module_args = [];
+        module_args.push(cmd_path);
 
+        // push input files
+        module_args.push(num_inputs);
         if (cmd_name == "mod_source")
-            args.push(node.path)
+            module_args.push(node.path)
         else {
             for (var n of in_map[node_id]) {
-                args.push(out_map[n]);
+                module_args.push(out_map[n]);
             }
         }
 
-        //push output file name
-        args.push(out_map[node_id]);
+        // push output file name
+        module_args.push(num_outputs);
+        module_args.push(out_map[node_id]);
 
+        // push parameters
+        module_args.push(num_params);
         for (var i=0; i<num_params; i++) {
             var param_type = params[i].type;
             var param = node[params[i].name];
             var found_type = typeof(param);
             if (found_type == param_type) {
-                args.push(node[params[i].name]);
+                module_args.push(node[params[i].name]);
             } else {
                 console.log("Wrong type for parameter " + params[i].name + ", expected " + param_type + ", found " + found_type);
                 console.log("Using default value");
-                args.push(params[i].default_value);
+                module_args.push(params[i].default_value);
             }
         }
 
-        //push metric file name
-        args.push(metric_file_name);
-
-        //run module
-        console.log("running ", cmd_name, args);
-
-        fs.writeFileSync(metric_file_name, JSON.stringify({}));
-
-        require('child_process').execSync(
-            'python ' + args.join(' '), {stdio: 'inherit'}
-        );
-
-        var obj = JSON.parse(fs.readFileSync(metric_file_name, 'utf8'));
-        const module_name = node.cmd + "_" + node.key;
-        if (!(Object.entries(obj).length === 0 && obj.constructor === Object)) {
-            metrics[module_name] = obj;
+        // push splits
+        if (node.splits == "") {
+            module_args.push(0);
+        } else {
+            var splits = node.splits.split(',').map(Number);
+            module_args.push(splits.length);
+            module_args = module_args.concat(splits);
         }
-        fs.unlinkSync(metric_file_name);
 
-        console.log("run finished.");
-
+        console.log(module_args);
+        args = args.concat(module_args);
     }
 
-    return metrics;
-}
+    var child = spawn('python ' + args.join(' '), {'shell': true, 'stdio': 'inherit'});
+    running_models.push(modelId.toString() + '_' + runNo.toString());
+};
 
 function get_sortOp(pipeline) {
 
-    console.log(pipeline.linkDataArray);
-
-    //top sorting
     const nodes = new Map();
-
-    console.log("nodes")
-    console.log(pipeline.nodeDataArray);
-
-    //get nodes
     for (var id in pipeline.nodeDataArray) {
         nodes.set(pipeline.nodeDataArray[id].key, pipeline.nodeDataArray[id]);
-
     }
-
-    console.log(nodes);
-
     const sortOp = new TopologicalSort(nodes);
-
     for (var edge in pipeline.linkDataArray) {
         sortOp.addEdge(pipeline.linkDataArray[edge].from, pipeline.linkDataArray[edge].to);
     }
-
+    console.log("sort op: ", sortOp);
     return sortOp;
 }
 
@@ -223,15 +264,9 @@ function get_sortOp(pipeline) {
 function get_input_map(nodes) {
 
     var in_map = new Map();
-
     for (var node_id of nodes.keys()) {
-        console.log(node_id);
-
         for (var value_id of nodes.get(node_id).children.keys()) {
-            console.log(value_id);
-
             if (value_id in in_map) {
-                console.log("has value", node_id, value_id);
                 in_map[value_id].push(node_id);
             } else {
                 in_map[value_id] = [];
@@ -239,45 +274,30 @@ function get_input_map(nodes) {
             }
         }
     }
-
     //sort node ids (left edges have lower order in argument list than right edges)
     for (var key in in_map)
         in_map[key].sort(function (a, b) {
             return b - a
         });
-
     console.log("in map: ", in_map);
-
     return in_map;
 }
 
-// Load previous runs from the file containing the model
-function load_runs(pipeline) {
-
-    const modelId = pipeline.modelId;
-    const filename = "saved_models/" + "model_" + modelId + ".json";
-
-    var obj = JSON.parse(fs.readFileSync(filename, 'utf8'));
-    pipeline['runs'] = obj.runs;
-
-    return JSON.stringify(pipeline);
-}
-
 // Save metrics from a new run in the file containing the model
-function save_run(pipeline, runNo, runMetrics) {
+function save_run(modelId, runNo, metrics) {
 
-    pipeline['runs'].push({'runNo' : runNo, 'metrics' : runMetrics});
-
-    const modelId = pipeline.modelId;
-    const filename = "saved_models/" + "model_" + modelId + ".json"
-
+    const filename = "./saved_models/model_" + modelId + ".json";
+    var pipeline = JSON.parse(fs.readFileSync(filename, 'utf8'));
+    if (!('runs' in pipeline)) {
+        pipeline['runs'] = []
+    }
+    pipeline['runs'].push({'runNo' : runNo, 'metrics' : metrics});
     obj = JSON.stringify(pipeline, null, 4);
-
-    console.log("Writing model to JSON file");
     fs.writeFileSync(filename, obj, 'utf8');
 };
 
-function get_model_params(model) {
+function get_model_params(modelJsonString) {
+    var model = JSON.parse(modelJsonString);
     var module_array = model.nodeDataArray;
     var _module;
     var parameters = {}
@@ -294,66 +314,188 @@ function get_model_params(model) {
         }
     }
     return parameters;
-}
+};
 
 app.post('/run', function (request, response) {
+
     console.log("running pipeline requested");
     console.log(request.body);
 
     //parse JSON file
-    var modelString = JSON.stringify(request.body);
-    var pipeline = JSON.parse(modelString);
-    var pipelineCopy = JSON.parse(modelString);
-
+    var pipeline = request.body;
+    const modelId = pipeline.modelId;
     const runNo = pipeline.runNo;
-
-    delete pipeline.runNo;
-
-    if (runNo != 1) {
-        modelString = load_runs(pipeline);
-        console.log(modelString);
-        pipeline = JSON.parse(modelString);
-    } else {
-        pipeline['runs'] = [];
-    }
-
-    if (!('parameters' in pipeline)) {
-        console.log("Computing pipeline parameters")
-        var parameters = get_model_params(pipelineCopy);
-        pipeline['parameters'] = parameters;
-    }
 
     // get parameters for run
     var sortOp = get_sortOp(pipeline);
     const sorted = sortOp.sort();
     var input_map = get_input_map(sortOp.nodes);
 
-    // run the pipeline and return metrics
-    var runMetrics = run_pipeline(sorted, input_map);
+    // run the pipeline
+    run_pipeline(modelId, runNo, sorted, input_map);
+    var model_debug_info = {
+        'modelId': modelId,
+        'runNo': runNo,
+        'modules': []
+    }
+    var node;
+    for (var node_id of sorted.keys()) {
+        node = sorted.get(node_id).node;
+        var splits = [];
+        if (node.splits == "") {
+            splits = [100];
+        } else {
+            splits = splits.concat(node.splits.split(',').map(Number));
+            splits.push(100);
+        }
+        console.log(splits);
+        model_debug_info.modules.push({
+            'name': node.cmd,
+            'splits': splits,
+            'split_outputs': []
+        });
+    }
+    console.log(model_debug_info);
+    response.send(JSON.stringify(model_debug_info));
+});
 
-    // save the run with the pipeline
-    save_run(pipeline, runNo, runMetrics);
+app.post('/pause_pipeline', function (request, response) {
 
+    console.log("Pausing pipeline");
+    var mrId = request.body.mrId;
+    paused_models.push(mrId);
+    for (var i = running_models.length - 1; i >= 0; i--) {
+        if (running_models[i] == mrId) {
+            running_models.splice(i,1);
+        }
+    }
     response.end();
 });
 
+app.post('/resume_pipeline', function (request, response) {
+
+    console.log("Resuming pipeline");
+    var mrId = request.body.mrId;
+    running_models.push(mrId);
+    for (var i = paused_models.length - 1; i >= 0; i--) {
+        if (paused_models[i] == mrId) {
+            paused_models.splice(i,1);
+        }
+    }
+    response.end();
+});
+
+app.post('/kill_pipeline', function (request, response) {
+
+    console.log("Killing pipeline");
+    var mrId = request.body.mrId;
+    for (var i = running_models.length - 1; i >= 0; i--) {
+        if (running_models[i] == mrId) {
+            running_models.splice(i,1);
+        }
+    }
+    for (var i = paused_models.length - 1; i >= 0; i--) {
+        if (paused_models[i] == mrId) {
+            paused_models.splice(i,1);
+        }
+    }
+    response.end();
+});
+
+app.get('/get_status', function (request, response) {
+
+    var model_run_info = request.query;
+    var modelId = model_run_info.modelId;
+    var runNo = model_run_info.runNo;
+    var id = modelId + '_' + runNo;
+    if (running_models.includes(id)) {
+        response.send('running');
+    } else if (paused_models.includes(id)) {
+        response.send('paused');
+    } else {
+        response.send('stopped')
+    }
+});
+
+app.post('/split', function (request, response) {
+
+    connection.sendSplitUpdate(request.body);
+    response.end();
+});
+
+app.post('/finish_run', function (request, response) {
+
+    var obj = request.body;
+    var metric_file_name = obj.metric_file_name;
+    var modelId = obj.modelId;
+    var runNo = obj.runNo;
+
+    var metrics = JSON.parse(fs.readFileSync(metric_file_name, 'utf8'));
+    console.log(metrics);
+    fs.unlinkSync(metric_file_name);
+
+    save_run(modelId, runNo, metrics)
+    connection.finish_run(obj)
+    response.end()
+});
+
+function remove_dir(dir_name) {
+    console.log("Removing directory " + dir_name)
+    try {
+        fs.readdirSync(dir_name).forEach(function(filename, index){
+            var file_path = path.join(dir_name, filename)
+            fs.unlinkSync(file_path);
+        });
+        fs.rmdirSync(dir_name);
+        console.log("Directory successfully removed")
+    } catch (err) {
+        console.log("An error occurred, trying again in 1 minute")
+        setTimeout(remove_dir, 60000, dir_name)
+    }
+};
+
+app.post('/remove_tmp_run_dir', function (request, response) {
+
+    var mrId = request.body.mrId;
+    var dir_name = './Data/' + mrId
+    remove_dir(dir_name)
+    response.end()
+});
+
+app.post('/saveModel', function(request, response) {
+
+    console.log("saving model data");
+    var model = request.body;
+    const filename = "saved_models/" + "model_" + model.modelId + ".json"
+
+    if (model.runNo == 1) {
+        var parameters = get_model_params(JSON.stringify(model));
+        model['parameters'] = parameters;
+        var obj = JSON.stringify(model, null, 4);
+        fs.writeFileSync(filename, obj, 'utf8');
+    } else {
+        var prev_model = JSON.parse(fs.readFileSync(filename, 'utf8'));
+        prev_model.modelData = model.modelData;
+        prev_model.nodeDataArray = model.nodeDataArray;
+        prev_model.linkDataArray = model.linkDataArray;
+        var obj = JSON.stringify(prev_model, null, 4);
+        fs.writeFileSync(filename, obj, 'utf8');
+    }
+    response.end()
+});
+
 app.post('/saveModelVersions', function (request, response) {
+
     console.log("saving versioning data");
-
-    //parse JSON file
     var obj = JSON.stringify(request.body, null, 4);
-
-    console.log("Writing versioning data to JSON file");
     fs.writeFileSync("versioningData.json", obj, 'utf8');
-
     response.end();
 });
 
 app.get('/getModelVersions', function (request, response) {
+
     console.log("loading versioning data");
-
     response.sendfile(path.resolve("versioningData.json"));
-
 });
 
 app.get('/models', function(request, response) {
@@ -381,38 +523,27 @@ app.get('/models', function(request, response) {
         var obj = JSON.parse(fs.readFileSync(pathname, 'utf8'));
         modules_info[file_name.substring(0,file_name.length-5)] = JSON.stringify(obj);
     };
-
     response.send({'models': models, 'modules_info': modules_info});
 });
 
 app.get('/request_pipeline', function (request, response) {
+
     var obj = JSON.stringify(request.query);
-
     var jss = JSON.parse(obj);
-
     var keys = Object.keys(jss);
-
-    console.log(jss[0]);
-
     response.sendfile(path.resolve(keys[0]) + '.json');
-
-
 });
 
 app.get('/fig.png', function (request, response) {
 
     response.sendfile(path.resolve('fig.png'));
-
-
 });
 
 app.get('/download_output', function (request, response) {
+
     var obj = JSON.stringify(request.query);
-    console.log(obj);
     var jss = JSON.parse(obj);
-    console.log(jss);
     var keys = Object.keys(jss);
-    console.log(Object.keys(jss)[0]);
     var file_name = path.resolve("Data/out_" + Object.keys(jss)[0]) + ".mat";
     var stats = fs.statSync(file_name)
     response.writeHead(200, {

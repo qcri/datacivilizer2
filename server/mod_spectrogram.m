@@ -9,7 +9,7 @@ addpath([pwd, '/Callbacks/'])
 % Step1 - read data %
 tmp = load([pwd, '/Data/', in_file]);
 
-eeg = tmp.eeg;
+eeg = tmp.data(1:19,:);
 Fs = tmp.Fs;                % sampling rate %             
 eeg_bi = fcn_LBipolar(eeg); % bipolar %
 

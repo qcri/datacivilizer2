@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<div class="debugger_model" id="debugger_model_<%= mrId %>">
+    <div class="debugger_modules_header">Modules</div>
+    <%
+        for (var i = 0; i < model.modules.length; i++) {
+            var module = model.modules[i];
+    %>
+        <div class="debugger_module">
+            <div class="debugger_module_header"><%= module.name %></div>
+            <div class="progress_bar_container">
+                <div class="progress_bar">
+                    <%
+                        var prev_split = 0;
+                        var split;
+                        var split_width;
+                        var split_done;
+                        var n = module.split_outputs.length;
+                        for (var j = 0; j < module.splits.length; j++) {
+                            split = module.splits[j];
+                            split_width = (split - prev_split)*4;
+                            prev_split = split;
+                            if (j < n) {
+                                split_done = "done";
+                            } else {
+                                split_done = "";
+                            }
+                    %>
+                        <div class="progress_bar_split" onclick="visualizeDebuggingOutput(<%= model.modelId %>, <%= model.runNo %>, '<%= module.name %>', <%= j %>)" style="width: <%= split_width %>px;">
+                            <div id="pbh_<%= mrId %>_<%= module.name %>_<%= split %>" class="progress_bar_horizontal <%= split_done %>" style="width: <%= split_width - 10 %>px;
+                            <%
+                                if (j==0) {
+                            %>
+                                border-left: 1px solid gray;
+                            <%
+                                }
+                            %>
+                            "></div>
+                            <div id="pbv_<%= mrId %>_<%= module.name %>_<%= split %>" class="progress_bar_vertical <%= split_done %>"></div>
+                        </div>
+                    <%
+                        }
+                    %>
+                </div>
+            </div>
+        </div>
+    <%
+        }
+    %>
+    <div class="debugger_extra running_div" id="debugger_running_<%= mrId %>">
+        <div>Pipeline running</div>
+        <button onclick="pause_pipeline('<%= mrId %>')">Pause pipeline</button>
+        <button onclick="stop_pipeline('<%= mrId %>')">Stop pipeline</button>
+    </div>
+    <div class="debugger_extra stopped_div" id="debugger_paused_<%= mrId %>" style="display: none;">
+        <div>Pipeline paused</div>
+        <button onclick="resume_pipeline('<%= mrId %>')">Resume pipeline</button>
+        <button onclick="stop_pipeline('<%= mrId %>')">Stop pipeline</button>
+    </div>
+    <div class="debugger_extra stopped_div" id="debugger_stopped_<%= mrId %>" style="display: none;">
+        <div>Pipeline stopped</div>
+        <button onclick="remove_debugger_model('<%= mrId %>', <%= model.modelId %>, <%= model.runNo %>)">Remove run from debugger</button>
+    </div>
+    <div class="debugger_extra ended_div" id="debugger_ended_<%= mrId %>" style="display: none;">
+        <div>Pipeline finished</div>
+        <button onclick="remove_debugger_model('<%= mrId %>', <%= model.modelId %>, <%= model.runNo %>)">Remove run from debugger</button>
+    </div>
+</div>

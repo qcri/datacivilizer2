@@ -8,6 +8,8 @@
 
 function [] = mod_source(in_file, out_file)
 
+tic;
+
 addpath([pwd, '/Callbacks/']);
 
 % Step1 - read data %
@@ -23,11 +25,15 @@ if isfield(tmp,'channels')
     
     data = cat(1,eeg,ekg);
     dlmwrite([pwd, '/Data/', out_file, '.txt'], data);
-    save([pwd, '/Data/', out_file], 'eeg', 'ekg', 'channels', 'startTime', 'Fs');
+    save([pwd, '/Data/', out_file], 'data', 'channels', 'startTime', 'Fs');
 else
     data = tmp.data;            % data               %
     t = tmp.t;                  % time number vector %
     Fs = tmp.Fs;                % sampling rate      %
     dlmwrite([pwd, '/Data/', out_file, '.txt'], data);
     save([pwd, '/Data/', out_file], 'data', 't', 'Fs');
+end
+
+toc;
+
 end

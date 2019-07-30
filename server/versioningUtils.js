@@ -1,3 +1,16 @@
+function saveModel(modelJsonString) {
+    $.ajax({
+        url: '/saveModel',
+        type: 'post',
+        processData: false,
+        data: modelJsonString,
+        contentType: "application/json; charset=utf-8",
+        success: function (data) {
+            console.log("success!");
+        }
+    });
+}
+
 function saveModelVersions() {
     modelVersions = {'maxSize' : maxSize, 'maxModelId' : maxModelId, 'runCounter' : runCounter, 'hashTable' : hashTable};
     obj = JSON.stringify(modelVersions);
@@ -46,6 +59,7 @@ function getHash(modelString, maxSize) {
         delete nodes[nodeId].fill;
         delete nodes[nodeId].loc;
         delete nodes[nodeId].text;
+        delete nodes[nodeId].splits;
     }
 
     for (var linkId in links) {
@@ -54,6 +68,7 @@ function getHash(modelString, maxSize) {
         delete links[linkId].toPort;
     }
 
+    console.log(model)
     return Math.abs(murmurhash3_32_gc(JSON.stringify(model),1) % maxSize);
 };
 

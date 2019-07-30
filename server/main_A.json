@@ -3,13 +3,13 @@
   "linkToPortIdProperty": "toPort",
   "modelData": {"position":"-837 -277.5"},
   "nodeDataArray": [ 
-{"text":"Resample", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_resample", "resample_frequency": 200, "key":-2, "loc":"-549 -171"},
-{"text":"Filter", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_filter", "notch_frequency": 60, "high_pass_frequency": 0.5, "low_pass_frequency": 40, "key":-3, "loc":"-549 -94"},
-{"text":"Montage", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_montage", "montage_type": "monopolar", "key":-4, "loc":"-549 -7"},
-{"text":"Clip", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_clip", "key":-5, "loc":"-549 86"},
-{"text":"Data source", "figure":"RoundedRectangle", "fill":"lightgreen", "cmd":"mod_source", "path":"SampleData1.mat", "key":-1, "loc":"-549 -252.5"},
-{"text":"Spectogram", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_spectrogram", "nw": 2, "key":-6, "loc":"-337 -14"},
-{"text":"EEG features", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_computeFeatures", "delta_low":1, "delta_high":4, "theta_low":4, "theta_high":8, "alpha_low":8, "alpha_high":12, "beta_low":12, "beta_high":18, "key":-7, "loc":"-430 197"}
+{"text":"Resample", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_resample", "resample_frequency": 200, "key":-2, "loc":"-549 -171", "splits": ""},
+{"text":"Filter", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_filter", "notch_frequency": 60, "high_pass_frequency": 0.5, "low_pass_frequency": 40, "key":-3, "loc":"-549 -94", "splits": ""},
+{"text":"Montage", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_montage", "montage_type": "monopolar", "key":-4, "loc":"-549 -7", "splits": ""},
+{"text":"Clip", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_clip", "key":-5, "loc":"-549 86", "splits": ""},
+{"text":"Data source", "figure":"RoundedRectangle", "fill":"lightgreen", "cmd":"mod_source", "path":"SampleData1.mat", "key":-1, "loc":"-549 -252.5", "splits": ""},
+{"text":"Spectogram", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_spectrogram", "nw": 2, "key":-6, "loc":"-337 -14", "splits": ""},
+{"text":"EEG features", "figure":"RoundedRectangle", "fill":"white", "cmd":"mod_computeFeatures", "delta_low":1, "delta_high":4, "theta_low":4, "theta_high":8, "alpha_low":8, "alpha_high":12, "beta_low":12, "beta_high":18, "key":-7, "loc":"-430 197", "splits": ""}
  ],
   "linkDataArray": [ 
 {"from":-2, "to":-3, "fromPort":"B", "toPort":"T", "points":[-549,-151,-549,-141,-549,-132.5,-549,-132.5,-549,-124,-549,-114]},
