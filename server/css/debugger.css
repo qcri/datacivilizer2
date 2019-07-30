@@ -122,3 +122,9 @@
 .progress_bar_split .done {
     background-color: lightgray;
 }
+
+.debugger_extra {
+    margin: 10px 100px;
+    text-align: center;
+    align-content: center;
+}

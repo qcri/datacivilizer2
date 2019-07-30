@@ -1,6 +1,6 @@
 function pause_pipeline(mrId) {
     document.getElementById("debugger_running_" + mrId).style.display = "none";
-    document.getElementById("debugger_paused_" + mrId).style.display = "initial";
+    document.getElementById("debugger_paused_" + mrId).style.display = "inline-block";
     $.ajax({
         url: '/pause_pipeline',
         type: 'post',
@@ -13,7 +13,7 @@ function pause_pipeline(mrId) {
 };
 
 function resume_pipeline(mrId) {
-    document.getElementById("debugger_running_" + mrId).style.display = "initial";
+    document.getElementById("debugger_running_" + mrId).style.display = "inline-block";
     document.getElementById("debugger_paused_" + mrId).style.display = "none";
     $.ajax({
         url: '/resume_pipeline',
@@ -29,7 +29,7 @@ function resume_pipeline(mrId) {
 function stop_pipeline(mrId) {
     document.getElementById("debugger_running_" + mrId).style.display = "none";
     document.getElementById("debugger_paused_" + mrId).style.display = "none";
-    document.getElementById("debugger_stopped_" + mrId).style.display = "initial";
+    document.getElementById("debugger_stopped_" + mrId).style.display = "inline-block";
     $.ajax({
         url: '/kill_pipeline',
         type: 'post',

@@ -606,7 +606,7 @@
 
     getModelVersions();
 
-    function send() {
+    function send(debugger_type) {
         saveDiagramProperties();
         console.log(myDiagram.model.toJson());
         modelJsonString = myDiagram.model.toJson();
@@ -633,6 +633,7 @@
         modelJson = JSON.parse(modelJsonString);
         modelJson['modelId'] = modelId;
         modelJson['runNo'] = runNo;
+        modelJson['debugger_type'] = debugger_type;
         modelJsonString = JSON.stringify(modelJson);
         saveModel(modelJsonString);
 
@@ -704,7 +705,8 @@
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_D')">main_D</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_E')">main_E</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_F')">main_F</button>
-                <button type="button" class="btn btn-success" onclick="send()">Execute</button>
+                <button type="button" class="btn btn-success" onclick="send('clean')">Execute clean</button>
+                <button type="button" class="btn btn-success" onclick="send('dirty')">Execute dirty</button>
             </div>
             <div>
                 <h4>Load pipeline from file</h4>

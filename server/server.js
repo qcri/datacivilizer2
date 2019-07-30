@@ -169,7 +169,7 @@ app.get('/debugger.css', function (request, response) {
  *    3.2/ get output file path from module
  *    3.3/ pass output file (and possible other files) as input file(s) to the next module
  */
-function run_pipeline(modelId, runNo, pipeline_map, in_map) {
+function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type) {
 
     //create output map
     var out_map = new Map();
@@ -179,6 +179,7 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map) {
     args.push(modelId);
     args.push(runNo);
     args.push(num_modules);
+    args.push(debugger_type);
 
     for (var node_id of pipeline_map.keys()) {
         var node = pipeline_map.get(node_id).node;
@@ -325,6 +326,8 @@ app.post('/run', function (request, response) {
     var pipeline = request.body;
     const modelId = pipeline.modelId;
     const runNo = pipeline.runNo;
+    const debugger_type = pipeline.debugger_type;
+    delete pipeline.debugger_type;
 
     // get parameters for run
     var sortOp = get_sortOp(pipeline);
@@ -332,7 +335,7 @@ app.post('/run', function (request, response) {
     var input_map = get_input_map(sortOp.nodes);
 
     // run the pipeline
-    run_pipeline(modelId, runNo, sorted, input_map);
+    run_pipeline(modelId, runNo, sorted, input_map, debugger_type);
     var model_debug_info = {
         'modelId': modelId,
         'runNo': runNo,
@@ -449,8 +452,8 @@ function remove_dir(dir_name) {
         fs.rmdirSync(dir_name);
         console.log("Directory successfully removed")
     } catch (err) {
-        console.log("An error occurred, trying again in 1 minute")
-        setTimeout(remove_dir, 60000, dir_name)
+        console.log("An error occurred, trying again in 30 seconds")
+        setTimeout(remove_dir, 30000, dir_name)
     }
 };
 

@@ -7,13 +7,14 @@ import h5py
 import hdf5storage
 import requests
 import subprocess
+from operator import itemgetter
 from shutil import copyfile
 
 class Debugger(object):
 
     """docstring for Debugger"""
 
-    def __init__(self, modelId, runNo, _type="clean", splits=None, metric_file="metric_temp.json", max_processes=2):
+    def __init__(self, modelId, runNo, _type="dirty", metric_file="metric_temp.json", max_processes=2):
         super(Debugger, self).__init__()
         self.modelId = modelId
         self.runNo = runNo
@@ -21,8 +22,7 @@ class Debugger(object):
         self.dirName = str(modelId) + '_' + str(runNo)
         self.metric_file = './Data/' + self.dirName + '/' + metric_file
         self.metrics = {}
-        self.type = _type # clean, dirty-priority or dirty
-        self.splits = splits # used if type=dirty, same splits for all modules
+        self.type = _type # clean or dirty (breadth-first or depth-first)
         self.modules = []
         self.stopped = False
         self.paused = False
@@ -68,12 +68,11 @@ class Debugger(object):
             return
         while True:
             try:
-                f = hdf5storage.loadmat('./Data/' + mrId + '/' + in_name + '_' + str(in_split) + extension)
+                f = hdf5storage.loadmat('./Data/' + mrId + '/' + in_name + '_' + str(in_split).zfill(3) + extension)
                 break
             except:
                 print("Loading failed, trying again")
-                raise
-                time.sleep(1)
+                time.sleep(2)
         tmp_f = {}
         for key in f.keys():
             if key == 'data':
@@ -86,15 +85,17 @@ class Debugger(object):
                 tmp_f[key] = f[key]
         while True:
             try:
-                hdf5storage.savemat('./Data/' + mrId + '/' + out_name + '_' + str(out_split) + extension, tmp_f, truncate_existing=True)
+                hdf5storage.savemat('./Data/' + mrId + '/' + out_name + '_' + str(out_split).zfill(3) + extension, tmp_f, truncate_existing=True)
                 break
             except:
                 print("Saving failed, trying again")
                 raise
-                time.sleep(1)
+                time.sleep(2)
 
     def rdy_tmp_file(self, filepath):
+        print("Testing file availability ", filepath)
         if os.path.exists('./Data/' + filepath):
+            print("File exists")
             return True
         else:
             mrId, _, file = filepath.partition('/')
@@ -104,15 +105,18 @@ class Debugger(object):
                 if not os.path.exists('./Data/' + mrId + '/' + name + '_100.' + extension):
                     copyfile('./Data/' + name + '.' + extension, './Data/' + mrId + '/' + name + '_100.' + extension)
                 if int(split) == 100:
+                    print("File created")
                     return True
             if int(split) == 100:
+                print("File unavailable")
                 return False
             else:
                 if self.type == 'clean':
                     if int(split) != 100 and os.path.exists('./Data/' + mrId + '/' + name + '_100.' + extension):
                         self.split_file(mrId, name, 100, name, int(split))
+                        print("File created")
                         return True
-                elif self.type == 'dirty-priority':
+                elif self.type == 'dirty':
                     if int(split) != 100:
                         files = fnmatch.filter(os.listdir('./Data/' + mrId), name + '_*.' + extension)
                         files.sort()
@@ -121,9 +125,9 @@ class Debugger(object):
                             name, _, other_split = other_filename.rpartition('_')
                             if int(other_split) >= int(split):
                                 self.split_file(mrId, name, int(other_split), name, int(split))
+                                print("File created")
                                 return True
-                else:
-                    pass
+                print("File unavailable")
                 return False
 
     def append_module(self, module_name, debug_info, module_args, in_files, out_files):
@@ -135,30 +139,33 @@ class Debugger(object):
     # create a list containg the module names, split values, names of output files and arguments of the processes to run, in the correct order.
     def create_run_list(self):
         run_list = []
-        if self.type == 'clean':
-            for i in range(len(self.modules)):
-                (module_name, module_args, splits, in_files, out_files) = self.modules[i]
-                num_in_files = len(in_files)
-                num_out_files = len(out_files)
-                n = len(splits)
-                for i in range(n):
-                    args = module_args[:]
-                    suffix = '_' + str(splits[i]).zfill(3)
-                    new_in_files = []
-                    new_out_files = []
-                    for j in range(num_in_files):
-                        name, _, extension = in_files[j].partition('.')
-                        in_filename = self.dirName + '/' + name + suffix + '.' + extension
-                        new_in_files.append(in_filename)
-                        args[2+j] = in_filename
-                    for j in range(num_out_files):
-                        name, _, extension = out_files[j].partition('.')
-                        out_filename = self.dirName + '/' + name + suffix
-                        new_out_files.append(out_filename + '.json')
-                        args[2+num_in_files+j] = out_filename + '.' + extension
-                    run_list.append((module_name, splits[i], new_in_files, new_out_files, args))
-        return run_list
+        for k in range(len(self.modules)):
+            (module_name, module_args, splits, in_files, out_files) = self.modules[k]
+            num_in_files = len(in_files)
+            num_out_files = len(out_files)
+            n = len(splits)
+            for i in range(n):
+                args = module_args[:]
+                suffix = '_' + str(splits[i]).zfill(3)
+                new_in_files = []
+                new_out_files = []
+                for j in range(num_in_files):
+                    name, _, extension = in_files[j].partition('.')
+                    in_filename = self.dirName + '/' + name + suffix + '.' + extension
+                    new_in_files.append(in_filename)
+                    args[2+j] = in_filename
+                for j in range(num_out_files):
+                    name, _, extension = out_files[j].partition('.')
+                    out_filename = self.dirName + '/' + name + suffix
+                    new_out_files.append(out_filename + '.json')
+                    args[2+num_in_files+j] = out_filename + '.' + extension
+                run_list.append((k, module_name, splits[i], new_in_files, new_out_files, args))
+        if self.type == 'dirty':
+            run_list.sort(key=itemgetter(2,0))
 
+        for i in range(len(run_list)):
+            print(run_list[i])
+        return run_list
 
     def run(self):
         run_list = self.create_run_list()
@@ -166,13 +173,17 @@ class Debugger(object):
         while (len(run_list) > 0 or len(process_queue) > 0) and not self.stopped:
             # try to add a new process
             if len(run_list) > 0 and len(process_queue) < self.max_processes and not self.paused:
-                (_, _, in_files, _, _) = run_list[0]
-                ready = True
-                for file in in_files:
-                    if not self.rdy_tmp_file(file):
-                        ready = False
+                for i in range(len(run_list)):
+                    ready = True
+                    (_, _, _, in_files, _, _) = run_list[i]
+                    for file in in_files:
+                        if not self.rdy_tmp_file(file):
+                            ready = False
+                            break
+                    if ready:
+                        break
                 if ready:
-                    (module_name, split, _, out_files, args) = run_list.pop(0)
+                    (_, module_name, split, _, out_files, args) = run_list.pop(i)
                     print("Starting new process")
                     print(args)
                     p = subprocess.Popen(args)
@@ -252,8 +263,9 @@ def main(args):
     modelId = int(args.pop(0))
     runNo = int(args.pop(0))
     num_modules = int(args.pop(0))
+    debugger_type = args.pop(0)
     print(str(num_modules) + " modules to run")
-    debugger = Debugger(modelId, runNo)
+    debugger = Debugger(modelId, runNo, _type=debugger_type)
     for i in range(num_modules):
         module_name, module_args, in_files, out_files, debug_info = get_module_info(args)
         debugger.append_module(module_name, debug_info, module_args, in_files, out_files)
