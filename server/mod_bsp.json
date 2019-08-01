@@ -1,4 +1,6 @@
 {
+    "name": "BSP",
+    "cmd": "mod_bsp",
     "cmd_path": "mod_bsp.py",
     "num_inputs": 1,
     "num_outputs": 1,

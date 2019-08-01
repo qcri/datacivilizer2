@@ -85,6 +85,20 @@ function remove_debugger_model(mrId, modelId, runNo) {
 };
 
 function update_running_pipeline(split_data) {
+    const mrId = split_data.modelId.toString() + '_' + split_data.runNo.toString();
+    var breakpoints = split_data.breakpoints;
+    const breakpoint_entries = Object.entries(breakpoints);
+    var _continue = true;
+    var bp_text = ""
+    for (const [bp, val] of breakpoint_entries) {
+        console.log(bp);
+        console.log(val);
+        bp_text += bp + ": " + val + "\n";
+        if (val == false) {
+            _continue = false;
+            pause_pipeline(mrId);
+        }
+    }
     for (var i = running_models.length - 1; i >= 0; i--) {
         var model = running_models[i];
         if (model.modelId == split_data.modelId && model.runNo == split_data.runNo) {
@@ -98,15 +112,19 @@ function update_running_pipeline(split_data) {
         }
     }
     document.getElementById("pbh_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done";
-    document.getElementById("pbv_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done";
-    var mrId = split_data.modelId.toString() + '_' + split_data.runNo.toString();
+    if (_continue) {
+        document.getElementById("pbv_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done";
+    } else {
+        document.getElementById("pbv_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done incorrect";
+    }
+    document.getElementById("pbv_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).title = bp_text;
     select_debugger_model(mrId);
 };
 
 function finish_running_pipeline(data) {
     var mrId = data.modelId.toString() + '_' + data.runNo.toString();
     document.getElementById("debugger_running_" + mrId).style.display = "none";
-    document.getElementById("debugger_ended_" + mrId).style.display = "initial";
+    document.getElementById("debugger_ended_" + mrId).style.display = "inline-block";
     select_debugger_model(mrId);
 };
 

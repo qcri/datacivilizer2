@@ -3,7 +3,7 @@
     "linkFromPortIdProperty": "fromPort",
     "linkToPortIdProperty": "toPort",
     "modelData": {
-        "position": "-203 -309"
+        "position": "-198.0625 -306"
     },
     "nodeDataArray": [
         {
@@ -141,8 +141,7 @@
         }
     ],
     "modelId": 0,
-    "runNo": 1,
-    "debugger_type": "clean",
+    "runNo": 21,
     "parameters": {
         "path": "SampleData1.mat",
         "resample_frequency": 200,
@@ -150,5 +149,59 @@
         "high_pass_frequency": 0.5,
         "low_pass_frequency": 40,
         "montage_type": "monopolar"
-    }
+    },
+    "runs": [
+        {
+            "runNo": 3,
+            "metrics": {
+                "mod_source": {
+                    "source_metric_1": 1.6,
+                    "source_metric_2": 1.3
+                },
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                }
+            }
+        },
+        {
+            "runNo": 8,
+            "metrics": {
+                "mod_source": {
+                    "source_metric_1": 1.6,
+                    "source_metric_2": 1.3
+                },
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                }
+            }
+        },
+        {
+            "runNo": 19,
+            "metrics": {
+                "mod_source": {
+                    "source_metric_1": 1.6,
+                    "source_metric_2": 1.3
+                },
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                }
+            }
+        },
+        {
+            "runNo": 21,
+            "metrics": {
+                "mod_source": {
+                    "source_metric_1": 1.6,
+                    "source_metric_2": 1.3
+                },
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                }
+            }
+        }
+    ]
 }

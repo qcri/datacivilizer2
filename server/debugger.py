@@ -39,17 +39,15 @@ class Debugger(object):
         elif response.text == 'stopped':
             self.stopped = True
 
-    def send_split(self, module_name, split, out_files):
+    def send_split(self, module_name, split, out_files, breakpoints):
         post_data = {
             'modelId': self.modelId,
             'runNo': self.runNo,
             'module_name': module_name,
             'split': split,
-            'out_files': out_files
+            'out_files': out_files,
+            'breakpoints': breakpoints
         }
-        # for j in range(len(out_files)):
-        #     json_filename = out_files[j][i][:-4] + ".json"
-        #     post_data['out_files'].append(json_filename)
         requests.post(url="http://localhost:8080/split", json=post_data)
 
     def create_run_directory(self):
@@ -85,11 +83,17 @@ class Debugger(object):
                 tmp_f[key] = f[key]
         while True:
             try:
-                hdf5storage.savemat('./Data/' + mrId + '/' + out_name + '_' + str(out_split).zfill(3) + extension, tmp_f, truncate_existing=True)
+                hdf5storage.savemat('./Data/' + mrId + '/' + out_name + '_' + str(out_split).zfill(3) + extension, tmp_f)
                 break
             except:
                 print("Saving failed, trying again")
-                raise
+                raise 
+                # print("---------------------------")
+                # print("---------------------------")
+                # print("---------------------------")
+                # print("---------------------------")
+                # print("---------------------------")
+                # print("---------------------------")
                 time.sleep(2)
 
     def rdy_tmp_file(self, filepath):
@@ -132,13 +136,13 @@ class Debugger(object):
 
     def append_module(self, module_name, debug_info, module_args, in_files, out_files):
         module_args.insert(0,'python')
-        module_args.append(self.metric_file)
         debug_info.append(100)
         self.modules.append((module_name, module_args, debug_info, in_files, out_files))
 
     # create a list containg the module names, split values, names of output files and arguments of the processes to run, in the correct order.
     def create_run_list(self):
         run_list = []
+        tmp_counter = 0
         for k in range(len(self.modules)):
             (module_name, module_args, splits, in_files, out_files) = self.modules[k]
             num_in_files = len(in_files)
@@ -159,7 +163,10 @@ class Debugger(object):
                     out_filename = self.dirName + '/' + name + suffix
                     new_out_files.append(out_filename + '.json')
                     args[2+num_in_files+j] = out_filename + '.' + extension
-                run_list.append((k, module_name, splits[i], new_in_files, new_out_files, args))
+                tmp_file_name = 'tmp_' + str(tmp_counter) + '.json'
+                tmp_counter += 1
+                args.append(tmp_file_name)
+                run_list.append((k, module_name, splits[i], new_in_files, new_out_files, tmp_file_name, args))
         if self.type == 'dirty':
             run_list.sort(key=itemgetter(2,0))
 
@@ -175,7 +182,7 @@ class Debugger(object):
             if len(run_list) > 0 and len(process_queue) < self.max_processes and not self.paused:
                 for i in range(len(run_list)):
                     ready = True
-                    (_, _, _, in_files, _, _) = run_list[i]
+                    (_, _, _, in_files, _, _, _) = run_list[i]
                     for file in in_files:
                         if not self.rdy_tmp_file(file):
                             ready = False
@@ -183,20 +190,18 @@ class Debugger(object):
                     if ready:
                         break
                 if ready:
-                    (_, module_name, split, _, out_files, args) = run_list.pop(i)
+                    (_, module_name, split, _, out_files, tmp_file_name, args) = run_list.pop(i)
                     print("Starting new process")
                     print(args)
                     p = subprocess.Popen(args)
-                    process_queue.append((module_name, split, out_files, p))
+                    process_queue.append((module_name, split, out_files, tmp_file_name, p))
             # wait for the next running process to finish with 5 second timeout, handle finished process if present
             if len(process_queue) > 0: # and not self.paused ?
-                (_, _, _, p) = process_queue[0]
+                (_, _, _, _, p) = process_queue[0]
                 try:
                     p.wait(5)
-                    (module_name, split, out_files, _) = process_queue.pop(0)
-                    self.send_split(module_name,split,out_files)
-                    if split == 100:
-                        self.add_metrics(module_name)
+                    (module_name, split, out_files, tmp_file_name, _) = process_queue.pop(0)
+                    self.handle_split(module_name, split, out_files, tmp_file_name)
                 except subprocess.TimeoutExpired as e:
                     pass
             else:
@@ -204,19 +209,26 @@ class Debugger(object):
             self.update_status()
 
         if self.stopped:
-            for (_, _, _, p) in process_queue:
+            for (_, _, _, _, p) in process_queue:
                 p.kill()
         else:
             self.finish_run()
 
-    def add_metrics(self, module_name):
-        if os.path.exists(self.metric_file):
-            self.metrics[module_name] = {}
-            with open(self.metric_file) as metric_file:
-                data = json.load(metric_file)
-                for metric in data.keys():
-                    self.metrics[module_name][metric] = data[metric]
-            os.remove(self.metric_file)
+    def handle_split(self, module_name, split, out_files, tmp_file_name):
+        if os.path.exists(tmp_file_name):
+            with open(tmp_file_name) as tmp_file:
+                data = json.load(tmp_file)
+                breakpoints = data['breakpoints']
+                if split == 100:
+                    metrics = data['metrics']
+                    if (metrics != {}):
+                        self.metrics[module_name] = {}
+                        for metric in metrics.keys():
+                            self.metrics[module_name][metric] = metrics[metric]
+            os.remove(tmp_file_name)
+        else:
+            breakpoints = {}
+        self.send_split(module_name,split,out_files, breakpoints)
 
     def finish_run(self):
         with open(self.metric_file, 'w', encoding='utf-8') as f:

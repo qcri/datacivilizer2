@@ -1,4 +1,6 @@
 {
+    "name": "Clip",
+    "cmd": "mod_clip",
     "cmd_path": "mod_clip.py",
     "num_inputs": 1,
     "num_outputs": 1,

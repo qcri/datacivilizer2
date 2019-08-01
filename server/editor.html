@@ -374,78 +374,109 @@
 
             // initialize the Palette that is on the left side of the page
 
-            myPalette =
-                GOJS(go.Palette, "myPaletteDiv", // must name or refer to the DIV HTML element
-                    {
-                        maxSelectionCount: 1,
-                        nodeTemplateMap: myDiagram.nodeTemplateMap, // share the templates used by myDiagram
-                        linkTemplate: // simplify the link template, just in this Palette
-                            GOJS(go.Link, { // because the GridLayout.alignment is Location and the nodes have locationSpot == Spot.Center,
-                                    // to line up the Link in the same manner we have to pretend the Link has the same location spot
-                                    locationSpot: go.Spot.Center,
-                                    selectionAdornmentTemplate: GOJS(go.Adornment, "Link", {locationSpot: go.Spot.Center},
-                                        GOJS(go.Shape, {
-                                            isPanelMain: true,
-                                            fill: null,
-                                            stroke: "deepskyblue",
-                                            strokeWidth: 0
-                                        }),
+            $.ajax({
+                url: '/modules_info',
+                type: 'get',
+                success: function (data) {
+                    contents = [];
+                    for (var i in data) {
+                        var obj = JSON.parse(data[i]);
+                        var palette_elem = {
+                            text: obj.name,
+                            figure: "RoundedRectangle",
+                            fill: "white",
+                            cmd: obj.cmd,
+                            splits: ""
+                        }
+                        if ("color" in obj) {
+                            palette_elem["fill"] = obj.color;
+                        }
+                        for (var i = 0; i < obj.parameters.length; i++) {
+                            var param = obj.parameters[i];
+                            palette_elem[param.name] = param.default_value;
+                        }
+                        if ("color" in obj) {
+                            palette_elem["fill"] = obj.color;
+                            contents.splice(0, 0, palette_elem);
+                        } else {
+                            contents.push(palette_elem);
+                        }                    }
+                    console.log(contents);
+                    myPalette =
+                        GOJS(go.Palette, "myPaletteDiv", // must name or refer to the DIV HTML element
+                            {
+                                maxSelectionCount: 1,
+                                nodeTemplateMap: myDiagram.nodeTemplateMap, // share the templates used by myDiagram
+                                linkTemplate: // simplify the link template, just in this Palette
+                                    GOJS(go.Link, { // because the GridLayout.alignment is Location and the nodes have locationSpot == Spot.Center,
+                                            // to line up the Link in the same manner we have to pretend the Link has the same location spot
+                                            locationSpot: go.Spot.Center,
+                                            selectionAdornmentTemplate: GOJS(go.Adornment, "Link", {locationSpot: go.Spot.Center},
+                                                GOJS(go.Shape, {
+                                                    isPanelMain: true,
+                                                    fill: null,
+                                                    stroke: "deepskyblue",
+                                                    strokeWidth: 0
+                                                }),
+                                                GOJS(go.Shape, // the arrowhead
+                                                    {toArrow: "Standard", stroke: null})
+                                            )
+                                        }, {
+                                            routing: go.Link.AvoidsNodes,
+                                            curve: go.Link.JumpOver,
+                                            corner: 5,
+                                            toShortLength: 4
+                                        },
+                                        new go.Binding("points"),
+                                        GOJS(go.Shape, // the link path shape
+                                            {isPanelMain: true, strokeWidth: 2}),
                                         GOJS(go.Shape, // the arrowhead
                                             {toArrow: "Standard", stroke: null})
-                                    )
-                                }, {
-                                    routing: go.Link.AvoidsNodes,
-                                    curve: go.Link.JumpOver,
-                                    corner: 5,
-                                    toShortLength: 4
-                                },
-                                new go.Binding("points"),
-                                GOJS(go.Shape, // the link path shape
-                                    {isPanelMain: true, strokeWidth: 2}),
-                                GOJS(go.Shape, // the arrowhead
-                                    {toArrow: "Standard", stroke: null})
-                            ),
-                        model: new go.GraphLinksModel([ // specify the contents of the Palette
-                            {
-                                text: "Data source",
-                                figure: "RoundedRectangle",
-                                fill: "lightgreen",
-                                cmd: "mod_source",
-                                path: "SampleData1.mat",
-                                splits: ""
-                            },
-                            {text: "Resample", figure: "RoundedRectangle", fill: "white", cmd: "mod_resample", resample_frequency: 200, splits: ""},
-                            {text: "Filter", figure: "RoundedRectangle", fill: "white", cmd: "mod_filter", notch_frequency: 60, high_pass_frequency: 0.5, low_pass_frequency: 40, splits: ""},
-                            {text: "Montage", figure: "RoundedRectangle", fill: "white", cmd: "mod_montage", montage_type: "monopolar", splits: ""},
-                            {text: "Clip", figure: "RoundedRectangle", fill: "white", cmd: "mod_clip", splits: ""},
-                            {text: "Spectogram", figure: "RoundedRectangle", fill: "white", cmd: "mod_spectrogram", nw: 2, splits: ""},
-                            {
-                                text: "EEG features",
-                                figure: "RoundedRectangle",
-                                fill: "white",
-                                cmd: "mod_computeFeatures",
-                                delta_low: 1,
-                                delta_high: 4,
-                                theta_low: 4,
-                                theta_high: 8,
-                                alpha_low: 8,
-                                alpha_high: 12,
-                                beta_low: 12,
-                                beta_high: 18,
-                                splits: ""
-                            },
-                            {text: "Change pts", figure: "RoundedRectangle", fill: "white", cmd: "mod_changePoints", threshold: 0.5, splits: ""},
-                            {
-                                text: "Binary seg",
-                                figure: "RoundedRectangle",
-                                fill: "white",
-                                cmd: "mod_binarySegmentation",
-                                splits: ""
-                            },
-                            {text: "BSP", figure: "RoundedRectangle", fill: "white", cmd: "mod_bsp", splits: ""},
+                                    ),
+                                model: new go.GraphLinksModel(contents/*[ // specify the contents of the Palette
+                                    {
+                                        text: "Data source",
+                                        figure: "RoundedRectangle",
+                                        fill: "lightgreen",
+                                        cmd: "mod_source",
+                                        path: "SampleData1.mat",
+                                        splits: ""
+                                    },
+                                    {text: "Resample", figure: "RoundedRectangle", fill: "white", cmd: "mod_resample", resample_frequency: 200, splits: ""},
+                                    {text: "Filter", figure: "RoundedRectangle", fill: "white", cmd: "mod_filter", notch_frequency: 60, high_pass_frequency: 0.5, low_pass_frequency: 40, splits: ""},
+                                    {text: "Montage", figure: "RoundedRectangle", fill: "white", cmd: "mod_montage", montage_type: "monopolar", splits: ""},
+                                    {text: "Clip", figure: "RoundedRectangle", fill: "white", cmd: "mod_clip", splits: ""},
+                                    {text: "Spectogram", figure: "RoundedRectangle", fill: "white", cmd: "mod_spectrogram", nw: 2, splits: ""},
+                                    {
+                                        text: "EEG features",
+                                        figure: "RoundedRectangle",
+                                        fill: "white",
+                                        cmd: "mod_computeFeatures",
+                                        delta_low: 1,
+                                        delta_high: 4,
+                                        theta_low: 4,
+                                        theta_high: 8,
+                                        alpha_low: 8,
+                                        alpha_high: 12,
+                                        beta_low: 12,
+                                        beta_high: 18,
+                                        splits: ""
+                                    },
+                                    {text: "Change pts", figure: "RoundedRectangle", fill: "white", cmd: "mod_changePoints", threshold: 0.5, splits: ""},
+                                    {
+                                        text: "Binary seg",
+                                        figure: "RoundedRectangle",
+                                        fill: "white",
+                                        cmd: "mod_binarySegmentation",
+                                        splits: ""
+                                    },
+                                    {text: "BSP", figure: "RoundedRectangle", fill: "white", cmd: "mod_bsp", splits: ""},
 
-                        ])
-                    });
+                                ]*/)
+                            });
+                    myPalette.requestUpdate();
+                }
+            });
         };
 
         // Show the diagram's model in JSON format that the user may edit
@@ -468,7 +499,6 @@
 
         function saveDiagramProperties() {
             myDiagram.model.modelData.position = go.Point.stringify(myDiagram.position);
-
         };
 
         function loadDiagramProperties(e) {
@@ -602,7 +632,7 @@
     var runCounter = [];
     var newId = false;
 
-    saveModelVersions(); // Use this to reset hash table and model id's, preferrably destroy alll saved models before
+    // saveModelVersions(); // Use this to reset hash table and model id's, preferrably destroy alll saved models before
 
     getModelVersions();
 
@@ -702,7 +732,6 @@
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_A')">main_A</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_B')">main_B</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_C')">main_C</button>
-                <button type="button" class="btn btn-default" onclick="request_pipeline('main_D')">main_D</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_E')">main_E</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_F')">main_F</button>
                 <button type="button" class="btn btn-success" onclick="send('clean')">Execute clean</button>

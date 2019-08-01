@@ -1,4 +1,6 @@
 {
+    "name": "Montage",
+    "cmd": "mod_montage",
     "cmd_path": "mod_montage.py",
     "num_inputs": 1,
     "num_outputs": 1,

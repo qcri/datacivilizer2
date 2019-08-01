@@ -21,6 +21,7 @@ start = time.time()
 
 execute_service(sys.argv[1], sys.argv[2], float(sys.argv[3]))
 
+
 end = time.time()
 print("Execution time: " + str(end - start))
 

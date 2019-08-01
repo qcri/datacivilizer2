@@ -1,6 +1,6 @@
 import matlab.engine
 import sys
-from utils.dcmetric import DCMetric, DC
+from utils.dc import DCMetric, DC, BpOps
 from utils.mod_util import transform_to_tensor
 import time
 
@@ -24,6 +24,8 @@ def execute_service(in_path, out_path, notch_freq=60.0, high_pass_freq=0.5, low_
     f2_metric.setValue(0.3)
     DC.register_metric(f1_metric)
     DC.register_metric(f2_metric)
+    DC.register_breakpoint('>', f1_metric, 1)
+    DC.register_breakpoint(BpOps.always_ge, f2_metric, 0)
 
 print("Executing function")
 start = time.time()
@@ -36,8 +38,8 @@ print("Execution time: " + str(end - start))
 print("Do rest")
 start = time.time()
 
-# Use this if metrics were added
-DC.save_metrics(sys.argv[-1])
+# Use this if metrics and/or breakpoints were added
+DC.end(sys.argv[-1])
 
 # TODO: get visualization data
 file_in = "./Data/" + sys.argv[2] + ".txt"

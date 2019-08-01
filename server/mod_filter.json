@@ -1,4 +1,6 @@
 {
+    "name": "Filter",
+    "cmd": "mod_filter",
     "cmd_path": "mod_filter.py",
     "num_inputs": 1,
     "num_outputs": 1,

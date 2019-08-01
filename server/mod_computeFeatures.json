@@ -1,4 +1,6 @@
 {
+    "name": "EEG features",
+    "cmd": "mod_computeFeatures",
     "cmd_path": "mod_computeFeatures.py",
     "num_inputs": 2,
     "num_outputs": 1,

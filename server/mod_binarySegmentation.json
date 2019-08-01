@@ -1,4 +1,6 @@
 {
+    "name": "Binary seg",
+    "cmd": "mod_binarySegmentation",
     "cmd_path": "mod_binarySegmentation.py",
     "num_inputs": 1,
     "num_outputs": 1,

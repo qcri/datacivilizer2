@@ -1,4 +1,6 @@
 {
+    "name": "Change pts",
+    "cmd": "mod_changePoints",
     "cmd_path": "mod_changePoints.py",
     "num_inputs": 1,
     "num_outputs": 1,

@@ -203,9 +203,7 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type) {
 
         // push input files
         module_args.push(num_inputs);
-        if (cmd_name == "mod_source")
-            module_args.push(node.path)
-        else {
+        if (node_id in in_map) {
             for (var n of in_map[node_id]) {
                 module_args.push(out_map[n]);
             }
@@ -310,6 +308,7 @@ function get_model_params(modelJsonString) {
         delete _module.fill;
         delete _module.loc;
         delete _module.text;
+        delete _module.splits;
         for (var j in _module) {
             parameters[j] = _module[j];
         }
@@ -469,6 +468,7 @@ app.post('/saveModel', function(request, response) {
 
     console.log("saving model data");
     var model = request.body;
+    delete model.debugger_type;
     const filename = "saved_models/" + "model_" + model.modelId + ".json"
 
     if (model.runNo == 1) {
@@ -481,6 +481,8 @@ app.post('/saveModel', function(request, response) {
         prev_model.modelData = model.modelData;
         prev_model.nodeDataArray = model.nodeDataArray;
         prev_model.linkDataArray = model.linkDataArray;
+        prev_model.runNo = model.runNo;
+        delete prev_model.debugger_type;
         var obj = JSON.stringify(prev_model, null, 4);
         fs.writeFileSync(filename, obj, 'utf8');
     }
@@ -501,6 +503,26 @@ app.get('/getModelVersions', function (request, response) {
     response.sendfile(path.resolve("versioningData.json"));
 });
 
+function get_modules_info() {
+
+    function handle_module_file(file_name) {
+        const pathname = dir_name + file_name;
+        var obj = JSON.parse(fs.readFileSync(pathname, 'utf8'));
+        modules_info[file_name.substring(0,file_name.length-5)] = JSON.stringify(obj);
+    };
+
+    var modules_info = {};
+    dir_name = './';
+    var regex = /^mod_.*\.json$/;
+    fs.readdirSync(dir_name).filter(fn => regex.test(fn)).forEach(handle_module_file);
+    return modules_info
+};
+
+app.get('/modules_info', function(request, response) {
+    var modules_info = get_modules_info();
+    response.send(modules_info);
+});
+
 app.get('/models', function(request, response) {
     console.log("Loading models")
 
@@ -515,17 +537,8 @@ app.get('/models', function(request, response) {
         models.push(JSON.stringify(obj));
     };
 
-    var modules_info = {};
+    var modules_info = get_modules_info();
 
-    dir_name = './';
-    var regex = /^mod_.*\.json$/;
-    fs.readdirSync(dir_name).filter(fn => regex.test(fn)).forEach(handle_module_file);
-    
-    function handle_module_file(file_name) {
-        const pathname = dir_name + file_name;
-        var obj = JSON.parse(fs.readFileSync(pathname, 'utf8'));
-        modules_info[file_name.substring(0,file_name.length-5)] = JSON.stringify(obj);
-    };
     response.send({'models': models, 'modules_info': modules_info});
 });
 
