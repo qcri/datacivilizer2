@@ -18,6 +18,7 @@
     <link rel="stylesheet" type="text/css" href="./debugger.css" />
     <script src="/visualizerUtils.js"></script>
     <script src="/debuggerUtils.js"></script>
+    <script src="/trackingUtils.js"></script>
     <script src="/DataInspector.js"></script>
     <script src="/ejs_production.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
@@ -31,6 +32,10 @@
 
         source.addEventListener('split_update', (e) => {
             update_running_pipeline(JSON.parse(event.data));
+        });
+
+        source.addEventListener('tracking_update', (e) => {
+            add_tracking_ids(JSON.parse(event.data));
         });
 
         source.addEventListener('finish_run', (e) => {
@@ -529,6 +534,18 @@
                 });
         };
 
+        function visualizeFile(filepath) {
+
+            console.log("visualizing: " + filepath);
+            var iframe = document.getElementById('iframeViz');
+            $.get('/setViz',
+                {"pathJSON": filepath})
+                .done(function (response) {
+                    iframe.setAttribute("src", "vizFrame");
+                    iframe.src = iframe.src;
+                });
+        };
+
         function request_pipeline(p) {
 
             console.log(p);
@@ -663,15 +680,22 @@
         modelJson = JSON.parse(modelJsonString);
         modelJson['modelId'] = modelId;
         modelJson['runNo'] = runNo;
-        modelJson['debugger_type'] = debugger_type;
         modelJsonString = JSON.stringify(modelJson);
         saveModel(modelJsonString);
+
+        tracking_filters = get_tracking_filters()
+
+        data_to_send = {
+            'pipeline': modelJson,
+            'debugger_type': debugger_type,
+            'tracking_filters': tracking_filters
+        }
 
         $.ajax({
             url: '/run',
             type: 'post',
             processData: false,
-            data: modelJsonString,
+            data: JSON.stringify(data_to_send),
             contentType: "application/json; charset=utf-8",
             success: function (data) {
                 console.log("success!");
@@ -732,6 +756,7 @@
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_A')">main_A</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_B')">main_B</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_C')">main_C</button>
+                <button type="button" class="btn btn-default" onclick="request_pipeline('main_D')">main_D</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_E')">main_E</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_F')">main_F</button>
                 <button type="button" class="btn btn-success" onclick="send('clean')">Execute clean</button>
@@ -748,6 +773,26 @@
                     <button id="close_debugger" type="button" class="btn btn-default" onclick="close_debugger()" style="display: none;">Close Debugger</button>
                 </div>
             </div>
+        </div>
+        <br>
+        <div id="tracking_info">
+            <div id="tracking_filter_form" class="tracking_filter_form">
+                <h2>Add or remove tracking filter</h2>
+                <div>Filter Type:</div>
+                <select id="tracking_filter_options" onchange="showAppropriateForm(this.value);">
+                    <option value="id">Id</option>
+                    <option value="id_range">Id range</option>
+                </select>
+                <div id="tracking_form_inputs">
+                    <input type="number" required name="tr_id" class="tracking_form_elem" style="display: inline-block;" placeholder="id"></input>
+                    <input type="number" required name="tr_id_start" class="tracking_form_elem" style="display: none;" placeholder="from (inclusive)"></input>
+                    <input type="number" required name="tr_id_end" class="tracking_form_elem" style="display: none;" placeholder="until (not inclusive)"></input>
+                </div>
+                <span onclick="newElement()" class="addBtn">Add</span>
+            </div>
+            <div>Tracking filters</div>
+            <ul id="tracking_filters">
+            </ul>
         </div>
         <br>
         <div id="sample">

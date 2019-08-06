@@ -41,6 +41,10 @@ var Connection = (function () {
         console.log("send event to SSE stream "+JSON.stringify(data));
         this.res.write("event: split_update\ndata: " + JSON.stringify(data) + "\n\n");
     };
+    Connection.prototype.sendTrackingUpdate = function (data) {
+        console.log("send event to SSE stream "+JSON.stringify(data));
+        this.res.write("event: tracking_update\ndata: " + JSON.stringify(data) + "\n\n");
+    };
     Connection.prototype.finish_run = function (data) {
         console.log("send event to SSE stream "+JSON.stringify(data));
         this.res.write("event: finish_run\ndata: " + JSON.stringify(data) + "\n\n");
@@ -124,6 +128,10 @@ app.get('/debuggerUtils.js', function (request, response) {
     response.sendfile(path.resolve('./debuggerUtils.js'));
 });
 
+app.get('/trackingUtils.js', function (request, response) {
+    response.sendfile(path.resolve('./trackingUtils.js'));
+});
+
 app.get('/ejs_production.js', function (request, response) {
     response.sendfile(path.resolve('./ejs_production.js'));
 });
@@ -148,6 +156,10 @@ app.get('/debugger_model.ejs', function (request, response) {
     response.sendfile(path.resolve('./ejs/debugger_model.ejs'));
 });
 
+app.get('/tracked_id_range.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/tracked_id_range.ejs'));
+});
+
 app.get('/visualizer.css', function (request, response) {
     response.sendfile(path.resolve('./css/visualizer.css'));
 });
@@ -169,17 +181,34 @@ app.get('/debugger.css', function (request, response) {
  *    3.2/ get output file path from module
  *    3.3/ pass output file (and possible other files) as input file(s) to the next module
  */
-function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type) {
+function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, tracking_filters) {
 
     //create output map
     var out_map = new Map();
 
-    args = ["debugger.py"];
-    var num_modules = pipeline_map.size;
-    args.push(modelId);
-    args.push(runNo);
-    args.push(num_modules);
-    args.push(debugger_type);
+    const dirName = modelId + '_' + runNo;
+    const run_info_filename = 'run_info.json';
+    const tracking_info_filename = 'tracking_info.json';
+
+    args = ["utils/debugger.py", dirName, run_info_filename, tracking_info_filename];
+
+    const num_modules = pipeline_map.size;
+    var run_info = {
+        'modelId': modelId,
+        'runNo': runNo,
+        'debugger_type': debugger_type,
+        'metric_file': "metric_temp.json",
+        'max_processes': 2,
+        'num_modules': num_modules,
+        'pipeline': []
+    }
+
+    var tracking_info = {
+        'filters': tracking_filters,
+        'type': 'eager',
+        'splitter_type': 'segments',
+        'filename': 'tracking_file.json'
+    }
 
     for (var node_id of pipeline_map.keys()) {
         var node = pipeline_map.get(node_id).node;
@@ -192,55 +221,77 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type) {
         var num_params = module_info.num_parameters;
         var params = module_info.parameters;
 
+        var inputs = [];
+        var outputs = [];
+        var parameters = [];
+        var splits = [];
+
+        if (cmd_name == "mod_source") {
+            inputs.push(node.path);
+        } else {
+            if (node_id in in_map) {
+                for (var n of in_map[node_id]) {
+                    inputs.push(out_map[n]);
+                }
+            }
+        }
+
         if (cmd_name == "mod_changePoints")
             out_map[node_id] = "out_" + node_id + ".jpg";
         else
             out_map[node_id] = "out_" + node_id + ".mat";
 
-        // get input files list
-        var module_args = [];
-        module_args.push(cmd_path);
+        outputs.push(out_map[node_id]);
 
-        // push input files
-        module_args.push(num_inputs);
-        if (node_id in in_map) {
-            for (var n of in_map[node_id]) {
-                module_args.push(out_map[n]);
-            }
-        }
+        if (cmd_name == "mod_spectrogram")
+            outputs.push(out_map[node_id].replace('.mat', '.jpg'))
 
-        // push output file name
-        module_args.push(num_outputs);
-        module_args.push(out_map[node_id]);
-
-        // push parameters
-        module_args.push(num_params);
         for (var i=0; i<num_params; i++) {
             var param_type = params[i].type;
             var param = node[params[i].name];
             var found_type = typeof(param);
             if (found_type == param_type) {
-                module_args.push(node[params[i].name]);
+                parameters.push(node[params[i].name]);
             } else {
                 console.log("Wrong type for parameter " + params[i].name + ", expected " + param_type + ", found " + found_type);
                 console.log("Using default value");
-                module_args.push(params[i].default_value);
+                parameters.push(params[i].default_value);
             }
         }
 
-        // push splits
-        if (node.splits == "") {
-            module_args.push(0);
-        } else {
-            var splits = node.splits.split(',').map(Number);
-            module_args.push(splits.length);
-            module_args = module_args.concat(splits);
+        if (node.splits != "") {
+            splits = node.splits.split(',').map(Number);
         }
+        splits.push(100);
 
-        console.log(module_args);
-        args = args.concat(module_args);
+        run_info['pipeline'].push({
+            'cmd_name': cmd_name,
+            'cmd_path': cmd_path,
+            'num_inputs': num_inputs,
+            'inputs': inputs,
+            'num_outputs': num_outputs,
+            'outputs': outputs,
+            'num_params': num_params,
+            'params': parameters,
+            'splits': splits
+        })
     }
 
+    console.log("Run info")
+    console.log(run_info)
+    console.log("Tracking info")
+    console.log(tracking_info)
+
+    if (!fs.existsSync('./Data/' + dirName)){
+        fs.mkdirSync('./Data/' + dirName);
+        console.log("Directory " + './Data/' + dirName + " created")
+    } else {
+        console.log("Directory " + './Data/' + dirName + " already exists")
+    }
+    run_obj = JSON.stringify(run_info, null, 4);
+    tracking_obj = JSON.stringify(tracking_info, null, 4);
+    fs.writeFileSync('./Data/' + dirName + '/' + run_info_filename, run_obj, 'utf8');
+    fs.writeFileSync('./Data/' + dirName + '/' + tracking_info_filename, tracking_obj, 'utf8');
     var child = spawn('python ' + args.join(' '), {'shell': true, 'stdio': 'inherit'});
     running_models.push(modelId.toString() + '_' + runNo.toString());
 };
@@ -322,11 +373,11 @@ app.post('/run', function (request, response) {
     console.log(request.body);
 
     //parse JSON file
-    var pipeline = request.body;
+    var pipeline = request.body.pipeline;
     const modelId = pipeline.modelId;
     const runNo = pipeline.runNo;
-    const debugger_type = pipeline.debugger_type;
-    delete pipeline.debugger_type;
+    const debugger_type = request.body.debugger_type;
+    const tracking_filters = request.body.tracking_filters;
 
     // get parameters for run
     var sortOp = get_sortOp(pipeline);
@@ -334,7 +385,7 @@ app.post('/run', function (request, response) {
     var input_map = get_input_map(sortOp.nodes);
 
     // run the pipeline
-    run_pipeline(modelId, runNo, sorted, input_map, debugger_type);
+    run_pipeline(modelId, runNo, sorted, input_map, debugger_type, tracking_filters);
     var model_debug_info = {
         'modelId': modelId,
         'runNo': runNo,
@@ -350,7 +401,6 @@ app.post('/run', function (request, response) {
             splits = splits.concat(node.splits.split(',').map(Number));
             splits.push(100);
         }
-        console.log(splits);
         model_debug_info.modules.push({
             'name': node.cmd,
             'splits': splits,
@@ -425,10 +475,24 @@ app.post('/split', function (request, response) {
     response.end();
 });
 
+app.post('/update_tracking_file', function (request, response) {
+
+    var obj = request.body;
+    var tracking_file_name = obj.tracking_file_name;
+    var tracking_ids = JSON.parse(fs.readFileSync(tracking_file_name, 'utf8'));
+    var modelId = obj.modelId;
+    var runNo = obj.runNo;
+    var mrId = modelId + '_' + runNo;
+    data = {'mrId': mrId, 'tracking_ids': tracking_ids}
+    connection.sendTrackingUpdate(data);
+    response.end();
+});
+
 app.post('/finish_run', function (request, response) {
 
     var obj = request.body;
     var metric_file_name = obj.metric_file_name;
+    var tracking_file_name = obj.tracking_file_name;
     var modelId = obj.modelId;
     var runNo = obj.runNo;
 

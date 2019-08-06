@@ -1,0 +1,9 @@
+{
+    "name": "Crop",
+    "cmd": "mod_crop",
+    "cmd_path": "mod_crop.py",
+    "num_inputs": 1,
+    "num_outputs": 1,
+    "num_parameters": 0,
+    "parameters": []
+}

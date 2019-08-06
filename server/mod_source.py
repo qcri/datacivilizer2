@@ -1,8 +1,9 @@
 import matlab.engine
+import time
 import sys
+from shutil import copyfile
 from utils.dc import DCMetric, DC
 from utils.mod_util import transform_to_tensor
-import time
 
 print("Starting matlab engine")
 start = time.time()
@@ -18,8 +19,11 @@ def customOp(metric, constant1, constant2):
 
 def execute_service(in_path, out_path):
 
-    # TODO: get args from JSON
-    eng.mod_source(in_path, out_path, nargout=0)
+    if (in_path[-4:] == '.mat'):
+        eng.mod_source(in_path, out_path, nargout=0)
+    else:
+        copyfile('./Data/' + in_path, './Data/' + out_path)
+
     f1_metric = DCMetric("source_metric_1")
     f2_metric = DCMetric("source_metric_2")
     f1_metric.setValue(1.6)
@@ -32,7 +36,7 @@ def execute_service(in_path, out_path):
 print("Executing function")
 start = time.time()
 
-execute_service(sys.argv[2], sys.argv[1])
+execute_service(sys.argv[1], sys.argv[2])
 eng.exit()
 
 end = time.time()
@@ -43,10 +47,10 @@ start = time.time()
 
 DC.end(sys.argv[-1])
 
-file_in = "./Data/" + sys.argv[1] + ".txt"
-file_out = "./Data/"+ sys.argv[1].split(".mat")[0] +".json"
+# file_in = "./Data/" + sys.argv[2] + ".txt"
+# file_out = "./Data/"+ sys.argv[2].split(".mat")[0] +".json"
 
-transform_to_tensor(file_in, file_out, 1000, 1020)
+# transform_to_tensor(file_in, file_out, 1000, 1020)
 
 end = time.time()
 print("Execution time: " + str(end - start))

@@ -129,8 +129,54 @@
     background-color: red;
 }
 
+.progress_bar_split:hover .done.incorrect {
+    background-color: darkred;
+}
+
 .debugger_extra {
     margin: 10px 100px;
     text-align: center;
     align-content: center;
+}
+
+.tracked_ids_container {
+    width: 400px;
+    margin: 10px;
+    height: 25px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.tracked_ids_header {
+    width: 85px;
+    height: 25px;
+    white-space: nowrap;
+    text-align: center;
+    display: inline-block;
+}
+
+.tracked_ids {
+    width: 300px;
+    height: 25px;
+    white-space: nowrap;
+    overflow: auto;
+    display: inline-block;
+}
+
+.tracked_ids::-webkit-scrollbar { 
+    display: none;
+}
+
+.tracked_id_range {
+    padding: 2px 1px;
+    height: 25px;
+    border: 1px solid lightgray;
+    border-radius: 3px;
+    text-align: center;
+    display: inline-block;
+}
+
+.tracked_id_range:hover {
+    border-color: gray;
+    background-color: lightgray;
 }

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<div class="tracked_id_range" onclick="visualizeFile('<%= data.data_file_path %>')">
+    <%
+        if (data.num_segments > 1) {
+    %>
+        <%= data.start_id %> - <%= data.start_id + data.num_segments %>
+    <%
+        } else {
+    %>
+        <%= data.start_id %>
+    <%
+        }
+    %>
+</div>

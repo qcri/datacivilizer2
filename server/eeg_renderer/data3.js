@@ -10,4 +10,4 @@
 
 // var viewBox = "3702125 0 "; // start of first segment = firstId * 250
 // var viewBox = "250000 0 "; // start of first segment = firstId * 250
-var viewBox = "250000 0 ";
+var viewBox = "0 0 ";

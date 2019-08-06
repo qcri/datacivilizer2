@@ -1,0 +1,10 @@
+{
+    "name": "Neural Netw",
+    "color": "lightgray",
+    "cmd": "mod_nn",
+    "cmd_path": "mod_nn.py",
+    "num_inputs": 1,
+    "num_outputs": 1,
+    "num_parameters": 0,
+    "parameters": []
+}

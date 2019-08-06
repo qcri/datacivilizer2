@@ -1,0 +1,58 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-396.5 -287"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "SampleData1.mat",
+            "key": -1,
+            "loc": "-143.00000000000006 -262",
+            "splits": ""
+        },
+        {
+            "text": "Spectogram",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_spectrogram",
+            "nw": 2,
+            "key": -6,
+            "loc": "-143 -156",
+            "splits": ""
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -1,
+            "to": -6,
+            "fromPort": "B",
+            "toPort": "T",
+            "points": [
+                -143,
+                -242,
+                -143,
+                -232,
+                -143,
+                -209,
+                -143,
+                -209,
+                -143,
+                -186,
+                -143,
+                -176
+            ]
+        }
+    ],
+    "modelId": 2,
+    "runNo": 5,
+    "parameters": {
+        "path": "SampleData1.mat",
+        "nw": 2
+    }
+}

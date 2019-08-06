@@ -17,7 +17,8 @@ npm install topological-sort
 
 2. Python dependencies
 ```
-hdf5storage (using pip: pip install hdf5storage)
+pip install hdf5storage
+pip install tqdm
 ```
 
 3. You need to have a working version of Matlab (tested with R2019a and R2018).

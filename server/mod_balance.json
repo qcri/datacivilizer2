@@ -1,0 +1,9 @@
+{
+    "name": "Balance",
+    "cmd": "mod_balance",
+    "cmd_path": "mod_balance.py",
+    "num_inputs": 1,
+    "num_outputs": 1,
+    "num_parameters": 0,
+    "parameters": []
+}

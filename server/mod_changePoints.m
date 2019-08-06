@@ -27,12 +27,12 @@ P_(P_<-1000) = -1000;
 
 % step5. Display %
 verbose = 1;
-if verbose 
+if verbose
     close all
     f = figure('units','normalized','outerposition',[0 0 1 1]);
     subplot(6, 1, 1:5)
     colormap jet
-    imagesc(stimes, sfreqs, pow2db(Sdata), col);    
+    imagesc(stimes, sfreqs, pow2db(Sdata), col);
     axis(gca,'xy');
     xlim([2500 3400])
     set(gca, 'xticklabels', [], 'yticklabels', [])

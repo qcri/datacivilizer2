@@ -1,0 +1,12 @@
+{
+    "id": {
+        "name": "Id",
+        "classname": "IdTrackingFilter",
+        "parameters": ["id"]
+    },
+    "id_range": {
+        "name": "Id range",
+        "classname": "IdRangeTrackingFilter",
+        "parameters": ["id_start", "id_end"]
+    }
+}

@@ -3,9 +3,9 @@
     "color": "lightgreen",
     "cmd": "mod_source",
     "cmd_path": "mod_source.py",
-    "num_inputs": 0,
+    "num_inputs": 1,
     "num_outputs": 1,
-    "num_parameters": 1,
+    "num_parameters": 0,
     "parameters": [
         {
             "name": "path",

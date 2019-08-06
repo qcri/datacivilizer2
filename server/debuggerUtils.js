@@ -91,8 +91,6 @@ function update_running_pipeline(split_data) {
     var _continue = true;
     var bp_text = ""
     for (const [bp, val] of breakpoint_entries) {
-        console.log(bp);
-        console.log(val);
         bp_text += bp + ": " + val + "\n";
         if (val == false) {
             _continue = false;
@@ -111,12 +109,14 @@ function update_running_pipeline(split_data) {
             }
         }
     }
-    document.getElementById("pbh_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done";
     if (_continue) {
+        document.getElementById("pbh_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done";
         document.getElementById("pbv_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done";
     } else {
+        document.getElementById("pbh_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done incorrect";
         document.getElementById("pbv_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done incorrect";
     }
+    document.getElementById("pbh_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).title = bp_text;
     document.getElementById("pbv_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).title = bp_text;
     select_debugger_model(mrId);
 };
@@ -139,6 +139,23 @@ function add_model_to_debugger(modelJsonString) {
     select_debugger_model(mrId);
 };
 
+function add_tracking_ids(data) {
+    var tracking_ids = data.tracking_ids; // tracking_ids = {'module': [{'start_id','num_segments','data_file_path'}]}
+    var mrId = data.mrId;
+    for (const _module of Object.keys(tracking_ids)) {
+        console.log("OK")
+        var id_ranges = tracking_ids[_module];
+        $("#ti_"+mrId+"_"+_module).html("");
+        console.log(id_ranges);
+        console.log($("#ti_"+mrId+"_"+_module));
+        for (var i = 0; i < id_ranges.length; i++) {
+            var metadata = id_ranges[i];
+            var html = new EJS({url : '/tracked_id_range.ejs'}).render({'data': metadata});
+            $("#ti_"+mrId+"_"+_module).append($(html));
+        }
+    }
+}
+
 function visualizeDebuggingOutput(modelId, runNo, module_name, splitNo) {
 
     var iframe = document.getElementById('iframeViz');
@@ -150,10 +167,9 @@ function visualizeDebuggingOutput(modelId, runNo, module_name, splitNo) {
                 var _module = modules[i];
                 if (_module.name == module_name) {
                     if (_module.split_outputs.length > splitNo) {
-                        console.log(_module.split_outputs);
-                        console.log(splitNo);
+                        const filename = _module.split_outputs[splitNo].replace('.mat','.json');
                         $.get('/setViz',
-                            {"pathJSON": "./Data/" + _module.split_outputs[splitNo]})
+                            {"pathJSON": "./Data/" + filename})
                             .done(function (response) {
                                 iframe.setAttribute("src", "vizFrame");
                                 iframe.src = iframe.src;

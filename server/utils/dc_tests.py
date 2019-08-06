@@ -23,5 +23,10 @@ def main():
     print(bp1)
     print(bp2)
 
+def main2():
+    listA = [['a', 'b', 'c'], [1, 2, 3], [False, False, False, False]]
+    listB = [['d', 'e', 'f'], [4, 5, 6], [True, True, True, True]]
+    print([x + y for x, y in zip(listA, listB)])
+
 if __name__ == '__main__':
-    main()
+    main2()

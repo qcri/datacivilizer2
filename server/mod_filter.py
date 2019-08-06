@@ -24,7 +24,7 @@ def execute_service(in_path, out_path, notch_freq=60.0, high_pass_freq=0.5, low_
     f2_metric.setValue(0.3)
     DC.register_metric(f1_metric)
     DC.register_metric(f2_metric)
-    DC.register_breakpoint('>', f1_metric, 1)
+    DC.register_breakpoint('<', f1_metric, 1)
     DC.register_breakpoint(BpOps.always_ge, f2_metric, 0)
 
 print("Executing function")

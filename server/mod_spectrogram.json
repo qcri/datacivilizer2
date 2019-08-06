@@ -3,7 +3,7 @@
     "cmd": "mod_spectogram",
     "cmd_path": "mod_spectrogram.py",
     "num_inputs": 1,
-    "num_outputs": 1,
+    "num_outputs": 2,
     "num_parameters": 1,
     "parameters": [
         {
