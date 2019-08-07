@@ -1,9 +1,13 @@
 {
-    "name": "Spectogram",
-    "cmd": "mod_spectogram",
+    "name": "Spectrogram",
+    "cmd": "mod_spectrogram",
     "cmd_path": "mod_spectrogram.py",
     "num_inputs": 1,
-    "num_outputs": 2,
+    "in_types": [".mat"],
+    "num_outputs": 1,
+    "out_types": [".mat"],
+    "viz": true,
+    "viz_type": ".jpg",
     "num_parameters": 1,
     "parameters": [
         {

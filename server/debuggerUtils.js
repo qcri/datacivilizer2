@@ -104,7 +104,7 @@ function update_running_pipeline(split_data) {
             for (var i = modules.length - 1; i >= 0; i--) {
                 var _module = modules[i];
                 if (_module.name == split_data.module_name) {
-                    _module.split_outputs.push(split_data.out_files[0]);
+                    _module.split_outputs.push(split_data.viz_file);
                 }
             }
         }
@@ -167,13 +167,14 @@ function visualizeDebuggingOutput(modelId, runNo, module_name, splitNo) {
                 var _module = modules[i];
                 if (_module.name == module_name) {
                     if (_module.split_outputs.length > splitNo) {
-                        const filename = _module.split_outputs[splitNo].replace('.mat','.json');
-                        $.get('/setViz',
-                            {"pathJSON": "./Data/" + filename})
-                            .done(function (response) {
-                                iframe.setAttribute("src", "vizFrame");
-                                iframe.src = iframe.src;
-                            });
+                        const viz_file = _module.split_outputs[splitNo]
+                        if (viz_file != undefined) {
+                            $.get('/setViz',{"pathJSON": "./Data/" + viz_file})
+                                .done(function (response) {
+                                    iframe.setAttribute("src", "vizFrame");
+                                    iframe.src = iframe.src;
+                                });
+                        }
                     }
                 }
             }

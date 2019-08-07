@@ -13,6 +13,7 @@
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel='stylesheet' href='/DataInspector.css'/>
     <link rel="stylesheet" type="text/css" href="./visualizer.css" />
     <link rel="stylesheet" type="text/css" href="./debugger.css" />
@@ -390,11 +391,10 @@
                             text: obj.name,
                             figure: "RoundedRectangle",
                             fill: "white",
-                            cmd: obj.cmd,
-                            splits: ""
+                            cmd: obj.cmd
                         }
-                        if ("color" in obj) {
-                            palette_elem["fill"] = obj.color;
+                        if (obj.cmd != "mod_source") {
+                            palette_elem['splits'] = "";
                         }
                         for (var i = 0; i < obj.parameters.length; i++) {
                             var param = obj.parameters[i];
@@ -405,7 +405,8 @@
                             contents.splice(0, 0, palette_elem);
                         } else {
                             contents.push(palette_elem);
-                        }                    }
+                        }
+                    }
                     console.log(contents);
                     myPalette =
                         GOJS(go.Palette, "myPaletteDiv", // must name or refer to the DIV HTML element
@@ -759,6 +760,7 @@
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_D')">main_D</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_E')">main_E</button>
                 <button type="button" class="btn btn-default" onclick="request_pipeline('main_F')">main_F</button>
+                <button type="button" class="btn btn-success" onclick="send('no_split')">Execute no split</button>
                 <button type="button" class="btn btn-success" onclick="send('clean')">Execute clean</button>
                 <button type="button" class="btn btn-success" onclick="send('dirty')">Execute dirty</button>
             </div>

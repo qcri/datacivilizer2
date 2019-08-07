@@ -1,0 +1,65 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-182.1354217529297 -309"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "11_4/out_-3.pkl",
+            "key": -1,
+            "loc": "52.86457824707031 -162.33334350585938"
+        },
+        {
+            "text": "Crop",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_crop",
+            "splits": "",
+            "key": -9,
+            "loc": "25.364578247070312 -41.333343505859375"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -1,
+            "to": -9,
+            "fromPort": "B",
+            "toPort": "T",
+            "points": [
+                52.86457824707031,
+                -142.33334350585938,
+                52.86457824707031,
+                -132.33334350585938,
+                52.86457824707031,
+                -101.83334350585938,
+                25.364578247070312,
+                -101.83334350585938,
+                25.364578247070312,
+                -71.33334350585938,
+                25.364578247070312,
+                -61.333343505859375
+            ]
+        }
+    ],
+    "modelId": 12,
+    "runNo": 3,
+    "parameters": {
+        "path": "11_4/out_-3.pkl"
+    },
+    "runs": [
+        {
+            "runNo": 1,
+            "metrics": {}
+        },
+        {
+            "runNo": 2,
+            "metrics": {}
+        }
+    ]
+}

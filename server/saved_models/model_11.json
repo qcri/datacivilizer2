@@ -1,0 +1,73 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-189.1354217529297 -309"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "dataset_index.pkl",
+            "key": -1,
+            "loc": "45.86457824707031 -185.33334350585938"
+        },
+        {
+            "text": "Balance",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_balance",
+            "splits": "",
+            "key": -3,
+            "loc": "33.86457824707031 -52.66667175292969"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -1,
+            "to": -3,
+            "fromPort": "B",
+            "toPort": "",
+            "points": [
+                45.86457824707031,
+                -165.33334350585938,
+                45.86457824707031,
+                -155.33334350585938,
+                45.86457824707031,
+                -119.00000762939453,
+                33.86457824707031,
+                -119.00000762939453,
+                33.86457824707031,
+                -82.66667175292969,
+                33.86457824707031,
+                -72.66667175292969
+            ]
+        }
+    ],
+    "modelId": 11,
+    "runNo": 4,
+    "parameters": {
+        "path": "dataset_index.pkl"
+    },
+    "runs": [
+        {
+            "runNo": 1,
+            "metrics": {}
+        },
+        {
+            "runNo": 2,
+            "metrics": {}
+        },
+        {
+            "runNo": 3,
+            "metrics": {}
+        },
+        {
+            "runNo": 4,
+            "metrics": {}
+        }
+    ]
+}

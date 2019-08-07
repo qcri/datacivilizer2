@@ -1,12 +1,13 @@
 {
-    "name": "Binary seg",
-    "cmd": "mod_binarySegmentation",
-    "cmd_path": "mod_binarySegmentation.py",
+    "name": "Format data",
+    "cmd": "mod_format",
+    "cmd_path": "mod_format.py",
     "num_inputs": 1,
     "in_types": [".mat"],
     "num_outputs": 1,
     "out_types": [".mat"],
-    "viz": false,
+    "viz": true,
+    "viz_type": ".json",
     "num_parameters": 0,
     "parameters": []
 }

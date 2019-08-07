@@ -2,8 +2,11 @@
     "name": "FlipMontage",
     "cmd": "mod_flip_montage",
     "cmd_path": "mod_flip_montage.py",
-    "num_inputs": 1,
+    "num_inputs": 2,
+    "in_types": ["dir", ".pkl"],
     "num_outputs": 1,
+    "out_types": ["dir"],
+    "viz": false,
     "num_parameters": 0,
     "parameters": []
 }

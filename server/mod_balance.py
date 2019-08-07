@@ -27,7 +27,7 @@ def down_sample_init(in_file, out_file):
         c = "second_dataset_from_cpd_label"
         m = subject_key + "_" + date_str + "_" + time_str
         d = "label_" + m + ".pkl"
-        label_file_path = ("/{}/{}/{}/{}/{}".format(home, dell, a, c, d))
+        label_file_path = ("./Data/{}/{}".format(c, d))
 
         # name = input("Please intput your name:")
         # 如果是other，一定概率下进入新表
@@ -76,7 +76,8 @@ def down_sample_init(in_file, out_file):
         else:
             not_other += 1
             if not_other % 1000 == 0:
-                print(not_other)
+                pass
+                # print(not_other)
             vote_arr = pickle.load(open(label_file_path, 'rb'), encoding='latin1')
             tmp = [(m, int(segment_index), vote_arr[int(segment_index)])]
             # print(vote_arr[int(segment_index)])
@@ -123,11 +124,6 @@ def detect_other(label_file_path, segment_index):
     vote_arr = pickle.load(open(label_file_path, 'rb'), encoding='latin1')
     other = np.array([1, 0, 0, 0, 0, 0])
     if vote_arr[segment_index][0][0] == 1:
-        # print(vote_arr[segment_index][0][0])
-        # print(vote_arr[segment_index][0][1])
-        # print(vote_arr[segment_index][0][2])
-        # print(vote_arr[segment_index][0][3])
-        # print(vote_arr[segment_index][0][4])
         return True
     else:
         return False

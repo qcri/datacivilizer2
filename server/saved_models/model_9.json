@@ -3,7 +3,7 @@
     "linkFromPortIdProperty": "fromPort",
     "linkToPortIdProperty": "toPort",
     "modelData": {
-        "position": "-378 -287"
+        "position": "-179.1354217529297 -309"
     },
     "nodeDataArray": [
         {
@@ -13,51 +13,50 @@
             "cmd": "mod_source",
             "path": "SampleData1.mat",
             "key": -1,
-            "loc": "-143.00000000000006 -262",
-            "splits": ""
+            "loc": "55.86457824707031 -167.33333587646484"
         },
         {
-            "text": "Spectogram",
+            "text": "Spectrogram",
             "figure": "RoundedRectangle",
             "fill": "white",
             "cmd": "mod_spectrogram",
+            "splits": "",
             "nw": 2,
-            "key": -6,
-            "loc": "-143 -156",
-            "splits": ""
+            "key": -15,
+            "loc": "4.8645782470703125 -79.33333206176758"
         }
     ],
     "linkDataArray": [
         {
             "from": -1,
-            "to": -6,
-            "fromPort": "B",
+            "to": -15,
+            "fromPort": "",
             "toPort": "T",
             "points": [
-                -143,
-                -242,
-                -143,
-                -232,
-                -143,
-                -209,
-                -143,
-                -209,
-                -143,
-                -186,
-                -143,
-                -176
+                55.86457824707031,
+                -147.33333587646484,
+                55.86457824707031,
+                -137.33333587646484,
+                55.86457824707031,
+                -123.33333396911621,
+                4.8645782470703125,
+                -123.33333396911621,
+                4.8645782470703125,
+                -109.33333206176758,
+                4.8645782470703125,
+                -99.33333206176758
             ]
         }
     ],
-    "modelId": 2,
-    "runNo": 10,
+    "modelId": 9,
+    "runNo": 9,
     "parameters": {
         "path": "SampleData1.mat",
         "nw": 2
     },
     "runs": [
         {
-            "runNo": 10,
+            "runNo": 9,
             "metrics": {}
         }
     ]

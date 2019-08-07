@@ -1,0 +1,132 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-251.5 -309"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "SampleData1.mat",
+            "key": -1,
+            "loc": "3.8645782470703125 -254.33334350585938"
+        },
+        {
+            "text": "Format data",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_format",
+            "splits": "",
+            "key": -12,
+            "loc": "1.8645782470703125 -141.66666665673256"
+        },
+        {
+            "text": "Filter",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_filter",
+            "splits": "",
+            "notch_frequency": 60,
+            "high_pass_frequency": 0.5,
+            "low_pass_frequency": 40,
+            "key": -10,
+            "loc": "-2.1354217529296875 -28.666656494140625"
+        },
+        {
+            "text": "Spectrogram",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_spectrogram",
+            "splits": "",
+            "nw": 2,
+            "key": -15,
+            "loc": "-8.135421752929688 91.33334350585938"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -10,
+            "to": -15,
+            "fromPort": "",
+            "toPort": "T",
+            "points": [
+                -2.1354217529296875,
+                -8.666656494140625,
+                -2.1354217529296875,
+                1.333343505859375,
+                -2.1354217529296875,
+                31.333343505859375,
+                -8.135421752929688,
+                31.333343505859375,
+                -8.135421752929688,
+                61.333343505859375,
+                -8.135421752929688,
+                71.33334350585938
+            ]
+        },
+        {
+            "from": -12,
+            "to": -10,
+            "fromPort": "B",
+            "toPort": "",
+            "points": [
+                1.8645782470703125,
+                -121.66666665673256,
+                1.8645782470703125,
+                -111.66666665673256,
+                1.8645782470703125,
+                -85.16666157543659,
+                -2.1354217529296875,
+                -85.16666157543659,
+                -2.1354217529296875,
+                -58.666656494140625,
+                -2.1354217529296875,
+                -48.666656494140625
+            ]
+        },
+        {
+            "from": -1,
+            "to": -12,
+            "fromPort": "",
+            "toPort": "T",
+            "points": [
+                3.8645782470703125,
+                -234.33334350585938,
+                3.8645782470703125,
+                -224.33334350585938,
+                3.8645782470703125,
+                -198.00000508129597,
+                1.8645782470703125,
+                -198.00000508129597,
+                1.8645782470703125,
+                -171.66666665673256,
+                1.8645782470703125,
+                -161.66666665673256
+            ]
+        }
+    ],
+    "modelId": 10,
+    "runNo": 1,
+    "parameters": {
+        "path": "SampleData1.mat",
+        "notch_frequency": 60,
+        "high_pass_frequency": 0.5,
+        "low_pass_frequency": 40,
+        "nw": 2
+    },
+    "runs": [
+        {
+            "runNo": 1,
+            "metrics": {
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                }
+            }
+        }
+    ]
+}

@@ -6,7 +6,7 @@
 % - clip;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [] = mod_source(in_file, out_file)
+function [] = mod_format(in_file, out_file)
 
 tic;
 

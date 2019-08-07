@@ -3,7 +3,7 @@
     "linkFromPortIdProperty": "fromPort",
     "linkToPortIdProperty": "toPort",
     "modelData": {
-        "position": "-378 -287"
+        "position": "-396.5 -287"
     },
     "nodeDataArray": [
         {
@@ -13,52 +13,45 @@
             "cmd": "mod_source",
             "path": "SampleData1.mat",
             "key": -1,
-            "loc": "-143.00000000000006 -262",
-            "splits": ""
+            "loc": "-112.13542175292969 -195.33334350585938"
         },
         {
             "text": "Spectogram",
             "figure": "RoundedRectangle",
             "fill": "white",
-            "cmd": "mod_spectrogram",
+            "cmd": "mod_spectogram",
+            "splits": "",
             "nw": 2,
-            "key": -6,
-            "loc": "-143 -156",
-            "splits": ""
+            "key": -15,
+            "loc": "-155.1354217529297 -105.66665649414062"
         }
     ],
     "linkDataArray": [
         {
             "from": -1,
-            "to": -6,
+            "to": -15,
             "fromPort": "B",
-            "toPort": "T",
+            "toPort": "",
             "points": [
-                -143,
-                -242,
-                -143,
-                -232,
-                -143,
-                -209,
-                -143,
-                -209,
-                -143,
-                -186,
-                -143,
-                -176
+                -112.13542175292969,
+                -175.33334350585938,
+                -112.13542175292969,
+                -165.33334350585938,
+                -112.13542175292969,
+                -150.5,
+                -155.1354217529297,
+                -150.5,
+                -155.1354217529297,
+                -135.66665649414062,
+                -155.1354217529297,
+                -125.66665649414062
             ]
         }
     ],
-    "modelId": 2,
-    "runNo": 10,
+    "modelId": 8,
+    "runNo": 1,
     "parameters": {
         "path": "SampleData1.mat",
         "nw": 2
-    },
-    "runs": [
-        {
-            "runNo": 10,
-            "metrics": {}
-        }
-    ]
+    }
 }

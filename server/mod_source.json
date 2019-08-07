@@ -2,15 +2,11 @@
     "name": "Data source",
     "color": "lightgreen",
     "cmd": "mod_source",
-    "cmd_path": "mod_source.py",
-    "num_inputs": 1,
-    "num_outputs": 1,
-    "num_parameters": 0,
     "parameters": [
         {
             "name": "path",
             "type": "string",
-            "default_value": "SampleData1.mat"
+            "default_value": ""
         }
     ]
 }

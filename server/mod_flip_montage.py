@@ -1,5 +1,7 @@
 import sys
+import os
 import numpy as np
+import pickle
 
 montages = [
     [["FP1", "F7"], ["F7", "T3"], ["T3", "T5"], ["T5", "O1"]],  # LL
@@ -111,9 +113,99 @@ class Normalize(object):
     def __repr__(self):
         return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
 
-def execute_service(in_path, out_path):
+class Processor(Dataset):
 
-    # TODO
-    pass
+    def __init__(self, in_path, out_path, list_index, transform):
 
-execute_service(sys.argv[1], sys.argv[2])
+        ### self.FIRST_DATA_KEYS = set(np.load("/home/ast0414/Data/first_dataset_key_array.npy", allow_pickle=True).tolist())
+        self.SECOND_DATA_KEYS = set(np.load("./Data/second_dataset_key_array.npy", allow_pickle=True).tolist())
+
+        ### self.FIRST_DATA_PATH = "/mnt/disks/3_2T_SSD/EEG_10s_splits/first_dataset_sungtae_eeg_10s_split"
+        self.SECOND_DATA_PATH = "/home/dell/sssd/dirty1"
+
+        self.LABEL_H5_PATH = "./Data/labels.h5"
+        self.labels_hf = None
+        # print(list_index)
+        self.list_index = list_index
+        self.transform = transform
+
+        self.in_path = in_path
+        self.out_path = out_path
+
+    def process_all_items(self):
+        for i in range(len(self.list_index)):
+            self.process_item(i)
+
+    def process_item(self, index):
+        subject_key, segment_idx, target = self.list_index[index]
+        pid, date_str, time_str = subject_key.split('_')
+
+        if pid == "emu285":
+            subject_key, segment_idx, target = self.list_index[index-1]
+
+        subject_key = bytes(subject_key.encode('utf-8'))
+        if subject_key in self.SECOND_DATA_KEYS:
+            eeg_dir_in_path = os.path.join(self.in_path, pid, date_str, time_str)
+            eeg_file_in_path = os.path.join(eeg_dir_in_path, "{}.pkl".format(segment_idx))
+            eeg_dir_out_path = os.path.join(self.out_path, pid, date_str, time_str)
+            eeg_file_out_path = os.path.join(eeg_dir_out_path, "{}.pkl".format(segment_idx))
+        else:
+            raise KeyError
+
+        with open(eeg_file_in_path, 'rb') as f:
+            eeg_data_array = pickle.load(f)
+
+        montage = eeg_data_array.astype(dtype=np.float32).transpose()
+
+        if self.transform is not None:
+            montage = self.transform(montage)
+
+        if not os.path.exists(eeg_dir_out_path):
+            os.mkdir(eeg_dir_out_path)
+
+        # TODO: verify objct format
+        with open(eeg_file_out_path, 'w') as f:
+            pickle.dump(montage, f)
+
+        # if self.labels_hf is None:
+        #      self.labels_hf = h5py.File(self.LABEL_H5_PATH, 'r', libver='latest', swmr=True)
+
+        # target_array = np.array(self.labels_hf[subject_key][str(segment_idx)]).astype(dtype=np.float32)
+
+        # montage_tensor = torch.from_numpy(montage)
+        # target_tensor = torch.from_numpy(target_array)
+
+        # return montage_tensor, target_tensor, (subject_key, segment_idx)
+
+    def __len__(self):
+        return len(self.list_index)
+
+    def __repr__(self):
+        fmt_str = 'Dataset ' + self.__class__.__name__ + '\n'
+        fmt_str += '    Number of datapoints: {}\n'.format(self.__len__())
+        tmp = '    Transforms (if any): '
+        fmt_str += '{0}{1}\n'.format(tmp, self.transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
+        return fmt_str
+
+def execute_service(in_path, index_name, out_path):
+
+    print(in_path, index_name, out_path)
+    return
+
+    mean=[0.05822158, 0.79031128, 0.68925828, 0.60800403, 0.92262352, 0.6753147,
+        0.73978873, 0.7950735, 0.07544717, 0.5617258, 0.92687569, 0.60170792,
+        0.90717008, 0.79729081, 0.67532425, 0.84732697, 0.77063115, 0.62400107],
+    std=[76.89937982, 63.08870946, 67.46303121, 72.84682511, 71.82783947, 64.95668017,
+        66.33093137, 71.29754579, 76.1623206, 61.62166303, 63.41062531, 69.50769695,
+        71.26202116, 62.16298833, 63.83597864, 71.35798488, 65.21853278, 65.61397046]
+    flipMontage = RandomMontageFlip()
+    normalize = Normalize(mean, std)
+    transform = Compose([flipMontage, normalize])
+
+    with open(os.path.join('./Data', index_name), "rb") as f:
+        data_splits = pickle.load(f)
+
+    processor = Processor(in_path, out_path, data_splits['train'], transform)
+    processor.process_all_items()
+
+execute_service(sys.argv[1], sys.argv[2], sys.argv[3])

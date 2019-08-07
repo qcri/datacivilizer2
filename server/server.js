@@ -192,14 +192,13 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
 
     args = ["utils/debugger.py", dirName, run_info_filename, tracking_info_filename];
 
-    const num_modules = pipeline_map.size;
+    var num_modules = 0;
     var run_info = {
         'modelId': modelId,
         'runNo': runNo,
         'debugger_type': debugger_type,
         'metric_file': "metric_temp.json",
         'max_processes': 2,
-        'num_modules': num_modules,
         'pipeline': []
     }
 
@@ -210,14 +209,31 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
         'filename': 'tracking_file.json'
     }
 
+    if (tracking_filters.length == 0) {
+        tracking_info['active'] = false;
+    } else {
+        tracking_info['active'] = true;
+    }
+
     for (var node_id of pipeline_map.keys()) {
         var node = pipeline_map.get(node_id).node;
         var cmd_name = node.cmd;
+
+        if (cmd_name == "mod_source") {
+            out_map[node_id] = [node.path];
+            continue;
+        }
+
+        num_modules += 1;
         var json_file = cmd_name + ".json";
         var module_info = JSON.parse(fs.readFileSync(json_file, 'utf8'));
         var cmd_path = module_info.cmd_path;
         var num_inputs = module_info.num_inputs;
+        var in_types = module_info.in_types;
         var num_outputs = module_info.num_outputs;
+        var out_types = module_info.out_types;
+        var viz = module_info.viz;
+        var viz_type = module_info.viz_type;
         var num_params = module_info.num_parameters;
         var params = module_info.parameters;
 
@@ -226,25 +242,29 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
         var parameters = [];
         var splits = [];
 
-        if (cmd_name == "mod_source") {
-            inputs.push(node.path);
-        } else {
-            if (node_id in in_map) {
-                for (var n of in_map[node_id]) {
-                    inputs.push(out_map[n]);
+        if (node_id in in_map) {
+            for (var n of in_map[node_id]) {
+                for (var o of out_map[n]) {
+                    inputs.push(o);
                 }
             }
         }
 
-        if (cmd_name == "mod_changePoints")
-            out_map[node_id] = "out_" + node_id + ".jpg";
-        else
-            out_map[node_id] = "out_" + node_id + ".mat";
+        out_map[node_id] = []
+        for (var i = 0; i < num_outputs; i++) {
+            if (out_types[i] == 'dir') {
+                out_name = "out_" + node_id;
+            } else {
+                out_name = "out_" + node_id + out_types[i];
+            }
+            out_map[node_id].push(out_name);
+            outputs.push(out_name);
+        }
 
-        outputs.push(out_map[node_id]);
-
-        if (cmd_name == "mod_spectrogram")
-            outputs.push(out_map[node_id].replace('.mat', '.jpg'))
+        var viz_name = undefined;
+        if (viz) {
+            viz_name = "out_" + node_id + viz_type;
+        }
 
         for (var i=0; i<num_params; i++) {
             var param_type = params[i].type;
@@ -268,14 +288,21 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
             'cmd_name': cmd_name,
             'cmd_path': cmd_path,
             'num_inputs': num_inputs,
+            'in_types': in_types,
             'inputs': inputs,
             'num_outputs': num_outputs,
+            'out_types': out_types,
             'outputs': outputs,
+            'viz': viz,
+            'viz_name': viz_name,
+            'viz_type': viz_type,
             'num_params': num_params,
             'params': parameters,
             'splits': splits
         })
     }
+
+    run_info['num_modules'] = num_modules;
 
     console.log("Run info")
     console.log(run_info)
@@ -394,18 +421,20 @@ app.post('/run', function (request, response) {
     var node;
     for (var node_id of sorted.keys()) {
         node = sorted.get(node_id).node;
-        var splits = [];
-        if (node.splits == "") {
-            splits = [100];
-        } else {
-            splits = splits.concat(node.splits.split(',').map(Number));
-            splits.push(100);
+        if (node.cmd != "mod_source") {
+            var splits = [];
+            if (node.splits == "" || debugger_type == 'no_split') {
+                splits = [100];
+            } else {
+                splits = splits.concat(node.splits.split(',').map(Number));
+                splits.push(100);
+            }
+            model_debug_info.modules.push({
+                'name': node.cmd,
+                'splits': splits,
+                'split_outputs': []
+            });
         }
-        model_debug_info.modules.push({
-            'name': node.cmd,
-            'splits': splits,
-            'split_outputs': []
-        });
     }
     console.log(model_debug_info);
     response.send(JSON.stringify(model_debug_info));
@@ -492,9 +521,11 @@ app.post('/finish_run', function (request, response) {
 
     var obj = request.body;
     var metric_file_name = obj.metric_file_name;
-    var tracking_file_name = obj.tracking_file_name;
     var modelId = obj.modelId;
     var runNo = obj.runNo;
+
+    /* TODO update tracking file if present */
+    /*var tracking_file_name = obj.tracking_file_name;*/
 
     var metrics = JSON.parse(fs.readFileSync(metric_file_name, 'utf8'));
     console.log(metrics);

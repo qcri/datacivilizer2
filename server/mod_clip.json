@@ -3,7 +3,11 @@
     "cmd": "mod_clip",
     "cmd_path": "mod_clip.py",
     "num_inputs": 1,
+    "in_types": [".mat"],
     "num_outputs": 1,
+    "out_types": [".mat"],
+    "viz": true,
+    "viz_type": ".json",
     "num_parameters": 0,
     "parameters": []
 }
