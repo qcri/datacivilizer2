@@ -11,9 +11,10 @@
     <script src="/go.js"></script>
     <script src="/Figures.js"></script>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"> -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel='stylesheet' href='/DataInspector.css'/>
     <link rel="stylesheet" type="text/css" href="./visualizer.css" />
     <link rel="stylesheet" type="text/css" href="./debugger.css" />
@@ -483,6 +484,7 @@
                     myPalette.requestUpdate();
                 }
             });
+            load_models();
         };
 
         // Show the diagram's model in JSON format that the user may edit
@@ -567,74 +569,38 @@
             });
         };
 
+        function toggle_viz(id) {
+            var x = document.getElementById(id);
+            if (x.className.indexOf("w3-show") == -1) {
+                x.className = x.className.replace(" w3-hide", " w3-show");
+            } else {
+                x.className = x.className.replace(" w3-show", " w3-hide");
+            }
+        };
+
+        function toggle_arrow(id) {
+            var x = document.getElementById(id);
+            if (x.className.indexOf("fa-angle-up") == -1) {
+                x.className = x.className.replace(" fa-angle-down", " fa-angle-up");
+            } else {
+                x.className = x.className.replace(" fa-angle-up", " fa-angle-down");
+            }
+        };
+
         function open_debugger() {
-            document.getElementById("editor").style.width = "60%";
-            document.getElementById("debugger").style.width = "40%";
-            document.getElementById("debugger").style.display = "inline-block";
-            document.getElementById("visualizer").style.width = "0%";
-            document.getElementById("visualizer").style.display = "none";
-            document.getElementById("open_visualizer").style.display = "inline-block";
-            document.getElementById("close_visualizer").style.display = "none";
-            document.getElementById("open_debugger").style.display = "none";
-            document.getElementById("close_debugger").style.display = "inline-block";
-            debugger_is_open = true;
+            var _diagram = document.getElementById("diagram");
+            var _debugger = document.getElementById("debugger");
+            _diagram.style.width = "40%";
+            _debugger.style.width = "40%";
             myDiagram.requestUpdate();
-            myPalette.requestUpdate();
         };
 
         function close_debugger() {
-            if (visualizer_is_open) {
-                document.getElementById("editor").style.width = "50%";
-                document.getElementById("visualizer").style.width = "50%";
-                document.getElementById("visualizer").style.display = "inline-block";
-                document.getElementById("open_visualizer").style.display = "none";
-                document.getElementById("close_visualizer").style.display = "inline-block";
-                load_models();
-            } else {
-                document.getElementById("editor").style.width = "100%";
-            }
-            document.getElementById("debugger").style.width = "0%";
-            document.getElementById("debugger").style.display = "none";
-            document.getElementById("open_debugger").style.display = "inline-block";
-            document.getElementById("close_debugger").style.display = "none";
-            debugger_is_open = false;
+            var _diagram = document.getElementById("diagram");
+            var _debugger = document.getElementById("debugger");
+            _diagram.style.width = "80%";
+            _debugger.style.width = "0%";
             myDiagram.requestUpdate();
-            myPalette.requestUpdate();
-        };
-
-        function open_visualizer() {
-            document.getElementById("editor").style.width = "50%";
-            document.getElementById("debugger").style.width = "0%";
-            document.getElementById("debugger").style.display = "none";
-            document.getElementById("visualizer").style.width = "50%";
-            document.getElementById("visualizer").style.display = "inline-block";
-            document.getElementById("open_visualizer").style.display = "none";
-            document.getElementById("close_visualizer").style.display = "inline-block";
-            document.getElementById("open_debugger").style.display = "inline-block";
-            document.getElementById("close_debugger").style.display = "none";
-            visualizer_is_open = true;
-            myDiagram.requestUpdate();
-            myPalette.requestUpdate();
-            load_models();
-        };
-
-        function close_visualizer() {
-            if (debugger_is_open) {
-                document.getElementById("editor").style.width = "60%";
-                document.getElementById("debugger").style.width = "40%";
-                document.getElementById("debugger").style.display = "inline-block";
-                document.getElementById("open_debugger").style.display = "none";
-                document.getElementById("close_debugger").style.display = "inline-block";
-            } else {
-                document.getElementById("editor").style.width = "100%";
-            }
-            document.getElementById("visualizer").style.width = "0%";
-            document.getElementById("visualizer").style.display = "none";
-            document.getElementById("open_visualizer").style.display = "inline-block";
-            document.getElementById("close_visualizer").style.display = "none";
-            visualizer_is_open = false;
-            myDiagram.requestUpdate();
-            myPalette.requestUpdate();
         };
     </script>
 </head>
@@ -654,7 +620,10 @@
 
     getModelVersions();
 
-    function send(debugger_type) {
+    function send() {
+
+        var debugger_type = document.querySelector('input[name="debug_type"]:checked').value;
+
         saveDiagramProperties();
         console.log(myDiagram.model.toJson());
         modelJsonString = myDiagram.model.toJson();
@@ -749,7 +718,262 @@
     }
 
 </script>
-<div class="global_div">
+
+
+<div class="w3-top" style="z-index: 5">
+    <div class="w3-bar w3-light-gray">
+        <a class="w3-bar-item w3-green">Data Civilizer 2.0</a>
+        <a class="w3-bar-item w3-button" onclick="document.getElementById('header_01').scrollIntoView({behavior: 'smooth'});">Saved Pipelines</a>
+        <a class="w3-bar-item w3-button" onclick="document.getElementById('header_02').scrollIntoView({behavior: 'smooth'});">Pipeline editor</a>
+        <a class="w3-bar-item w3-button" onclick="document.getElementById('header_03').scrollIntoView({behavior: 'smooth'});">Visualize output</a>
+    </div>
+</div>
+
+<hr id="header_01">
+<br>
+
+<div class="w3-container">
+    <button class="w3-button w3-block" onclick="toggle_viz('visualizer'); toggle_arrow('icon_models');">Saved Pipelines<i id="icon_models" class="w3-right fa fa-angle-down" style='font-size:20px'></i></button>
+</div>
+
+<div class="w3-container w3-hide visualizer" id="visualizer">
+        <div id="model_table" class="model_table">
+            <div class="models_headings">
+                <div class="model_heading heading_models">
+                    <button class="dropbtn" disabled="">Models</button>
+                </div>
+                <div class="model_heading heading_parameters dropdown">
+                    <div class="dropdown-container" style="width: 100%;">
+                        <button class="dropbtn">Parameter filter</button>
+                        <div class="parameters dropdown-content"></div>
+                    </div>
+                </div>
+                <div class="model_heading heading_parameters dropdown">
+                    <div class="dropdown-container" style="width: 100%;">
+                        <button class="dropbtn">Metrics filter</button>
+                        <div class="metrics dropdown-content"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="models_container">
+                <div id="models" class="models"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br>
+<hr id="header_02">
+<br>
+
+<div class="w3-container">
+    <button class="w3-button w3-block" onclick="toggle_viz('editor'); toggle_arrow('icon_editor');">Pipeline editor<i id="icon_editor" class="w3-right fa fa-angle-up" style='font-size:20px'></i></button>
+</div>
+<br>
+
+<div class="w3-container w3-show" id="editor">
+    <div id="sample">
+        <div class="w3-container">
+            <div id="workBench" class="w3-row">
+
+                <div class="w3-col w3-light-gray" style="width: 20%;">
+                    <button class="w3-button w3-block w3-border" onclick="document.getElementById('modal_02').style.display='block'">Load pipeline</button>
+                     <div class="w3-border" id="myPaletteDiv" style="height: 600px;"></div>
+                </div>
+
+                <div id="diagram" class="w3-col w3-light-gray" style="width: 80%;">
+                    <button class="w3-button w3-block w3-border w3-border-green w3-hover-border-gray w3-green" onclick="document.getElementById('modal_01').style.display='block'">Execute Pipeline</button>
+                    <div class="w3-border" id="myDiagramDiv" style="height: 600px;"></div>
+                    <!-- <button class="w3-button w3-block w3-border">Save pipeline to file</button> -->
+                </div>
+
+                <div id="debugger" class="w3-col debugger" style="width: 0%; height: 600px;">
+                    <div class="debugger_container">
+                        <div id="debugger_scrollmenu" class="debugger_scrollmenu"></div>
+                        <div id="debugger_models" class="debugger_models"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="w3-container">
+            <button class="w3-button w3-block w3-left-align w3-light-gray" onclick="toggle_viz('selected_parts'); toggle_arrow('icon_params');">Parameters<i id="icon_params" class="w3-right fa fa-angle-down" style='font-size:20px'></i></button>
+        </div>
+
+        <div class="w3-container w3-hide" id="selected_parts">
+            <br>
+            <div class="w3-container">Selected Part:</div>
+            <div class="w3-container inspector" id="myInspectorDiv"></div>
+        </div>
+
+        <br>
+
+        <div class="w3-container">
+            <button class="w3-button w3-block w3-left-align w3-light-gray" onclick="toggle_viz('tracking_info'); toggle_arrow('icon_tracking');">Tracking<i id="icon_tracking" class="w3-right fa fa-angle-down" style='font-size:20px'></i></button>
+        </div>
+
+        <div class="w3-container w3-hide" id="tracking_info">
+            <div id="tracking_filter_form" class="tracking_filter_form">
+                <br>
+                <div class="w3-container">
+                    <div class="w3-container w3-border-bottom">Tracking filters:</div>
+                    <ul class="w3-ul" id="tracking_filters">
+                    </ul>
+                </div>
+                <br>
+                <div class="w3-container">
+                    <div class="w3-container w3-border-bottom">Add or remove tracking filter:</div>
+                    <div class="w3-margin w3-row-padding">
+                        <div class="w3-quarter">Id filter</div>
+                        <div class="w3-quarter">
+                            <input id="tracking_form_input_01" class="w3-input" type="number" min="0" placeholder="Id">
+                        </div>
+                        <div class="w3-quarter w3-right">
+                            <button class="w3-btn w3-block" onclick="add_filter('id')">Add</button>
+                        </div>
+                    </div>
+                    <div class="w3-margin w3-row-padding">
+                        <div class="w3-quarter">Id range filter</div>
+                        <div class="w3-quarter">
+                            <input id="tracking_form_input_02" class="w3-input" type="number" min="0" placeholder="From (inclusive)">
+                        </div>
+                        <div class="w3-quarter">
+                            <input id="tracking_form_input_03" class="w3-input" type="number" min="0" placeholder="Until (not inclusive)">
+                        </div>
+                        <div class="w3-quarter w3-right">
+                            <button class="w3-btn w3-block" onclick="add_filter('id_range')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="w3-container w3-hide">
+            <!-- <div>
+                <button id="SaveButton" onclick="save()">Save</button>
+                <button onclick="load()">Load</button>
+                Diagram Model saved in JSON format:
+            </div>
+            <table>
+                <tr>
+                    <td>Filename to Save As:</td>
+                    <td>
+                        <input id="inputFileNameToSaveAs">
+                    </td>
+                    <td>
+                        <button onclick="saveTextAsFile()">Save Text to File</button>
+                    </td>
+                </tr>
+            </table> -->
+            <textarea id="mySavedModel" style="width:100%;height:300px">
+                { "class": "go.GraphLinksModel",
+                  "linkFromPortIdProperty": "fromPort",
+                  "linkToPortIdProperty": "toPort",
+                  "nodeDataArray": [
+                 ],
+                  "linkDataArray": [
+                 ]}
+            </textarea>
+        </div>
+    </div>
+</div>
+
+<br>
+<hr id="header_03">
+<br>
+
+<div class="w3-container">
+    <button class="w3-button w3-block" onclick="toggle_viz('output_viz'); toggle_arrow('icon_viz');">Visualize output<i id="icon_viz" class="w3-right fa fa-angle-up" style='font-size:20px'></i></button>
+</div>
+
+<div class="w3-container w3-center w3-margin w3-show" id="output_viz">
+    <iframe id="iframeViz" height="600" width="100%"></iframe>
+</div>
+
+<br>
+
+<!-- Execute pipeline modal -->
+<div id="modal_01" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top">
+        <div class="w3-container w3-green"> 
+            <h4>Execute pipeline<i onclick="document.getElementById('modal_01').style.display='none'" class="w3-button w3-right fa fa-times"></i></h4>
+        </div>
+        <div class="w3-container">
+            <br>
+            <div class="w3-container">Execution type</div>
+            <div class="w3-row-padding">
+                <div class="w3-quarter">
+                    <input class="w3-radio" type="radio" name="debug_type" value="no_split" checked>
+                    <label>No split</label>
+                </div>
+                <div class="w3-quarter">
+                    <input class="w3-radio" type="radio" name="debug_type" value="clean">
+                    <label>Clean</label>
+                </div>
+                <div class="w3-quarter">
+                    <input class="w3-radio" type="radio" name="debug_type" value="dirty">
+                    <label>Dirty</label>
+                </div>
+            </div>
+            <br>
+            <hr>
+            <div class="w3-row-padding">
+                <div class="w3-quarter w3-right">
+                    <button class="w3-button w3-block w3-left-align w3-border" onclick="document.getElementById('modal_01').style.display='none';">Cancel</button>
+                </div>
+                <div class="w3-quarter w3-right">
+                    <button class="w3-button w3-block w3-left-align w3-border w3-border-green w3-hover-border-gray w3-green" onclick="send();document.getElementById('modal_01').style.display='none';">Start</button>
+                </div>
+            </div>
+            <br>
+        </div>
+    </div>
+</div>
+
+<!-- Load pipeline modal -->
+<div id="modal_02" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top">
+        <div class="w3-container w3-green"> 
+            <h4>Load pipeline pipeline<i onclick="document.getElementById('modal_02').style.display='none'" class="w3-button w3-right fa fa-times"></i></h4>
+        </div>
+        <div class="w3-container">
+            <br>
+            <div class="w3-container">Load pre-difined pipeline</div>
+            <br>
+            <div class="w3-container">
+                <div class="w3-bar">
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_A')">main_A</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_B')">main_B</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_C')">main_C</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_D')">main_D</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_E')">main_E</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_F')">main_F</button>
+                </div>
+            </div>
+            <br>
+            <div class="w3-container">Load pipeline from file</div>
+            <br>
+            <div class="w3-container">
+            <input type="file" id="input" class="form-control-file" onchange="handleFile(this.files)">
+            </div>
+            <br>
+            <hr>
+            <div class="w3-row-padding">
+                <div class="w3-quarter w3-right">
+                    <button class="w3-button w3-block w3-left-align w3-border" onclick="document.getElementById('modal_02').style.display='none';">Close</button>
+                </div>
+            </div>
+            <br>
+        </div>
+    </div>
+</div>
+
+
+<!-- <div class="global_div">
     <div id="editor" style="float: left; width: 100%;">
         <div style="width: 100%">
             <div class="btn-group">
@@ -865,7 +1089,7 @@
             <div id="debugger_models" class="debugger_models"></div>
         </div>
     </div>
-</div>
+</div> -->
 </body>
 
 </html>

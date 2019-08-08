@@ -1,10 +1,6 @@
 .debugger {
-    display: none;
     float: left;
-    width: 0%;
-    height: 100%;
     white-space: nowrap;
-    overflow: auto;
 }
 
 .debugger_container {

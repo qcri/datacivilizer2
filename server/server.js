@@ -160,6 +160,10 @@ app.get('/tracked_id_range.ejs', function (request, response) {
     response.sendfile(path.resolve('./ejs/tracked_id_range.ejs'));
 });
 
+app.get('/tracking_filter.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/tracking_filter.ejs'));
+});
+
 app.get('/visualizer.css', function (request, response) {
     response.sendfile(path.resolve('./css/visualizer.css'));
 });

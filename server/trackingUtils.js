@@ -17,67 +17,32 @@ function parse_tracking_filter(filter_node) {
     };
 }
 
-function showAppropriateForm(v) {
-    form_elems = document.getElementsByClassName("tracking_form_elem")
-    for (i = 0; i < form_elems.length; i++) {
-        form_elems[i].style.display = "none";
-    }
-    if (v == "id") {
-        form_elems = document.getElementsByClassName("tracking_form_elem")
-        for (i = 0; i < form_elems.length; i++) {
-            if (form_elems[i].name == "tr_id") {
-                form_elems[i].style.display = "inline-block";
-            }
+function add_filter(filter_type) {
+    if (filter_type == 'id') {
+        var _id = document.getElementById("tracking_form_input_01").value;
+        if (_id == "") {
+            alert("Please fill all required fields")
+            return
+        } else {
+            var html = new EJS({url : '/tracking_filter.ejs'}).render({'_type': filter_type, '_id': _id});
+            $('.tracking_filters').append($(html));
         }
-    } else if (v == 'id_range') {
-        form_elems = document.getElementsByClassName("tracking_form_elem")
-        for (i = 0; i < form_elems.length; i++) {
-            if (form_elems[i].name == "tr_id_start" || form_elems[i].name == "tr_id_end") {
-                form_elems[i].style.display = "inline-block";
-            }
+    } else if (filter_type == 'id_range') {
+        var id_from = document.getElementById("tracking_form_input_02").value;
+        var id_until = document.getElementById("tracking_form_input_03").value;
+        if (id_from == "" || id_until == "") {
+            alert("Please fill all required fields")
+            return
+        } else {
+            var html = new EJS({url : '/tracking_filter.ejs'}).render({'_type': filter_type, 'id_from': id_from, 'id_until': id_until});
+            $('.tracking_filters').append($(html));
         }
     }
-}
 
-function newElement() {
-    var inputValue = document.getElementById("tracking_filter_options").value + "(";
-    var data = document.getElementById("tracking_filter_options").value;
-    var li = document.createElement("li");
-    var inputs = document.getElementsByClassName("tracking_form_elem");
-    var first = true;
-    for (var i = 0; i < inputs.length; i++) {
-        if (inputs[i].style.display != 'none') {
-            if (inputs[i].value == "") {
-                alert("Please fill all required fields")
-                inputValue = "";
-                break
-            } else {
-                data += "," + inputs[i].value;
-                if (first) {
-                    inputValue += inputs[i].value;
-                    first = false;
-                } else {
-                    inputValue += ", " + inputs[i].value;
-                }
-            }
-        }
-    }
-    if (inputValue != "") {
-        inputValue += ")";
-        var t = document.createTextNode(inputValue);
-        li.setAttribute('data-value', data);
-        li.appendChild(t);
-        document.getElementById("tracking_filters").appendChild(li);
+};
 
-        var span = document.createElement("SPAN");
-        var txt = document.createTextNode("\u00D7");
-        span.onclick = function() {
-            var li_elem = this.parentElement;
-            var ul_elem = li.parentElement;
-            ul_elem.removeChild(li)
-        };
-        span.className = "close";
-        span.appendChild(txt);
-        li.appendChild(span);
-    }
-} 
+function remove_filter(elem) {
+    var li = elem.parentElement.parentElement.parentElement;
+    var ul = li.parentElement;
+    ul.removeChild(li);
+};

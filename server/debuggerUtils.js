@@ -129,6 +129,10 @@ function finish_running_pipeline(data) {
 };
 
 function add_model_to_debugger(modelJsonString) {
+    if (running_models.length == 0) {
+        open_debugger();
+    }
+    console.log($('.debugger_scrollmenu'));
     var model = JSON.parse(modelJsonString); // model = {'modelID','runNo','modules':[{'name','splits','split_ouputs'}]}
     var mrId = model.modelId.toString() + '_' + model.runNo.toString();
     var html = new EJS({url : '/debugger_tab.ejs'}).render({'mrId': mrId, 'modelId': model.modelId, 'runNo': model.runNo});

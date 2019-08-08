@@ -1,8 +1,7 @@
 .visualizer {
-    display: none;
-    float: left;
-    width: 0%;
-    height: 100%;
+    margin: auto;
+    height: 400px;
+    overflow-y: auto;
     white-space: nowrap;
     text-align: center;
 }

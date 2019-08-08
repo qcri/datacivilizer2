@@ -3,7 +3,7 @@
     "linkFromPortIdProperty": "fromPort",
     "linkToPortIdProperty": "toPort",
     "modelData": {
-        "position": "-122.0625 -426.1666679382324"
+        "position": "-292.0625 -398.6666717529299"
     },
     "nodeDataArray": [
         {
@@ -170,7 +170,7 @@
         }
     ],
     "modelId": 5,
-    "runNo": 18,
+    "runNo": 28,
     "parameters": {
         "path": "SampleData1.mat",
         "resample_frequency": 200,
@@ -222,6 +222,15 @@
         },
         {
             "runNo": 18,
+            "metrics": {
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                }
+            }
+        },
+        {
+            "runNo": 21,
             "metrics": {
                 "mod_filter": {
                     "filter_metric_1": 0.6,
