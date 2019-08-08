@@ -96,7 +96,29 @@
                     else if (curSegChn[j] < minV)
                         curSegChn[j] = minV;
                     curSegChn[j] *= magnitude;
-                    
+                    if (montage == 1)
+                        curSeg.push({
+                            "x": 20 + pixelPerSeg * (+data[i][3]) + j * pixelPerSeg / numPoints,
+                            "y": d3.scaleLinear().domain([minV, maxV])
+                                .range([0, channelHeight - channelMargin])(curSegChn[j]) + startingY
+                              });
+                    else if (montage == 2)
+                        curSeg.push({
+                            "x": 45 + pixelPerSeg * (+data[i][3]) + j * pixelPerSeg / numPoints,
+                            "y": d3.scaleLinear().domain([minV, maxV])
+                                .range([0, channelHeight - channelMargin])(curSegChn[j]) + startingY
+                              });
+                    else {
+                        curSeg.push({
+                            "x": 55 + pixelPerSeg * (+data[i][3]) + j * pixelPerSeg / numPoints,
+                            "y": d3.scaleLinear().domain([minV, maxV])
+                                .range([0, channelHeight - channelMargin])(curSegChn[j]) + startingY
+                              });
+                    }
+                }
+                dataset.push(curSeg);
+            }
+        }
 
         // console.log(data);
 
