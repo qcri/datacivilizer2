@@ -96,16 +96,30 @@
                     else if (curSegChn[j] < minV)
                         curSegChn[j] = minV;
                     curSegChn[j] *= magnitude;
-                    curSeg.push({
-                        "x": pixelPerSeg * (+data[i][3]) + j * pixelPerSeg / numPoints,
-                        "y": d3.scaleLinear().domain([minV, maxV])
-                            .range([0, channelHeight - channelMargin])(curSegChn[j]) + startingY
-                    });
+                    if (montage == 1)
+                        curSeg.push({
+                            "x": 20 + pixelPerSeg * (+data[i][3]) + j * pixelPerSeg / numPoints,
+                            "y": d3.scaleLinear().domain([minV, maxV])
+                                .range([0, channelHeight - channelMargin])(curSegChn[j]) + startingY
+                              });
+                    else if (montage == 2)
+                        curSeg.push({
+                            "x": 45 + pixelPerSeg * (+data[i][3]) + j * pixelPerSeg / numPoints,
+                            "y": d3.scaleLinear().domain([minV, maxV])
+                                .range([0, channelHeight - channelMargin])(curSegChn[j]) + startingY
+                              });
+                    else {
+                        curSeg.push({
+                            "x": 55 + pixelPerSeg * (+data[i][3]) + j * pixelPerSeg / numPoints,
+                            "y": d3.scaleLinear().domain([minV, maxV])
+                                .range([0, channelHeight - channelMargin])(curSegChn[j]) + startingY
+                              });
+                    }
                 }
                 dataset.push(curSeg);
             }
         }
-
+        
         // console.log(data);
 
         // d3 line object
@@ -164,21 +178,6 @@
             });
     };
 
-    var width = 1000;
-    var height = 1000;
-    var montage = 1;
-    // var montage = 3;
-    var outersvg = d3.select("#outersvg")
-        .attr("width", width + 50)
-        .attr("height", height);
-    var eegsvg = outersvg.append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("x", 50)
-        .attr("y", 0)
-        .attr("viewBox", viewBox + width + " " + height)
-        .style("display", "inline-block");
-    
     $.ajax({
         url: '/vizData',
         type: 'GET',
@@ -190,6 +189,30 @@
         success: function (dataArray) {
             console.log("success iFrame");
             var data_series = dataArray;
+
+            // called pixelPerSeg from above
+            var pixelPerSeg = 250;
+            var perChannelHeight = 50;
+            var numChannels = (montage == 2 ? 24 : 23);
+            var width = pixelPerSeg * (data_series[1].length) + 100;
+            var height = perChannelHeight * numChannels;
+            var montage = 1;
+
+            localStorage.setItem("widthLocalStorage", width);
+            localStorage.setItem("heightLocalStorage", height);
+
+            // var montage = 3;
+            var outersvg = d3.select("#outersvg")
+                .attr("width", width)
+                .attr("height", height);
+            var eegsvg = outersvg.append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("x", 50)
+                .attr("y", 0)
+                .attr("viewBox", viewBox + width + " " + height)
+                .style("display", "inline-block");
+
             if (data_series.length > 0) {
                 eegLabelRendering(outersvg, data_series[0], width, height, montage);
                 eegRendering(eegsvg, data_series[1], width, height, {}, 1.0, montage);
