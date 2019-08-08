@@ -164,6 +164,21 @@
             });
     };
 
+    var width = 1000;
+    var height = 1000;
+    var montage = 1;
+    // var montage = 3;
+    var outersvg = d3.select("#outersvg")
+        .attr("width", width + 50)
+        .attr("height", height);
+    var eegsvg = outersvg.append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("x", 50)
+        .attr("y", 0)
+        .attr("viewBox", viewBox + width + " " + height)
+        .style("display", "inline-block");
+    
     $.ajax({
         url: '/vizData',
         type: 'GET',
@@ -175,30 +190,6 @@
         success: function (dataArray) {
             console.log("success iFrame");
             var data_series = dataArray;
-
-            // called pixelPerSeg from above
-            var pixelPerSeg = 250;
-            var perChannelHeight = 50;
-            var numChannels = (montage == 2 ? 24 : 23);
-            var width = pixelPerSeg * (data_series[1].length) + 100;
-            var height = perChannelHeight * numChannels;
-            var montage = 1;
-            // var montage = 3;
-
-            localStorage.setItem("widthLocalStorage", width);
-            localStorage.setItem("heightLocalStorage", height);
-
-            var outersvg = d3.select("#outersvg")
-                .attr("width", width)
-                .attr("height", height);
-            var eegsvg = outersvg.append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .attr("x", 50)
-                .attr("y", 0)
-                .attr("viewBox", viewBox + width + " " + height)
-                .style("display", "inline-block");
-
             if (data_series.length > 0) {
                 eegLabelRendering(outersvg, data_series[0], width, height, montage);
                 eegRendering(eegsvg, data_series[1], width, height, {}, 1.0, montage);
