@@ -1,7 +1,7 @@
 import sys
 import json
 
-def transform_to_tensor(file_in, file_out, point_start, point_end):
+def transform_to_tensor(file_in, file_out, point_end):
     f = open(file_in, "r")
 
     tensor = []
@@ -43,7 +43,7 @@ def transform_to_tensor(file_in, file_out, point_start, point_end):
         index += 1
         tensor_final.append(pp)
 
-    tensor_small = tensor_final[point_start:point_end]
+    tensor_small = tensor_final[:point_end]
 
     final_stuct.append(tensor_small)
 
