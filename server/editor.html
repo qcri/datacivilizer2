@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿OCTYPE html>
 <html>
 
 <head>
@@ -902,7 +902,9 @@
 </div>
 
 <div class="w3-container w3-center w3-margin w3-show" id="output_viz">
-    <iframe id="iframeViz" height="600" width="100%"></iframe>
+    <div id="myDiv" class="dragscroll" style="overflow: hidden; border: solid 1px black; background-color: white; width: 100%; height: 600px">
+        <iframe name="myIframeName" id="iframeViz" width="0" height="0" scrolling="no" style="pointer-events: none; border: none;"></iframe>
+    </div>
 </div>
 
 <br>

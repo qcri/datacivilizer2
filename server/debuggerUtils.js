@@ -132,7 +132,6 @@ function add_model_to_debugger(modelJsonString) {
     if (running_models.length == 0) {
         open_debugger();
     }
-    console.log($('.debugger_scrollmenu'));
     var model = JSON.parse(modelJsonString); // model = {'modelID','runNo','modules':[{'name','splits','split_ouputs'}]}
     var mrId = model.modelId.toString() + '_' + model.runNo.toString();
     var html = new EJS({url : '/debugger_tab.ejs'}).render({'mrId': mrId, 'modelId': model.modelId, 'runNo': model.runNo});
@@ -173,6 +172,7 @@ function visualizeDebuggingOutput(modelId, runNo, module_name, splitNo) {
                     if (_module.split_outputs.length > splitNo) {
                         const viz_file = _module.split_outputs[splitNo]
                         if (viz_file != undefined) {
+                            console.log("visualizing: ./Data/" + viz_file);
                             $.get('/setViz',{"pathJSON": "./Data/" + viz_file})
                                 .done(function (response) {
                                     iframe.setAttribute("src", "vizFrame");

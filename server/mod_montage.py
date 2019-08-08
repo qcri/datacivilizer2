@@ -18,7 +18,7 @@ def execute_service(in_path, out_path, viz_out_path, montage_type="monopolar"):
 
     file_in = "./Data/" + out_path + ".txt"
     file_out = "./Data/"+ viz_out_path
-    transform_to_tensor(file_in, file_out, 1000, 1020)
+    transform_to_tensor(file_in, file_out, 200)
 
 print("Executing function")
 start = time.time()

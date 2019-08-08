@@ -19,7 +19,7 @@ def execute_service(in_path, out_path, viz_out_path, notch_freq=60.0, high_pass_
 
     file_in = "./Data/" + out_path + ".txt"
     file_out = "./Data/"+ viz_out_path
-    transform_to_tensor(file_in, file_out, 1000, 1020)
+    transform_to_tensor(file_in, file_out, 200)
 
     # Example of how to use add metrics
     f1_metric = DCMetric("filter_metric_1")

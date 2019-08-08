@@ -22,7 +22,7 @@ def execute_service(in_path, out_path, viz_out_path):
 
     file_in = "./Data/" + out_path + ".txt"
     file_out = "./Data/"+ viz_out_path
-    transform_to_tensor(file_in, file_out, 1000, 1020)
+    transform_to_tensor(file_in, file_out, 200)
 
     # f1_metric = DCMetric("source_metric_1")
     # f2_metric = DCMetric("source_metric_2")
