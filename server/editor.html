@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -10,6 +10,7 @@
     <!-- Copyright 1998-2019 by Northwoods Software Corporation. -->
     <script src="/go.js"></script>
     <script src="/Figures.js"></script>
+    <script src="/dragscroll.js"></script>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"> -->
     <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> -->
@@ -44,6 +45,15 @@
             finish_running_pipeline(JSON.parse(event.data));
         });
 
+        function iFrameRealParams() {
+            var iFrameWidthString = localStorage.getItem("widthLocalStorage");
+            var iFrameHeightString = localStorage.getItem("heightLocalStorage");
+            var iFrameWidthNumber = Number(iFrameWidthString);
+            var iFrameHeightNumber = Number(iFrameHeightString) + 10;
+            document.getElementById('iframeViz').style.width = iFrameWidthNumber + 'px';
+            document.getElementById('iframeViz').style.height = iFrameHeightNumber + 'px';
+        };
+        
         var visualizer_is_open = false
         var debugger_is_open = false
         var running_models = []
@@ -534,6 +544,7 @@
                 .done(function (response) {
                     iframe.setAttribute("src", "vizFrame");
                     iframe.src = iframe.src;
+                    setTimeout(iFrameRealParams, 500);
                 });
         };
 
@@ -1024,9 +1035,11 @@
         <div id="sample">
             <div id="workBench" style="width: 100%; display: flex; justify-content: space-between">
                 <div id="myPaletteDiv"
-                     style="width: 10%; margin-right: 2px; background-color: whitesmoke; border: solid 1px black"></div>
-                <div id="myDiagramDiv" style="flex-grow: 0; height: 620px; width: 40%; border: solid 1px black"></div>
-                <iframe id="iframeViz" height="620" width="50%"></iframe>
+                     style="width: 20%; margin-right: 2px; background-color: white; border: solid 1px black"></div>
+                <div id="myDiagramDiv" style="flex-grow: 0; margin-right: 2px; height: 620px; width: 20%; border: solid 1px black"></div>
+                    <div id="myDiv" class="dragscroll" style="overflow: hidden; border: solid 1px black; background-color: white; width: 60%; height: 620px">
+                        <iframe name="myIframeName" id="iframeViz" width="0" height="0" scrolling="no" style="pointer-events: none; border: none;"></iframe>
+                    </div>
             </div>
             <span style="display: inline-block; vertical-align: top;">
                     Selected Part:<br/>

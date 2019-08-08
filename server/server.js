@@ -108,6 +108,10 @@ app.get('/Figures.js', function (request, response) {
     response.sendfile(path.resolve('../extensions/Figures.js'));
 });
 
+app.get('/dragscroll.js', function (request, response) {
+    response.sendfile(path.resolve('../extensions/dragscroll.js'));
+});
+
 app.get('/DataInspector.js', function (request, response) {
     response.sendfile(path.resolve('../extensions/DataInspector.js'));
 });
