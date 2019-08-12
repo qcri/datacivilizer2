@@ -1,6 +1,29 @@
+function toggle_border(id) {
+    var x = document.getElementById(id);
+    if (x.className.indexOf("w3-border-bottom") == -1) {
+        x.className = x.className.replace("w3-border-top", "w3-border-bottom");
+    } else {
+        x.className = x.className.replace("w3-border-bottom", "w3-border-top");
+    }
+};
+
+function select_debugging_tab(id) {
+    var x = document.getElementById(id);
+    if (x.className.indexOf("w3-opacity") != -1) {
+        x.className = x.className.replace(" w3-opacity", "");
+    }
+};
+
+function deselect_debugging_tab(id) {
+    var x = document.getElementById(id);
+    if (x.className.indexOf("w3-opacity") == -1) {
+        x.className += " w3-opacity";
+    }
+};
+
 function pause_pipeline(mrId) {
-    document.getElementById("debugger_running_" + mrId).style.display = "none";
-    document.getElementById("debugger_paused_" + mrId).style.display = "inline-block";
+    toggle_viz('debugger_running_'  + mrId);
+    toggle_viz('debugger_paused_'  + mrId);
     $.ajax({
         url: '/pause_pipeline',
         type: 'post',
@@ -13,8 +36,8 @@ function pause_pipeline(mrId) {
 };
 
 function resume_pipeline(mrId) {
-    document.getElementById("debugger_running_" + mrId).style.display = "inline-block";
-    document.getElementById("debugger_paused_" + mrId).style.display = "none";
+    toggle_viz('debugger_running_'  + mrId);
+    toggle_viz('debugger_paused_'  + mrId);
     $.ajax({
         url: '/resume_pipeline',
         type: 'post',
@@ -27,9 +50,9 @@ function resume_pipeline(mrId) {
 };
 
 function stop_pipeline(mrId) {
-    document.getElementById("debugger_running_" + mrId).style.display = "none";
-    document.getElementById("debugger_paused_" + mrId).style.display = "none";
-    document.getElementById("debugger_stopped_" + mrId).style.display = "inline-block";
+    close_viz('debugger_running_'  + mrId);
+    close_viz('debugger_paused_'  + mrId);
+    toggle_viz('debugger_stopped_'  + mrId);
     $.ajax({
         url: '/kill_pipeline',
         type: 'post',
@@ -41,18 +64,29 @@ function stop_pipeline(mrId) {
     });
 };
 
+
+function finish_running_pipeline(data) {
+    var mrId = data.modelId.toString() + '_' + data.runNo.toString();
+    close_viz('debugger_running_'  + mrId);
+    close_viz('debugger_paused_'  + mrId);
+    close_viz('debugger_stopped_'  + mrId);
+    open_viz("debugger_ended_" + mrId);
+    select_debugger_model(mrId);
+};
+
 function select_debugger_model(mrId) {
-    models = document.getElementsByClassName("debugger_model");
+    models = document.getElementById('debugger_models').children;
     for (i = 0; i < models.length; i++) {
-        models[i].style.display = "none";
+        console.log(models[i]);
+        close_viz(models[i].id);
     }
-    tabs = document.getElementsByClassName("debugger_tab");
+    tabs = document.getElementById('debugger_scrollmenu').children;
     for (i = 0; i < tabs.length; i++) {
-        tabs[i].className = tabs[i].className.replace(" active", "");
+        deselect_debugging_tab(tabs[i].id);
     }
 
-    document.getElementById("debugger_model_" + mrId).style.display = "block";
-    document.getElementById("debugger_tab_" + mrId).className += " active";
+    toggle_viz("debugger_model_" + mrId);
+    select_debugging_tab("debugger_tab_" + mrId);
 };
 
 function remove_debugger_model(mrId, modelId, runNo) {
@@ -109,22 +143,13 @@ function update_running_pipeline(split_data) {
             }
         }
     }
+    split_div = document.getElementById(split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split);
     if (_continue) {
-        document.getElementById("pbh_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done";
-        document.getElementById("pbv_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done";
+        split_div.className += " w3-green w3-hover-gray";
     } else {
-        document.getElementById("pbh_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done incorrect";
-        document.getElementById("pbv_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).className += " done incorrect";
+        split_div.className += " w3-red w3-hover-gray";
     }
-    document.getElementById("pbh_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).title = bp_text;
-    document.getElementById("pbv_" + split_data.modelId + "_" + split_data.runNo + "_" + split_data.module_name + "_" + split_data.split).title = bp_text;
-    select_debugger_model(mrId);
-};
-
-function finish_running_pipeline(data) {
-    var mrId = data.modelId.toString() + '_' + data.runNo.toString();
-    document.getElementById("debugger_running_" + mrId).style.display = "none";
-    document.getElementById("debugger_ended_" + mrId).style.display = "inline-block";
+    split_div.title = bp_text;
     select_debugger_model(mrId);
 };
 
@@ -135,9 +160,9 @@ function add_model_to_debugger(modelJsonString) {
     var model = JSON.parse(modelJsonString); // model = {'modelID','runNo','modules':[{'name','splits','split_ouputs'}]}
     var mrId = model.modelId.toString() + '_' + model.runNo.toString();
     var html = new EJS({url : '/debugger_tab.ejs'}).render({'mrId': mrId, 'modelId': model.modelId, 'runNo': model.runNo});
-    $('.debugger_scrollmenu').append($(html));
+    $('#debugger_scrollmenu').prepend($(html));
     html = new EJS({url : '/debugger_model.ejs'}).render({'mrId': mrId, 'model': model});
-    $('.debugger_models').append($(html));
+    $('#debugger_models').prepend($(html));
     running_models.push(model);
     select_debugger_model(mrId);
 };
@@ -146,22 +171,21 @@ function add_tracking_ids(data) {
     var tracking_ids = data.tracking_ids; // tracking_ids = {'module': [{'start_id','num_segments','data_file_path'}]}
     var mrId = data.mrId;
     for (const _module of Object.keys(tracking_ids)) {
-        console.log("OK")
         var id_ranges = tracking_ids[_module];
-        $("#ti_"+mrId+"_"+_module).html("");
-        console.log(id_ranges);
-        console.log($("#ti_"+mrId+"_"+_module));
-        for (var i = 0; i < id_ranges.length; i++) {
-            var metadata = id_ranges[i];
-            var html = new EJS({url : '/tracked_id_range.ejs'}).render({'data': metadata});
-            $("#ti_"+mrId+"_"+_module).append($(html));
+        if (id_ranges.length > 0) {
+            open_viz("tic_"+mrId+"_"+_module)
+            $("#ti_"+mrId+"_"+_module).html("");
+            for (var i = 0; i < id_ranges.length; i++) {
+                var metadata = id_ranges[i];
+                var html = new EJS({url : '/tracked_id_range.ejs'}).render({'data': metadata});
+                $("#ti_"+mrId+"_"+_module).append($(html));
+            }
         }
     }
-}
+};
 
 function visualizeDebuggingOutput(modelId, runNo, module_name, splitNo) {
 
-    var iframe = document.getElementById('iframeViz');
     for (var i = running_models.length - 1; i >= 0; i--) {
         var model = running_models[i];
         if (model.modelId == modelId && model.runNo == runNo) {
@@ -172,12 +196,7 @@ function visualizeDebuggingOutput(modelId, runNo, module_name, splitNo) {
                     if (_module.split_outputs.length > splitNo) {
                         const viz_file = _module.split_outputs[splitNo]
                         if (viz_file != undefined) {
-                            console.log("visualizing: ./Data/" + viz_file);
-                            $.get('/setViz',{"pathJSON": "./Data/" + viz_file})
-                                .done(function (response) {
-                                    iframe.setAttribute("src", "vizFrame");
-                                    iframe.src = iframe.src;
-                                });
+                            visualizeFile("./Data/" + viz_file);
                         }
                     }
                 }

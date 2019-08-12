@@ -4,7 +4,6 @@ import pickle
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from Tools import Cleaning
 import sys
 import h5py
 
@@ -117,13 +116,13 @@ def laplace_smoothing(observations, alpha=1.0):
 
 class MontagePickleDataset(Dataset):
 
-    def __init__(self, list_index, label_h5_path, transform):
+    def __init__(self, in_path, list_index, label_h5_path, transform):
 
         ### self.FIRST_DATA_KEYS = set(np.load("/home/ast0414/Data/first_dataset_key_array.npy", allow_pickle=True).tolist())
-        self.SECOND_DATA_KEYS = set(np.load("/home/dell/eeg-data-sample/second_dataset_key_array.npy", allow_pickle=True).tolist())
+        self.SECOND_DATA_KEYS = set(np.load("./Data/second_dataset_key_array.npy", allow_pickle=True).tolist())
 
         ### self.FIRST_DATA_PATH = "/mnt/disks/3_2T_SSD/EEG_10s_splits/first_dataset_sungtae_eeg_10s_split"
-        self.SECOND_DATA_PATH = "/home/dell/sssd/dirty1"
+        self.in_path = in_path
 
         self.LABEL_H5_PATH = label_h5_path
         self.labels_hf = None
@@ -141,47 +140,28 @@ class MontagePickleDataset(Dataset):
         """
         subject_key, segment_idx, target = self.list_index[index]
         pid, date_str, time_str = subject_key.split('_')
-        # emu285文件被损坏，所以剔除试一下
         if pid == "emu285":
             subject_key, segment_idx, target = self.list_index[index-1]
 
-        # print("~~~~~~here~~~~~~")
-        ### if subject_key in self.FIRST_DATA_KEYS:
-        ###    eeg_file_path = os.path.join(self.FIRST_DATA_PATH, pid, date_str, time_str, "{}.pkl".format(segment_idx))
-        ### el
         subject_key = bytes(subject_key.encode('utf-8'))
         if subject_key in self.SECOND_DATA_KEYS:
-            eeg_file_path = os.path.join(self.SECOND_DATA_PATH, pid, date_str, time_str, "{}.pkl".format(segment_idx))
-            # print(eeg_file_path)
+            eeg_dir_path = os.path.join('./Data/' + self.in_path, pid, date_str, time_str)
+            eeg_file_path = os.path.join(eeg_dir_path, "{}.pkl".format(segment_idx))
         else:
             raise KeyError
-
 
         with open(eeg_file_path, 'rb') as f:
             eeg_data_array = pickle.load(f)
 
-        # 如果前面进行了清洗，这句话就不需要了
-        # 清理要在训练之前，算一个单独的步骤，否则训练的时间太长
         montage = eeg_data_array.astype(dtype=np.float32).transpose()
 
         if self.transform is not None:
             montage = self.transform(montage)
 
-        # # Data Cleaning
-        # montage = Cleaning.clean_pipline(montage, 200)
-
-        # Data Dirty
-        # montage = Cleaning.dirty(montage, 2500, 1500)
-
-
-
-        # （model.h5报错
         if self.labels_hf is None:
              self.labels_hf = h5py.File(self.LABEL_H5_PATH, 'r', libver='latest', swmr=True)
 
         target_array = np.array(self.labels_hf[subject_key][str(segment_idx)]).astype(dtype=np.float32)
-
-
 
 
         # traget_array = np.array()

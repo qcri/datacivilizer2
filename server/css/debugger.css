@@ -1,4 +1,4 @@
-.debugger {
+/*.debugger {
     float: left;
     white-space: nowrap;
 }
@@ -17,6 +17,10 @@
     height: 32px;
     overflow: auto;
     white-space: nowrap;
+}
+
+#debugger_scrollmenu::-webkit-scrollbar { 
+    display: none;
 }
 
 .debugger_scrollmenu::-webkit-scrollbar { 
@@ -175,4 +179,4 @@
 .tracked_id_range:hover {
     border-color: gray;
     background-color: lightgray;
-}
+}*/

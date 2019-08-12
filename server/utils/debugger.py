@@ -160,6 +160,8 @@ class Debugger(object):
                 new_viz_name = self.dirName + '/' + module_dic['viz_name']
                 module_dic['viz_name'] = new_viz_name
                 args[2+num_in_files+num_out_files] = new_viz_name
+            else:
+                module_dic['viz_name'] = ""
             tmp_file_name = './Data/' + self.dirName + '/' + 'tmp_' + str(tmp_counter) + '.json'
             tmp_counter += 1
             args.append(tmp_file_name)
@@ -209,6 +211,8 @@ class Debugger(object):
                     new_viz_name = self.dirName + '/' + name + suffix + '.' + extension
                     module_dic['viz_name'] = new_viz_name
                     args[2+num_in_files+num_out_files] = new_viz_name
+                else:
+                    module_dic['viz_name'] = ""
                 tmp_file_name = './Data/' + self.dirName + '/' + 'tmp_' + str(tmp_counter) + '.json'
                 tmp_counter += 1
                 args.append(tmp_file_name)
@@ -281,7 +285,7 @@ class Debugger(object):
             split = run_dic['split']
         tmp_file_name = run_dic['tmp_file_name']
         if self.tracking and split == 100:
-            for file in run_dic['out_files']:
+            for file in run_dic['outputs']:
                 tracked = self.tracker.track_file(file, module_name)
                 if tracked:
                     post_data = {

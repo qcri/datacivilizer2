@@ -1,56 +1,72 @@
 <!DOCTYPE html>
-<div class="model_div_container">
-    <div class="model" onclick="on_click_model(<%= model.modelId %>)">
-        <div class="model_section section_model">
-            <div class="section_elem"> Model <%= model.modelId %> </div>
-            <div class="section_elem"> Number of runs:  <%= model.runs_amount %> </div>
-        </div>
-        <div class="model_section section_filter">
-            <%
-                if (filter_parameters.length == 0) {
-            %>
-                <div class="section_elem"> No filter </div>
-            <%
-                } else {
-                    for (var i in filter_parameters) {
-                        var param = filter_parameters[i]
-            %>
-                    <div class="section_elem"> <%= param %>: <%= model.parameters[param] %> </div>
-            <%
-                    }
-                }
-            %>
-        </div>
-        <div class="model_section section_filter">
-            <%
-                if (filter_metrics.length == 0) {
-            %>
-                <div class="section_elem"> No filter </div>
-            <%
-                } else {
-                    for (var i in filter_metrics) {
-                        var metric = filter_metrics[i]
-            %>
-                    <div class="section_elem"> <%= metric %>: <%= metric_values[metric] %> </div>
-            <%
-                    }
-                }
-            %>
-        </div>
-        <div onclick="var event = arguments[0] || window.event; see_more(event, <%= model.modelId %>)" class="model_see_more">See more</div>
-        <div id="add_<%= model.modelId %>" class="model_add">
-            <div class="parameters_list">
-                <div class="param_elem param_header"> Model parameters: </div>
-                <% 
-                    for (var param in model.parameters) {
-                %>
-                    <div class="param_elem"> <%= param %>: <%= model.parameters[param] %> </div>
+<div class="w3-container w3-margin-bottom w3-border w3-left-align" onclick="on_click_model(<%= model.modelId %>)">
+    <div>
+        <br>
+        <div class="w3-row">
+            <div class="w3-third">
+                <div class="w3-container"> Pipeline <%= model.modelId %> </div>
+                <div class="w3-container w3-tiny"> Number of completed runs:  <%= model.runs_amount %> </div>
+            </div>
+            <div class="w3-third">
                 <%
-                    } 
+                    if (filter_parameters.length == 0) {
+                %>
+                    <!-- <div class="w3-container"> No filter </div> -->
+                <%
+                    } else {
+                        for (var i in filter_parameters) {
+                            var param = filter_parameters[i]
+                %>
+                        <div class="w3-container w3-small"> <%= param %>: <%= model.parameters[param] %> </div>
+                <%
+                        }
+                    }
                 %>
             </div>
-            <div class="metric_table_div">
-                <table class="metric_table">
+            <div class="w3-third">
+                <%
+                    if (filter_metrics.length == 0) {
+                %>
+                    <!-- <div class="w3-container"> No filter </div> -->
+                <%
+                    } else {
+                        for (var i in filter_metrics) {
+                            var metric = filter_metrics[i]
+                %>
+                        <div class="w3-container w3-small"> <%= metric %>: <%= metric_values[metric] %> </div>
+                <%
+                        }
+                    }
+                %>
+            </div>
+        </div>
+    </div>
+    <div onclick="toggle_viz('add_<%= model.modelId %>')" class="w3-container w3-hover w3-hover-light-gray w3-right w3-small">See more</div>
+    <div class="w3-row-padding w3-margin-bottom w3-hide" id="add_<%= model.modelId %>">
+        <hr>
+        <div class="w3-third">
+            <div class="w3-container w3-small w3-center">Parameters</div>
+            <ul class="w3-ul w3-tiny" style="max-height: 200px; overflow-y: auto;">
+                <% 
+                    var added = false;
+                    for (var param in model.parameters) {
+                        added = true;
+                %>
+                    <li> <b><%= param %></b>: <%= model.parameters[param] %> </li>
+                <%
+                    }
+                    if (!added) {
+                %>
+                    <li> No parameters </li>
+                <% 
+                    }
+                %>
+            </ul>
+        </div>
+        <div class="w3-twothird">
+            <div class="w3-container w3-small w3-center">Metrics</div>
+            <div style="max-height: 200px; overflow: auto;">
+                <table class="w3-table w3-bordered w3-small">
                     <tr>
                         <th rowspan="2">Finished run id</th>
                         <%

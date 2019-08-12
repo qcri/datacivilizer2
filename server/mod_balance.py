@@ -129,7 +129,7 @@ def detect_other(label_file_path, segment_index):
         return False
 
 def execute_service(in_path, out_path):
-
+    return
     down_sample_init(in_path, out_path)
 
 execute_service(sys.argv[1], sys.argv[2])

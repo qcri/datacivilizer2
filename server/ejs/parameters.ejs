@@ -4,7 +4,7 @@
     for (var paramNo in parameters) {
         param = parameters[paramNo];
 %>
-    <a onclick="switchSelect(this)" data-selected="false" data-type="parameter" data-value="<%= param %>"><%= param %></a>
+    <a class="w3-button w3-block w3-left-align w3-small" onclick="switchSelect(this)" data-selected="false" data-type="parameter" data-value="<%= param %>"><%= param %></a>
 <%
     }
 %>

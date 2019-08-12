@@ -24,9 +24,7 @@ from utils.Loss import WeightedKLDivWithLogitsLoss
 from tqdm import tqdm
 
 
-def train(in_data_dir, index_file, out_path, run_dir, save_path_name='save', resume_path=None, batch_size=256, epochs=50, start_epoch=0, lr=1e-4, wd=1e-3, workers=12, no_cuda=True, seed=1):
-    print(in_data_dir, index_file, out_path, run_dir)
-    return
+def run_nn(in_data_dir, index_file, out_path, run_dir, save_path_name='save', resume=None, batch_size=256, epochs=50, start_epoch=0, lr=1e-4, wd=1e-3, workers=12, no_cuda=True, seed=1):
 
     # parser = argparse.ArgumentParser()
     # parser.add_argument('path', default='/home/dell/eeg-data-sample/', type=str, help='path to the main dir of the experiment')
@@ -67,13 +65,13 @@ def train(in_data_dir, index_file, out_path, run_dir, save_path_name='save', res
     label_h5_path = os.path.join('./Data/', "labels.h5")
     print(data_splits['train'][0])
     print("\t===> Construct train set")
-    train_set = MontagePickleDataset(list_index=data_splits['train'],
+    train_set = MontagePickleDataset(in_data_dir, list_index=data_splits['train'],
                                      label_h5_path=label_h5_path, transform=None)
 
     train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=workers)
 
     print("\t===> Construct validation set")
-    val_set = MontagePickleDataset(list_index=data_splits['validation'],
+    val_set = MontagePickleDataset(in_data_dir, list_index=data_splits['validation'],
                                    label_h5_path=label_h5_path, transform=None)
     val_loader = DataLoader(dataset=val_set, batch_size=batch_size, shuffle=False, num_workers=workers)
     print("===> Dataset loaded!")
@@ -189,9 +187,16 @@ def train(in_data_dir, index_file, out_path, run_dir, save_path_name='save', res
     writer.export_scalars_to_json("./all_scalars.json")
     writer.close()
 
-def execute_service(in_dir, index_file, out_path):
-
+def execute_service(in_data_dir, index_file, out_path):
+    print(in_data_dir, index_file)
+    return
     run_dir, _, _ = out_path.partition('/')
-    train(in_data_dir, index_file, out_path, run_dir)
+    run_nn(in_data_dir, index_file, out_path, run_dir)
 
-execute_service(sys.argv[1], sys.argv[2])
+if __name__ == '__main__':
+    torch.multiprocessing.freeze_support()
+
+    if (sys.argv[1].endswith('.pkl')):
+        execute_service(sys.argv[2], sys.argv[1], sys.argv[3])
+    else:
+        execute_service(sys.argv[1], sys.argv[2], sys.argv[3])

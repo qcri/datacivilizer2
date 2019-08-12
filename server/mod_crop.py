@@ -103,7 +103,7 @@ def equal_tuple(a, b):
         return False
 
 def execute_service(in_path, out_path):
-
+    return
     drop_init(in_path, out_path)
 
 execute_service(sys.argv[1], sys.argv[2])

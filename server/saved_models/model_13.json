@@ -1,0 +1,142 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-478.5 -291.84375"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "second_dataset_from_cpd_eeg_10s_split",
+            "key": -1,
+            "loc": "-251.796875 -139.84375"
+        },
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "dataset_index_random_sample.pkl",
+            "key": -2,
+            "loc": "-68.796875 -141.84375"
+        },
+        {
+            "text": "FlipMontage",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_flip_montage",
+            "splits": "",
+            "key": -11,
+            "loc": "-78.796875 -27.84375"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -1,
+            "to": -11,
+            "fromPort": "B",
+            "toPort": "",
+            "points": [
+                -251.796875,
+                -119.84375,
+                -251.796875,
+                -109.84375,
+                -251.796875,
+                -27.84375,
+                -200.296875,
+                -27.84375,
+                -148.796875,
+                -27.84375,
+                -138.796875,
+                -27.84375
+            ]
+        },
+        {
+            "from": -2,
+            "to": -11,
+            "fromPort": "",
+            "toPort": "",
+            "points": [
+                -68.796875,
+                -121.84375,
+                -68.796875,
+                -111.84375,
+                -68.796875,
+                -84.84375,
+                -78.796875,
+                -84.84375,
+                -78.796875,
+                -57.84375,
+                -78.796875,
+                -47.84375
+            ]
+        }
+    ],
+    "modelId": 13,
+    "runNo": 20,
+    "parameters": {
+        "path": "dataset_index_random_sample.pkl"
+    },
+    "runs": [
+        {
+            "runNo": 3,
+            "metrics": {}
+        },
+        {
+            "runNo": 4,
+            "metrics": {}
+        },
+        {
+            "runNo": 5,
+            "metrics": {}
+        },
+        {
+            "runNo": 6,
+            "metrics": {}
+        },
+        {
+            "runNo": 7,
+            "metrics": {}
+        },
+        {
+            "runNo": 8,
+            "metrics": {}
+        },
+        {
+            "runNo": 9,
+            "metrics": {}
+        },
+        {
+            "runNo": 10,
+            "metrics": {}
+        },
+        {
+            "runNo": 11,
+            "metrics": {}
+        },
+        {
+            "runNo": 12,
+            "metrics": {}
+        },
+        {
+            "runNo": 13,
+            "metrics": {}
+        },
+        {
+            "runNo": 14,
+            "metrics": {}
+        },
+        {
+            "runNo": 15,
+            "metrics": {}
+        },
+        {
+            "runNo": 16,
+            "metrics": {}
+        }
+    ]
+}

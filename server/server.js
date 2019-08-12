@@ -176,6 +176,10 @@ app.get('/debugger.css', function (request, response) {
     response.sendfile(path.resolve('./css/debugger.css'));
 });
 
+app.get('/Data/out_-1.jpg', function (request, response) {
+    response.sendfile(path.resolve('./Data/out_-1.jpg'));
+});
+
 /**
  * Runs a DC2 pipeline
  * args
@@ -544,18 +548,31 @@ app.post('/finish_run', function (request, response) {
     response.end()
 });
 
-function remove_dir(dir_name) {
-    console.log("Removing directory " + dir_name)
+function remove_dir(dir_name, is_first=true) {
+    if (is_first) {
+        console.log("Removing directory " + dir_name)
+    }
     try {
         fs.readdirSync(dir_name).forEach(function(filename, index){
-            var file_path = path.join(dir_name, filename)
-            fs.unlinkSync(file_path);
+            var curPath = path.join(dir_name, filename)
+            if (fs.lstatSync(curPath).isDirectory()) { // recurse
+                remove_dir(curPath, false);
+            } else { // delete file
+                fs.unlinkSync(curPath);
+            }
         });
         fs.rmdirSync(dir_name);
-        console.log("Directory successfully removed")
+        if (is_first) {
+            console.log("Directory successfully removed")
+        }
     } catch (err) {
-        console.log("An error occurred, trying again in 30 seconds")
-        setTimeout(remove_dir, 30000, dir_name)
+        if (is_first) {
+            console.log(err)
+            console.log("An error occurred, trying again in 30 seconds")
+            setTimeout(remove_dir, 30000, dir_name)
+        } else {
+            throw(err)
+        }
     }
 };
 

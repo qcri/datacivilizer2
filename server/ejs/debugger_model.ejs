@@ -1,75 +1,93 @@
 <!DOCTYPE html>
-<div class="debugger_model" id="debugger_model_<%= mrId %>">
-    <div class="debugger_modules_header">Modules</div>
-    <%
-        for (var i = 0; i < model.modules.length; i++) {
-            var module = model.modules[i];
-    %>
-        <div class="debugger_module">
-            <div class="debugger_module_header"><%= module.name %></div>
-            <div class="progress_bar_container">
-                <div class="progress_bar">
-                    <%
-                        var prev_split = 0;
-                        var split;
-                        var split_width;
-                        var split_done;
-                        var n = module.split_outputs.length;
-                        for (var j = 0; j < module.splits.length; j++) {
-                            split = module.splits[j];
-                            split_width = (split - prev_split)*4;
-                            prev_split = split;
-                            if (j < n) {
-                                split_done = "done";
-                            } else {
-                                split_done = "";
-                            }
-                    %>
-                        <div class="progress_bar_split" onclick="visualizeDebuggingOutput(<%= model.modelId %>, <%= model.runNo %>, '<%= module.name %>', <%= j %>)" style="width: <%= split_width %>px;">
-                            <div id="pbh_<%= mrId %>_<%= module.name %>_<%= split %>" class="progress_bar_horizontal <%= split_done %>" style="width: <%= split_width - 10 %>px;
+<div class="w3-container w3-show debugger_model" id="debugger_model_<%= mrId %>" style="height: 100%; padding: 0px;">
+    <div class="w3-container" style="height: 100%; padding: 0px; display: flex; flex-flow: column;">
+        <div class="w3-border-bottom">
+            <div class="w3-button w3-block w3-center w3-margin-bottom w3-margin-top" onclick="toggle_viz('progress_container_<%= mrId %>');toggle_viz('tracking_container_<%= mrId %>');toggle_border('tracking_header_<%= mrId %>');" style="padding: 0px;"><b>Progress</b></div>
+        </div>
+        <div class="w3-container w3-show" id="progress_container_<%= mrId %>" style="padding: 0px; flex: 2; overflow: auto;">
+            <%
+                String.prototype.capitalize = function() {
+                    return this.charAt(0).toUpperCase() + this.slice(1);
+                }
+
+                for (var i = 0; i < model.modules.length; i++) {
+                    var module = model.modules[i];
+            %>
+                <div class="w3-container w3-margin-top" style="padding: 0px;">
+                    <div class="w3-container w3-center" style="padding: 0px;"><%= module.name.substring(4).capitalize() %></div>
+                    <div class="w3-container" style="padding: 0px;">
+                        <div class="w3-row">
                             <%
-                                if (j==0) {
+                                var prev_split = 0;
+                                var split;
+                                var split_width;
+                                var split_done;
+                                var n = module.split_outputs.length;
+                                for (var j = 0; j < module.splits.length; j++) {
+                                    split = module.splits[j];
+                                    split_width = split - prev_split;
+                                    prev_split = split;
+                                    if (j < n) {
+                                        split_done = "done";
+                                    } else {
+                                        split_done = "";
+                                    }
                             %>
-                                border-left: 1px solid gray;
+                                <div class="w3-col w3-border" id="<%= mrId %>_<%= module.name %>_<%= split %>" onclick="visualizeDebuggingOutput(<%= model.modelId %>, <%= model.runNo %>, '<%= module.name %>', <%= j %>)" style="width: <%= split_width %>%; height: 30px;">
+                                </div>
                             <%
                                 }
                             %>
-                            "></div>
-                            <div id="pbv_<%= mrId %>_<%= module.name %>_<%= split %>" class="progress_bar_vertical <%= split_done %>"></div>
                         </div>
-                    <%
-                        }
-                    %>
+                    </div>
                 </div>
-            </div>
-            <div id="tic_<%= mrId %>_<%= module.name %>" class="tracked_ids_container">
-                <div id="tih_<%= mrId %>_<%= module.name %>" class="tracked_ids_header">
-                    Tracked Ids:
+            <%
+                }
+            %>
+        </div>
+        <div class="w3-border-top" id="tracking_header_<%= mrId %>">
+            <div class="w3-button w3-block w3-center w3-margin-bottom w3-margin-top" onclick="toggle_viz('progress_container_<%= mrId %>');toggle_viz('tracking_container_<%= mrId %>'); toggle_border('tracking_header_<%= mrId %>');" style="padding: 0px;"><b>Tracked Ids</b></div>
+        </div>
+        <div class="w3-container w3-hide" id="tracking_container_<%= mrId %>" style="padding: 0px; flex: 1; overflow: auto;">
+            <%
+                String.prototype.capitalize = function() {
+                    return this.charAt(0).toUpperCase() + this.slice(1);
+                }
+
+                for (var i = 0; i < model.modules.length; i++) {
+                    var module = model.modules[i];
+            %>
+                <div class="w3-container w3-margin-top" style="padding: 0px;">
+                    <div class="w3-container w3-hide" id="tic_<%= mrId %>_<%= module.name %>" style="padding: 0px;">
+                        <div class="w3-container w3-center" style="padding: 0px;"><%= module.name.substring(4).capitalize() %></div>
+                        <div class="w3-container w3-center ti" id="ti_<%= mrId %>_<%= module.name %>" style="padding: 0px; white-space: nowrap; overflow-x: auto;"></div>
+                    </div>
                 </div>
-                <div id="ti_<%= mrId %>_<%= module.name %>" class="tracked_ids">
-                    
-                </div>
+            <%
+                }
+            %>
+        </div>
+        <div class="w3-container w3-show w3-border-top w3-center" id="debugger_running_<%= mrId %>">
+            <div class="w3-container w3-margin-bottom w3-margin-top">Pipeline running</div>
+            <div class="w3-bar w3-margin-bottom w3-small" style="width: 100%;">
+                <button class="w3-bar-item w3-button w3-light-gray" style="width:50%" onclick="pause_pipeline('<%= mrId %>')">Pause pipeline</button>
+                <button class="w3-bar-item w3-button w3-light-gray" style="width:50%" onclick="stop_pipeline('<%= mrId %>')">Stop pipeline</button>
             </div>
         </div>
-    <%
-        }
-    %>
-    <div class="debugger_extra running_div" id="debugger_running_<%= mrId %>">
-        <div>Pipeline running</div>
-        <button onclick="pause_pipeline('<%= mrId %>')">Pause pipeline</button>
-        <button onclick="stop_pipeline('<%= mrId %>')">Stop pipeline</button>
-    </div>
-    <div class="debugger_extra stopped_div" id="debugger_paused_<%= mrId %>" style="display: none;">
-        <div>Pipeline paused</div>
-        <button onclick="resume_pipeline('<%= mrId %>')">Resume pipeline</button>
-        <button onclick="stop_pipeline('<%= mrId %>')">Stop pipeline</button>
-    </div>
-    <div class="debugger_extra stopped_div" id="debugger_stopped_<%= mrId %>" style="display: none;">
-        <div>Pipeline stopped</div>
-        <button onclick="remove_debugger_model('<%= mrId %>', <%= model.modelId %>, <%= model.runNo %>)">Remove run from debugger</button>
-    </div>
-    <div class="debugger_extra ended_div" id="debugger_ended_<%= mrId %>" style="display: none;">
-        <div>Pipeline finished</div>
-        <button onclick="remove_debugger_model('<%= mrId %>', <%= model.modelId %>, <%= model.runNo %>)">Remove run from debugger</button>
+        <div class="w3-container w3-hide w3-border-top w3-center" id="debugger_paused_<%= mrId %>">
+            <div class="w3-container w3-margin-bottom w3-margin-top">Pipeline paused</div>
+            <div class="w3-bar w3-margin-bottom  w3-small" style="width: 100%;">
+                <button class="w3-bar-item w3-button w3-light-gray w3-block" style="width:50%" onclick="resume_pipeline('<%= mrId %>')">Resume pipeline</button>
+                <button class="w3-bar-item w3-button w3-light-gray w3-block" style="width:50%" onclick="stop_pipeline('<%= mrId %>')">Stop pipeline</button>
+            </div>
+        </div>
+        <div class="w3-container w3-hide w3-border-top w3-center" id="debugger_stopped_<%= mrId %>">
+            <div class="w3-container w3-margin-bottom w3-margin-top">Pipeline stopped</div>
+            <button class="w3-button w3-light-gray w3-block w3-margin-bottom w3-small" onclick="remove_debugger_model('<%= mrId %>', <%= model.modelId %>, <%= model.runNo %>)">Remove run from debugger</button>
+        </div>
+        <div class="w3-container w3-hide w3-border-top w3-center" id="debugger_ended_<%= mrId %>">
+            <div class="w3-container w3-margin-bottom w3-margin-top">Pipeline finished</div>
+            <button class="w3-button w3-light-gray w3-block w3-margin-bottom w3-small" onclick="remove_debugger_model('<%= mrId %>', <%= model.modelId %>, <%= model.runNo %>)">Remove run from debugger</button>
+        </div>
     </div>
 </div>

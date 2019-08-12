@@ -17,6 +17,8 @@ npm install topological-sort
 
 2. Python dependencies
 ```
+pip install tensorboardX
+pip install torch
 pip install hdf5storage
 pip install tqdm
 ```

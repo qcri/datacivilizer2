@@ -59,7 +59,7 @@
 */
 function Inspector(divid, diagram, options) {
   var mainDiv = document.getElementById(divid);
-  mainDiv.className = "inspector";
+  mainDiv.className = "w3-container";
   mainDiv.innerHTML = "";
   this._div = mainDiv;
   this._diagram = diagram;
@@ -154,8 +154,9 @@ Inspector.prototype.inspectObject = function(object) {
     var data = (inspectedObject instanceof go.Part) ? inspectedObject.data : inspectedObject;
     if (!data) return;
     // Build table:
-    var table = document.createElement('table');
-    var tbody = document.createElement('tbody');
+
+    var ul = document.createElement('ul');
+    ul.className = "w3-ul";
     this._inspectedProperties = {};
     this.tabIndex = 0;
     var declaredProperties = this.declaredProperties;
@@ -165,7 +166,7 @@ Inspector.prototype.inspectObject = function(object) {
       var desc = declaredProperties[name];
       if (!this.canShowProperty(name, desc, inspectedObject)) continue;
       var val = this.findValue(name, desc, data);
-      tbody.appendChild(this.buildPropertyRow(name, val));
+      ul.appendChild(this.buildPropertyRow(name, val));
     }
     // Go through all the properties on the model data and show them, if appropriate:
     if (this.includesOwnProperties) {
@@ -173,12 +174,11 @@ Inspector.prototype.inspectObject = function(object) {
         if (k === '__gohashid') continue; // skip internal GoJS hash property
         if (this._inspectedProperties[k]) continue; // already exists
         if (declaredProperties[k] && !this.canShowProperty(k, declaredProperties[k], inspectedObject)) continue;
-        tbody.appendChild(this.buildPropertyRow(k, data[k]));
+        ul.appendChild(this.buildPropertyRow(k, data[k]));
       }
     }
 
-    table.appendChild(tbody);
-    mainDiv.appendChild(table);
+    mainDiv.appendChild(ul);
   } else { // multiple objects selected
     var mainDiv = this._div;
     mainDiv.innerHTML = '';
@@ -187,8 +187,8 @@ Inspector.prototype.inspectObject = function(object) {
     var all = new go.Map(); // used later to prevent changing properties when unneeded
     var it = inspectedObjects.iterator;
     // Build table:
-    var table = document.createElement('table');
-    var tbody = document.createElement('tbody');
+    var ul = document.createElement('ul');
+    ul.className = "w3-ul";
     this._inspectedProperties = {};
     this.tabIndex = 0;
     var declaredProperties = this.declaredProperties;
@@ -312,10 +312,9 @@ Inspector.prototype.inspectObject = function(object) {
     if (!this.showAllProperties) mapIt = shared.iterator;
     else mapIt = all.iterator;
     while (mapIt.next()) {
-      tbody.appendChild(this.buildPropertyRow(mapIt.key, mapIt.value)); // shows the properties that are allowed
+      ul.appendChild(this.buildPropertyRow(mapIt.key, mapIt.value)); // shows the properties that are allowed
     }
-    table.appendChild(tbody);
-    mainDiv.appendChild(table);
+    mainDiv.appendChild(ul);
     var allIt = all.iterator;
     while (allIt.next()) {
       this._multipleProperties[allIt.key] = allIt.value; // used for updateall to know which properties to change
@@ -392,13 +391,19 @@ Inspector.prototype.findValue = function(propName, propDesc, data) {
 */
 Inspector.prototype.buildPropertyRow = function(propertyName, propertyValue) {
   var mainDiv = this._div;
-  var tr = document.createElement("tr");
+  var li = document.createElement("li");
+  li.className ="w3-container w3-border-0";
+  var row_div = document.createElement("div");
+  row_div.className = "w3-row-padding";
+  li.appendChild(row_div)
 
-  var td1 = document.createElement("td");
-  td1.textContent = propertyName;
-  tr.appendChild(td1);
+  var name_div = document.createElement("div");
+  name_div.className = "w3-quarter";
+  name_div.textContent = propertyName;
+  row_div.appendChild(name_div);
 
-  var td2 = document.createElement("td");
+  var value_div = document.createElement("div");
+  value_div.className = "w3-quarter";
   var decProp = this.declaredProperties[propertyName];
   var input = null;
   var self = this;
@@ -406,11 +411,14 @@ Inspector.prototype.buildPropertyRow = function(propertyName, propertyValue) {
 
   if (decProp && decProp.type === "select") {
     input = document.createElement("select");
+    input.className = "w3-select";
+    input.setAttribute("style", "padding: 0px 8px;");
     this.updateSelect(decProp, input, propertyName, propertyValue);
     input.addEventListener("change", updateall);
   } else {
     input = document.createElement("input");
-
+    input.className = "w3-input";
+    input.setAttribute("style", "padding: 0px 8px;");
     input.value = this.convertToString(propertyValue);
     if (decProp) {
       var t = decProp.type;
@@ -436,12 +444,12 @@ Inspector.prototype.buildPropertyRow = function(propertyName, propertyValue) {
   if (input) {
     input.tabIndex = this.tabIndex++;
     input.disabled = !this.canEditProperty(propertyName, decProp, this.inspectedObject);
-    td2.appendChild(input);
+    value_div.appendChild(input);
   }
-  tr.appendChild(td2);
+  row_div.appendChild(value_div);
 
   this._inspectedProperties[propertyName] = input;
-  return tr;
+  return li;
 };
 
 /**

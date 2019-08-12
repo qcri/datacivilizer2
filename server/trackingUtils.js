@@ -5,7 +5,7 @@ function get_tracking_filters() {
         filters.push(parse_tracking_filter(filter_nodes[i]));
     }
     return filters;
-}
+};
 
 function parse_tracking_filter(filter_node) {
     var li = filter_node;
@@ -15,7 +15,7 @@ function parse_tracking_filter(filter_node) {
         'type': data_arr.shift(),
         'params': data_arr.map(x => parseInt(x))
     };
-}
+};
 
 function add_filter(filter_type) {
     if (filter_type == 'id') {
@@ -25,7 +25,7 @@ function add_filter(filter_type) {
             return
         } else {
             var html = new EJS({url : '/tracking_filter.ejs'}).render({'_type': filter_type, '_id': _id});
-            $('.tracking_filters').append($(html));
+            $('#tracking_filters').append($(html));
         }
     } else if (filter_type == 'id_range') {
         var id_from = document.getElementById("tracking_form_input_02").value;
@@ -35,7 +35,7 @@ function add_filter(filter_type) {
             return
         } else {
             var html = new EJS({url : '/tracking_filter.ejs'}).render({'_type': filter_type, 'id_from': id_from, 'id_until': id_until});
-            $('.tracking_filters').append($(html));
+            $('#tracking_filters').append($(html));
         }
     }
 
