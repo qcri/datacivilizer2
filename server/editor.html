@@ -45,13 +45,22 @@
             finish_running_pipeline(JSON.parse(event.data));
         });
 
-        function iFrameRealParams() {
+        function iFrameJsonParams() {
             var iFrameWidthString = localStorage.getItem("widthLocalStorage");
             var iFrameHeightString = localStorage.getItem("heightLocalStorage");
             var iFrameWidthNumber = Number(iFrameWidthString);
             var iFrameHeightNumber = Number(iFrameHeightString) + 10;
             document.getElementById('iframeViz').style.width = iFrameWidthNumber + 'px';
             document.getElementById('iframeViz').style.height = iFrameHeightNumber + 'px';
+        };
+        
+        function iFrameImageParams() {
+            var iframe = document.getElementById('iframeViz');
+            var innerDoc = iframe.contentWindow.document;
+            var myRegexp = /.+\s(\d+)\s.\s(\d+)/;
+            var match = myRegexp.exec(innerDoc.title);
+            document.getElementById('iframeViz').style.width = Number(match[1]);
+            document.getElementById('iframeViz').style.height = Number(match[2]);
         };
         
         var visualizer_is_open = false
@@ -532,15 +541,12 @@
 
         function visualizeOutput(e, obj) {
             console.log(obj.part.adornedPart.data.key);
-
             var node_key = obj.part.adornedPart.data.key;
             var iframe = document.getElementById('iframeViz');
-            var filename = "./Data/out_" + node_key + ".jpg";
-
+            var filename = "./Data/out_" + node_key + '.jpg';
             console.log("visualizing: " + filename);
             visualizeFile(filename);
-
-        };
+       };
 
         function visualizeFile(filepath) {
             var extension = filepath.split('.').pop();
@@ -554,8 +560,14 @@
 
         function visualizeImage(filepath) {
             console.log("visualizing: " + filepath);
-            document.getElementById('iframeViz').src = filepath;
-            iFrameRealParams();
+            var iframe = document.getElementById('iframeViz');
+            $.get('/setImageViz',
+                {"pathJSON": filepath})
+                .done(function (response) {
+                    iframe.setAttribute("src", "vizPicture");
+                    iframe.src = iframe.src;
+                    setTimeout(iFrameImageParams, 500);
+                });
         };
 
         function visualizeJson(filepath) {
@@ -566,7 +578,7 @@
                 .done(function (response) {
                     iframe.setAttribute("src", "vizFrame");
                     iframe.src = iframe.src;
-                    setTimeout(iFrameRealParams, 500);
+                    setTimeout(iFrameJsonParams, 500);
                 });
         };
 
