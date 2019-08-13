@@ -14,6 +14,7 @@ var fs = require('fs');
 const { spawn } = require('child_process');
 
 var dataVizPath = "";
+var setVizPicture = "";
 var running_models = [];
 var paused_models = [];
 var connection;
@@ -82,6 +83,15 @@ app.get('/vizData', function (request, response) {
     var data_series = JSON.parse(rawdata);
     console.log("data")
     response.send(data_series)
+});
+
+app.get('/vizPicture', function (request, response) {
+    response.sendfile(path.resolve(setVizPicture));
+});
+
+app.get('/setImageViz', function (request, response) {
+    setVizPicture = request.query.pathJSON;
+    response.send("ok");
 });
 
 app.get('/lpf.js', function (request, response) {
