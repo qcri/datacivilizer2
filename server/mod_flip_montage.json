@@ -6,7 +6,8 @@
     "in_types": ["dir", ".pkl"],
     "num_outputs": 1,
     "out_types": ["dir"],
-    "viz": false,
+    "viz": true,
+    "viz_type": ".csv",
     "num_parameters": 0,
     "parameters": []
 }

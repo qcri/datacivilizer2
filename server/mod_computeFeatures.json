@@ -3,7 +3,9 @@
     "cmd": "mod_computeFeatures",
     "cmd_path": "mod_computeFeatures.py",
     "num_inputs": 2,
+    "in_types": [".mat",".mat"],
     "num_outputs": 1,
+    "out_types": [".mat"],
     "viz": false,
     "num_parameters": 8,
     "parameters": [

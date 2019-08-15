@@ -1,59 +1,46 @@
 import sys
-import pickle
-import numpy as np
 import glob
+import pickle
 import operator
+import numpy as np
 from tqdm import tqdm
+from shutil import copyfile
 from utils.from_filepath_to_index import from_filepath_to_index
 from utils.weight_cal import compute_class_weight
-
+from utils.stacked_bar_chart import plot_stacked_bar_chart_2
 
 def drop_init(in_file, out_file):
     all_dataset = glob.glob("./Data/second_dataset_from_cpd_eeg_10s_split/*/*/*/*.pkl")
     count_zero = 0
     all_zero_file_path = []
     not_zero_file_path = []
-    # for file_path in tqdm(all_dataset):
-    #     eeg = pickle.load(open(file_path, 'rb'), encoding='latin1').astype(np.float)
-    #     regular_sum = np.sum(eeg, axis=0)
-    #
-    #     if np.sum(regular_sum) == 0:
-    #         count_zero += 1
-    #         all_zero_file_path.append(file_path)
-    #     else:
-    #         not_zero_file_path.append(file_path)
-    #     # print(count_zero)
-    # print("Not zero: ", len(not_zero_file_path))
-    # print("All zero: ", len(all_zero_file_path))
-    # with open('/home/dell/eeg-data-sample/all_zero_file_path.npy', 'wb') as f:
-    #     pickle.dump(all_zero_file_path, f, pickle.HIGHEST_PROTOCOL)
-    # with open('/home/dell/eeg-data-sample/not_zero_file_path.npy', 'wb') as f:
-    #     pickle.dump(not_zero_file_path, f, pickle.HIGHEST_PROTOCOL)
-    SECOND_DATA_KEYS = set(np.load("./Data/not_zero_file_path.npy", allow_pickle=True))
-    drop_in_dataset_index(in_file, out_file, SECOND_DATA_KEYS)
+    az_file_path = set(np.load("./Data/all_zero_file_path.npy", allow_pickle=True))
+    nz_file_path = set(np.load("./Data/not_zero_file_path.npy", allow_pickle=True))
+    return drop_in_dataset_index(in_file, out_file, nz_file_path, az_file_path)
 
-
-# 直接对dataset_index进行删除操作，这样不行
-# 建立新表，只有非全零的，而且在sample中出现的才能进入
-def drop_in_dataset_index(in_file, out_file, file_path):
+def drop_in_dataset_index(in_file, out_file, nz_file_path, az_file_path):
 
     with open('./Data/' + in_file, "rb") as f:
         data_splits_sample = pickle.load(f)
 
+    non_zero_train = 0
+    non_zero_test = 0
+    non_zero_validation = 0
+    all_zero_train = 0
+    all_zero_test = 0
+    all_zero_validation = 0
+
     new_dataset_index = dict()
-    for not_zero_file_path in tqdm(file_path):
+    for not_zero_file_path in tqdm(nz_file_path):
         p, home, dell, a, b, subject_key, date_str, time_str, segment = not_zero_file_path.split('/')
         segment_index = segment.split('.')[0]
         m = subject_key + "_" + date_str + "_" + time_str
 
-        # 把path处理成tmp index用于添加
         tmp = from_filepath_to_index(not_zero_file_path)
-        # print(not_zero_file_path)
-        # print(data_splits_sample['train'][0])
-        # print(tmp)
         jump = 0
         for i in range(len(data_splits_sample['train'])):
             if m == data_splits_sample['train'][i][0] and int(segment_index) == int(data_splits_sample['train'][i][1]):
+                non_zero_train += 1
                 jump = 1
                 if 'train' in new_dataset_index:
                     new_dataset_index['train'].extend(tmp)
@@ -66,6 +53,7 @@ def drop_in_dataset_index(in_file, out_file, file_path):
         jump_1 = 0
         for i in range(len(data_splits_sample['validation'])):
             if m == data_splits_sample['validation'][i][0] and int(segment_index) == int(data_splits_sample['validation'][i][1]):
+                non_zero_validation += 1
                 jump_1 = 1
                 if 'validation' in new_dataset_index:
                     new_dataset_index['validation'].extend(tmp)
@@ -77,10 +65,37 @@ def drop_in_dataset_index(in_file, out_file, file_path):
             continue
         for i in range(len(data_splits_sample['test'])):
             if m == data_splits_sample['test'][i][0] and int(segment_index) == int(data_splits_sample['test'][i][1]):
+                non_zero_test += 1
                 if 'test' in new_dataset_index:
                     new_dataset_index['test'].extend(tmp)
                 else:
                     new_dataset_index['test'] = tmp
+
+    for not_zero_file_path in tqdm(az_file_path):
+        p, home, dell, a, b, subject_key, date_str, time_str, segment = not_zero_file_path.split('/')
+        segment_index = segment.split('.')[0]
+        m = subject_key + "_" + date_str + "_" + time_str
+
+        tmp = from_filepath_to_index(not_zero_file_path)
+        jump = 0
+        for i in range(len(data_splits_sample['train'])):
+            if m == data_splits_sample['train'][i][0] and int(segment_index) == int(data_splits_sample['train'][i][1]):
+                all_zero_train += 1
+                jump = 1
+                break
+        if jump == 1:
+            continue
+        jump_1 = 0
+        for i in range(len(data_splits_sample['validation'])):
+            if m == data_splits_sample['validation'][i][0] and int(segment_index) == int(data_splits_sample['validation'][i][1]):
+                all_zero_validation += 1
+                jump_1 = 1
+                break
+        if jump_1 == 1:
+            continue
+        for i in range(len(data_splits_sample['test'])):
+            if m == data_splits_sample['test'][i][0] and int(segment_index) == int(data_splits_sample['test'][i][1]):
+                all_zero_test += 1
 
     print("train", len(new_dataset_index['train']))
     print("test", len(new_dataset_index['test']))
@@ -90,10 +105,7 @@ def drop_in_dataset_index(in_file, out_file, file_path):
                 pickle.HIGHEST_PROTOCOL)
     print("Dataset index saved!")
 
-    # class_weights, pseudo_counts = compute_class_weight(new_dataset_index['train'], alpha=0.2)
-    # print("Class weights")
-    # print(class_weights)
-    # pickle.dump(class_weights, open("/home/dell/eeg-data-sample/class_weights_sample_without_zero.pkl", "wb"), pickle.HIGHEST_PROTOCOL)
+    return non_zero_train, non_zero_test, non_zero_validation, all_zero_train, all_zero_test, all_zero_validation
 
 
 def equal_tuple(a, b):
@@ -102,8 +114,16 @@ def equal_tuple(a, b):
     else:
         return False
 
-def execute_service(in_path, out_path):
-    return
-    drop_init(in_path, out_path)
+def execute_service(in_path, out_path, viz_path):
 
-execute_service(sys.argv[1], sys.argv[2])
+    # For demo purposes, just copy precomputed output to the run directory
+    precomp_out_path = 'main_D_outputs/out_-9.pkl'
+    precomp_viz_path = 'main_D_outputs/out_-9.jpg'
+    copyfile('./Data/' + precomp_out_path, './Data/' + out_path)
+    copyfile('./Data/' + precomp_viz_path, './Data/' + viz_path)
+    return 
+
+    nztr, nzte, nzv, aztr, azte, azv = drop_init(in_path, out_path)
+    plot_stacked_bar_chart_2(viz_path, [nztr, nzte, nzv], [aztr, azte, azv])
+
+execute_service(sys.argv[1], sys.argv[2], sys.argv[3])

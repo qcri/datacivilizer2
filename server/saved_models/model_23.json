@@ -1,0 +1,277 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-382 -299"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "",
+            "key": -1,
+            "loc": "55.40625 -253.40625"
+        },
+        {
+            "text": "Format data",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_format",
+            "splits": "",
+            "key": -12,
+            "loc": "-166.59375 -163.40625"
+        },
+        {
+            "text": "Resample",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_resample",
+            "splits": "",
+            "resample_frequency": 200,
+            "key": -14,
+            "loc": "-166.59375 -94.40625"
+        },
+        {
+            "text": "Filter",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_filter",
+            "splits": "",
+            "notch_frequency": 60,
+            "high_pass_frequency": 0.5,
+            "low_pass_frequency": 40,
+            "key": -10,
+            "loc": "-166.59375 -24.40625"
+        },
+        {
+            "text": "Montage",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_montage",
+            "splits": "",
+            "montage_type": "monopolar",
+            "key": -13,
+            "loc": "-166.59375 46.59375"
+        },
+        {
+            "text": "Spectrogram",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_spectrogram",
+            "splits": "",
+            "nw": 2,
+            "key": -15,
+            "loc": "55.40625 -31.40625"
+        },
+        {
+            "text": "Clip",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_clip",
+            "splits": "",
+            "key": -7,
+            "loc": "-166.59375 112.59375"
+        },
+        {
+            "text": "EEG features",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_computeFeatures",
+            "splits": "",
+            "delta_low": 1,
+            "delta_high": 4,
+            "theta_low": 4,
+            "theta_high": 8,
+            "alpha_low": 8,
+            "alpha_high": 12,
+            "beta_low": 12,
+            "beta_high": 18,
+            "key": -8,
+            "loc": "-44.59375 215.59375"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -1,
+            "to": -12,
+            "fromPort": "B",
+            "toPort": "T",
+            "points": [
+                55.40625,
+                -233.40625,
+                55.40625,
+                -223.40625,
+                55.40625,
+                -208.40625,
+                -166.59375,
+                -208.40625,
+                -166.59375,
+                -193.40625,
+                -166.59375,
+                -183.40625
+            ]
+        },
+        {
+            "from": -12,
+            "to": -14,
+            "fromPort": "",
+            "toPort": "T",
+            "points": [
+                -166.59375,
+                -143.40625,
+                -166.59375,
+                -133.40625,
+                -166.59375,
+                -128.90625,
+                -166.59375,
+                -128.90625,
+                -166.59375,
+                -124.40625,
+                -166.59375,
+                -114.40625
+            ]
+        },
+        {
+            "from": -14,
+            "to": -10,
+            "fromPort": "",
+            "toPort": "T",
+            "points": [
+                -166.59375,
+                -74.40625,
+                -166.59375,
+                -64.40625,
+                -166.59375,
+                -59.40625,
+                -166.59375,
+                -59.40625,
+                -166.59375,
+                -54.40625,
+                -166.59375,
+                -44.40625
+            ]
+        },
+        {
+            "from": -10,
+            "to": -13,
+            "fromPort": "B",
+            "toPort": "",
+            "points": [
+                -166.59375,
+                -4.40625,
+                -166.59375,
+                5.59375,
+                -166.59375,
+                11.09375,
+                -166.59375,
+                11.09375,
+                -166.59375,
+                16.59375,
+                -166.59375,
+                26.59375
+            ]
+        },
+        {
+            "from": -13,
+            "to": -7,
+            "fromPort": "",
+            "toPort": "",
+            "points": [
+                -166.59375,
+                66.59375,
+                -166.59375,
+                76.59375,
+                -166.59375,
+                79.59375,
+                -166.59375,
+                79.59375,
+                -166.59375,
+                82.59375,
+                -166.59375,
+                92.59375
+            ]
+        },
+        {
+            "from": -7,
+            "to": -8,
+            "fromPort": "B",
+            "toPort": "L",
+            "points": [
+                -166.59375,
+                132.59375,
+                -166.59375,
+                142.59375,
+                -166.59375,
+                215.59375,
+                -140.59375,
+                215.59375,
+                -114.59375,
+                215.59375,
+                -104.59375,
+                215.59375
+            ]
+        },
+        {
+            "from": -15,
+            "to": -8,
+            "fromPort": "",
+            "toPort": "R",
+            "points": [
+                55.40625,
+                -11.40625,
+                55.40625,
+                -1.40625,
+                55.40625,
+                215.59375,
+                40.40625,
+                215.59375,
+                25.40625,
+                215.59375,
+                15.40625,
+                215.59375
+            ]
+        },
+        {
+            "from": -1,
+            "to": -15,
+            "fromPort": "B",
+            "toPort": "T",
+            "points": [
+                55.40625,
+                -233.40625,
+                55.40625,
+                -223.40625,
+                55.40625,
+                -142.40625,
+                55.40625,
+                -142.40625,
+                55.40625,
+                -61.40625,
+                55.40625,
+                -51.40625
+            ]
+        }
+    ],
+    "modelId": 23,
+    "runNo": 1,
+    "parameters": {
+        "path": "",
+        "resample_frequency": 200,
+        "notch_frequency": 60,
+        "high_pass_frequency": 0.5,
+        "low_pass_frequency": 40,
+        "montage_type": "monopolar",
+        "nw": 2,
+        "delta_low": 1,
+        "delta_high": 4,
+        "theta_low": 4,
+        "theta_high": 8,
+        "alpha_low": 8,
+        "alpha_high": 12,
+        "beta_low": 12,
+        "beta_high": 18
+    }
+}

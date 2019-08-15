@@ -81,6 +81,13 @@
         var channelMargin = 5;
         // var minV = -500, maxV = 500;
         // todo this is the scale for the visualization
+
+        // This is not working
+        /*var flatRaw = [].concat(...raw);
+        var flatterRaw = [].concat(...flatRaw);
+        var maxV = Math.max.apply(null, flatterRaw);
+        var minV = Math.min.apply(null, flatterRaw);*/
+        
         var minV = -50, maxV = 50;
         var dataset = [];
         for (var k = 0; k < numChannels; k++) {

@@ -6,7 +6,8 @@
     "in_types": [".pkl"],
     "num_outputs": 1,
     "out_types": [".pkl"],
-    "viz": false,
+    "viz": true,
+    "viz_type": ".jpg",
     "num_parameters": 0,
     "parameters": []
 }

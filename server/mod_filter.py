@@ -1,8 +1,7 @@
 import matlab.engine
 import sys
-from utils.dc import DCMetric, DC, BpOps
-from utils.mod_util import transform_to_tensor
 import time
+from utils.mod_util import transform_to_tensor
 
 print("Starting matlab engine")
 start = time.time()
@@ -21,16 +20,6 @@ def execute_service(in_path, out_path, viz_out_path, notch_freq=60.0, high_pass_
     file_out = "./Data/"+ viz_out_path
     transform_to_tensor(file_in, file_out, 200)
 
-    # Example of how to use add metrics
-    f1_metric = DCMetric("filter_metric_1")
-    f2_metric = DCMetric("filter_metric_2")
-    f1_metric.setValue(0.6)
-    f2_metric.setValue(0.3)
-    DC.register_metric(f1_metric)
-    DC.register_metric(f2_metric)
-    DC.register_breakpoint('<', f1_metric, 1)
-    DC.register_breakpoint(BpOps.always_ge, f2_metric, 0)
-
 print("Executing function")
 start = time.time()
 
@@ -38,6 +27,3 @@ execute_service(sys.argv[1], sys.argv[2], sys.argv[3], float(sys.argv[4]), float
 
 end = time.time()
 print("Execution time: " + str(end - start))
-
-# Use this if metrics and/or breakpoints were added
-DC.end(sys.argv[-1])

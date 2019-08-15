@@ -47,6 +47,10 @@ class DCMetric:
     def setValue(self, value):
         self.values.append(value)
 
+    def setValues(self, values):
+        for value in values:
+            self.values.append(value)
+
     def getValues(self):
         return self.values
 

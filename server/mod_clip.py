@@ -1,7 +1,8 @@
 import matlab.engine
 import sys
-from utils.mod_util import transform_to_tensor
 import time
+from utils.mod_util import transform_to_tensor
+
 
 print("Starting matlab engine")
 start = time.time()

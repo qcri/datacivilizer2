@@ -1,5 +1,6 @@
 import sys
 import os
+import csv
 import numpy as np
 import pickle
 from tqdm import tqdm
@@ -133,9 +134,16 @@ class Processor():
         self.in_path = in_path
         self.out_path = out_path
 
-    def process_all_items(self):
-        for i in tqdm(range(len(self.list_index))):
-            self.process_item(i)
+    def process_all_items(self, viz_file):
+        count = 0
+        with open('./Data/' + viz_file, 'w', newline="\n", encoding="utf-8") as f:
+            writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            for i in tqdm(range(len(self.list_index))):
+                eeg_file_out_path = self.process_item(i)
+                writer.writerow([eeg_file_out_path])
+                count += 1
+                if count == 1000:
+                    break
 
     def process_item(self, index):
         subject_key, segment_idx, target = self.list_index[index]
@@ -166,23 +174,12 @@ class Processor():
 
         data_array = montage.transpose()
 
-        # TODO: verify object format
         with open(eeg_file_out_path, 'wb') as f:
-            pickle.dump(montage, f)
+            pickle.dump(data_array, f)
 
-        # if self.labels_hf is None:
-        #      self.labels_hf = h5py.File(self.LABEL_H5_PATH, 'r', libver='latest', swmr=True)
+        return eeg_file_out_path
 
-        # target_array = np.array(self.labels_hf[subject_key][str(segment_idx)]).astype(dtype=np.float32)
-
-        # montage_tensor = torch.from_numpy(montage)
-        # target_tensor = torch.from_numpy(target_array)
-
-        # return montage_tensor, target_tensor, (subject_key, segment_idx)
-
-def execute_service(in_path, index_name, out_path):
-    print(in_path, index_name)
-    return
+def execute_service(in_path, index_name, out_path, viz_file):
 
     mean=[0.05822158, 0.79031128, 0.68925828, 0.60800403, 0.92262352, 0.6753147,
         0.73978873, 0.7950735, 0.07544717, 0.5617258, 0.92687569, 0.60170792,
@@ -198,9 +195,9 @@ def execute_service(in_path, index_name, out_path):
         data_splits = pickle.load(f)
 
     processor = Processor(in_path, out_path, data_splits['train'], transform)
-    processor.process_all_items()
+    processor.process_all_items(viz_file)
 
 if (sys.argv[1].endswith('.pkl')):
-    execute_service(sys.argv[2], sys.argv[1], sys.argv[3])
+    execute_service(sys.argv[2], sys.argv[1], sys.argv[3], sys.argv[4])
 else:
-    execute_service(sys.argv[1], sys.argv[2], sys.argv[3])
+    execute_service(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

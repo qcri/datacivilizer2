@@ -22,3 +22,4 @@ class Splitter(object):
             segments.append(Segment(count, data[:,i:i + type(self).points].tolist()))
             count += 1
         return segments
+

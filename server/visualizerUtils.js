@@ -132,7 +132,7 @@ function get_modules_and_metrics(runs) {
 };
 
 function on_click_model(modelId) {
-    model = models[modelId];
+    var model = models[modelId];
     load_diagram(model);
 };
 
@@ -181,4 +181,7 @@ function updateFilters(x) {
         }
     }
     display_models();
+    console.log(filter_parameters);
+    console.log(filter_metrics);
+    console.log(models);
 };

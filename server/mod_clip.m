@@ -15,8 +15,9 @@ addpath([pwd, '/Callbacks/']);
 % Step1 - read data %
 tmp = load([pwd, '/Data/', in_file]);
 
-eeg = tmp.data(1:19,:);
-ekg = tmp.data(20,:);
+num_channels = size(tmp.data, 1);
+eeg = tmp.data(1:num_channels-1,:);
+ekg = tmp.data(num_channels,:);
 channels = tmp.channels;
 startTime = tmp.startTime;
 Fs = tmp.Fs;                % sampling rate %

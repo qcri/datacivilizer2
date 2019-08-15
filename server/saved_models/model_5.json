@@ -170,7 +170,7 @@
         }
     ],
     "modelId": 5,
-    "runNo": 152,
+    "runNo": 177,
     "parameters": {
         "path": "SampleData1.mat",
         "resample_frequency": 200,
@@ -361,6 +361,54 @@
                 "mod_filter": {
                     "filter_metric_1": 0.6,
                     "filter_metric_2": 0.3
+                }
+            }
+        },
+        {
+            "runNo": 154,
+            "metrics": {
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                }
+            }
+        },
+        {
+            "runNo": 158,
+            "metrics": {
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                }
+            }
+        },
+        {
+            "runNo": 160,
+            "metrics": {
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                }
+            }
+        },
+        {
+            "runNo": 166,
+            "metrics": {
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                }
+            }
+        },
+        {
+            "runNo": 168,
+            "metrics": {
+                "mod_filter": {
+                    "filter_metric_1": 0.6,
+                    "filter_metric_2": 0.3
+                },
+                "mod_montage": {
+                    "num_out_channels": 19
                 }
             }
         }

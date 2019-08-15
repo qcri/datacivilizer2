@@ -274,7 +274,8 @@ class Debugger(object):
                 new_data = data[:,:new_l]
                 tmp_f[key] = new_data
             else:
-                tmp_f[key] = f[key]
+                if not key.endswith('__'):
+                    tmp_f[key] = f[key]
         hdf5storage.savemat('./Data/' + mrId + '/' + name + '_' + str(out_split).zfill(3) + '.mat', tmp_f)
         print("File created")
 

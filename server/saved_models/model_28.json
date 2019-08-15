@@ -44,7 +44,7 @@
             "fill": "white",
             "cmd": "mod_montage",
             "splits": "30, 80",
-            "montage_type": "monopolar",
+            "montage_type": "L-bipolar",
             "key": -8,
             "loc": "-28.0625 22.333332061767578"
         },
@@ -169,10 +169,24 @@
             ]
         }
     ],
-    "modelId": 8,
-    "runNo": 6,
+    "modelId": 28,
+    "runNo": 2,
     "parameters": {
         "path": "SampleData1.mat",
-        "nw": 2
-    }
+        "resample_frequency": 50,
+        "notch_frequency": 240,
+        "high_pass_frequency": 0.5,
+        "low_pass_frequency": 40,
+        "montage_type": "L-bipolar"
+    },
+    "runs": [
+        {
+            "runNo": 1,
+            "metrics": {}
+        },
+        {
+            "runNo": 2,
+            "metrics": {}
+        }
+    ]
 }

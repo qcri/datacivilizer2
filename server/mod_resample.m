@@ -6,7 +6,7 @@
 % - clip;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [] = mod_resample(in_file, out_file, resample_freq)
+function [Fs_before, Fs] = mod_resample(in_file, out_file, resample_freq)
 
 tic;
 
@@ -20,6 +20,7 @@ ekg = tmp.data(20,:);
 channels = tmp.channels;
 startTime = tmp.startTime;
 Fs = tmp.Fs;                % sampling rate %
+Fs_before = Fs;
 
 % Step2 - resample %
 if Fs~=resample_freq

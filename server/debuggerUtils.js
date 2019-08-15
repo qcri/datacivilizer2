@@ -75,10 +75,9 @@ function finish_running_pipeline(data) {
 };
 
 function select_debugger_model(mrId) {
-    models = document.getElementById('debugger_models').children;
-    for (i = 0; i < models.length; i++) {
-        console.log(models[i]);
-        close_viz(models[i].id);
+    debugger_models = document.getElementById('debugger_models').children;
+    for (i = 0; i < debugger_models.length; i++) {
+        close_viz(debugger_models[i].id);
     }
     tabs = document.getElementById('debugger_scrollmenu').children;
     for (i = 0; i < tabs.length; i++) {
@@ -119,6 +118,7 @@ function remove_debugger_model(mrId, modelId, runNo) {
 };
 
 function update_running_pipeline(split_data) {
+    console.log("Updating model data");
     const mrId = split_data.modelId.toString() + '_' + split_data.runNo.toString();
     var breakpoints = split_data.breakpoints;
     const breakpoint_entries = Object.entries(breakpoints);

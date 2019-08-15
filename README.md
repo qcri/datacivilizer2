@@ -13,6 +13,8 @@ git clone --recursive https://github.com/elkindi/dc2.git
 ```
 npm install express
 npm install topological-sort
+npm install csv-parser
+npm install path-sort
 ```
 
 2. Python dependencies

@@ -1,0 +1,88 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-396.5 -287"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "",
+            "key": -1,
+            "loc": "-41.59375 -196.40625"
+        },
+        {
+            "text": "Spectrogram",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_spectrogram",
+            "splits": "",
+            "nw": 2,
+            "key": -15,
+            "loc": "-41.59375 -106.40625"
+        },
+        {
+            "text": "Change pts",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_changePoints",
+            "splits": "",
+            "threshold": 0.5,
+            "key": -6,
+            "loc": "-41.59375 -14.40625"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -1,
+            "to": -15,
+            "fromPort": "",
+            "toPort": "",
+            "points": [
+                -41.59375,
+                -176.40625,
+                -41.59375,
+                -166.40625,
+                -41.59375,
+                -151.40625,
+                -41.59375,
+                -151.40625,
+                -41.59375,
+                -136.40625,
+                -41.59375,
+                -126.40625
+            ]
+        },
+        {
+            "from": -15,
+            "to": -6,
+            "fromPort": "",
+            "toPort": "",
+            "points": [
+                -41.59375,
+                -86.40625,
+                -41.59375,
+                -76.40625,
+                -41.59375,
+                -60.40625,
+                -41.59375,
+                -60.40625,
+                -41.59375,
+                -44.40625,
+                -41.59375,
+                -34.40625
+            ]
+        }
+    ],
+    "modelId": 25,
+    "runNo": 1,
+    "parameters": {
+        "path": "",
+        "nw": 2,
+        "threshold": 0.5
+    }
+}

@@ -11,7 +11,9 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var fs = require('fs');
-const { spawn } = require('child_process');
+const { execSync, spawn } = require('child_process');
+const csv = require('csv-parser');
+const path_sort = require('path-sort');
 
 var dataVizPath = "";
 var running_models = [];
@@ -21,8 +23,7 @@ var connection;
 
 var Connection = (function () {
     function Connection(res) {
-          console.log(" sseMiddleware construct connection for response ");
-   
+        console.log(" sseMiddleware construct connection for response ");
         this.res = res;
     }
     Connection.prototype.setup = function () {
@@ -34,19 +35,19 @@ var Connection = (function () {
         });
     };
     Connection.prototype.send = function (data) {
-        console.log("send event to SSE stream "+JSON.stringify(data));
+        console.log("send message to SSE stream "+JSON.stringify(data));
         this.res.write("data: " + JSON.stringify(data) + "\n\n");
     };
     Connection.prototype.sendSplitUpdate = function (data) {
-        console.log("send event to SSE stream "+JSON.stringify(data));
+        console.log("send split update event to SSE stream "+JSON.stringify(data));
         this.res.write("event: split_update\ndata: " + JSON.stringify(data) + "\n\n");
     };
     Connection.prototype.sendTrackingUpdate = function (data) {
-        console.log("send event to SSE stream "+JSON.stringify(data));
+        console.log("send tracking update event to SSE stream "+JSON.stringify(data));
         this.res.write("event: tracking_update\ndata: " + JSON.stringify(data) + "\n\n");
     };
     Connection.prototype.finish_run = function (data) {
-        console.log("send event to SSE stream "+JSON.stringify(data));
+        console.log("send finished run event to SSE stream "+JSON.stringify(data));
         this.res.write("event: finish_run\ndata: " + JSON.stringify(data) + "\n\n");
     };
     return Connection;
@@ -73,7 +74,12 @@ app.get('/vizFrame', function (request, response) {
 });
 
 app.get('/setViz', function (request, response) {
-    dataVizPath = request.query.pathJSON;
+    filepath = request.query.pathJSON;
+    dataVizPath = filepath;
+    if (filepath.endsWith('.pkl')) {
+        dataVizPath = "./Data/plk_viz.json";
+        execSync('python utils/pklToJson.py ' + filepath + ' ' + dataVizPath, {stdio: 'inherit'});
+    }
     response.send("ok");
 });
 
@@ -82,6 +88,16 @@ app.get('/vizData', function (request, response) {
     var data_series = JSON.parse(rawdata);
     console.log("data")
     response.send(data_series)
+});
+
+app.get('/csvVizList', function (request, response) {
+    results = []
+    fs.createReadStream(request.query.pathCsv)
+      .pipe(csv({'headers': false}))
+      .on('data', (data) => results.push(data['0']))
+      .on('end', () => {
+        response.send({'list': path_sort(results)})
+      });
 });
 
 app.get('/lpf.js', function (request, response) {
@@ -166,6 +182,10 @@ app.get('/tracked_id_range.ejs', function (request, response) {
 
 app.get('/tracking_filter.ejs', function (request, response) {
     response.sendfile(path.resolve('./ejs/tracking_filter.ejs'));
+});
+
+app.get('/edv_list_elem.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/edv_list_elem.ejs'));
 });
 
 app.get('/visualizer.css', function (request, response) {
@@ -428,7 +448,12 @@ app.post('/run', function (request, response) {
     var model_debug_info = {
         'modelId': modelId,
         'runNo': runNo,
-        'modules': []
+        'modules': [],
+    }
+    if (tracking_filters.length == 0) {
+        model_debug_info['tracking'] = false;
+    } else {
+        model_debug_info['tracking'] = true;
     }
     var node;
     for (var node_id of sorted.keys()) {
@@ -567,7 +592,6 @@ function remove_dir(dir_name, is_first=true) {
         }
     } catch (err) {
         if (is_first) {
-            console.log(err)
             console.log("An error occurred, trying again in 30 seconds")
             setTimeout(remove_dir, 30000, dir_name)
         } else {

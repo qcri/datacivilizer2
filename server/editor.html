@@ -1,6 +1,5 @@
 ﻿OCTYPE html>
 <html>
-
 <head>
     <meta charset="UTF-8">
     <title>DC2 Editor</title>
@@ -12,13 +11,9 @@
     <script src="/Figures.js"></script>
     <script src="/dragscroll.js"></script>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
-    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"> -->
-    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel='stylesheet' href='/DataInspector.css'/>
-    <!-- <link rel="stylesheet" type="text/css" href="./visualizer.css" />
-    <link rel="stylesheet" type="text/css" href="./debugger.css" /> -->
     <script src="/visualizerUtils.js"></script>
     <script src="/debuggerUtils.js"></script>
     <script src="/trackingUtils.js"></script>
@@ -54,8 +49,6 @@
             document.getElementById('iframeViz').style.height = iFrameHeightNumber + 'px';
         };
         
-        var visualizer_is_open = false
-        var debugger_is_open = false
         var running_models = []
         var models = {};
         var modules_info;
@@ -512,7 +505,7 @@
             console.log("Loading diagram for model " + model.modelId);
             myDiagram.model = go.Model.fromJson(model);
             loadDiagramProperties(); // do this after the Model.modelData has been brought into memory
-        }
+        };
 
         function saveDiagramProperties() {
             myDiagram.model.modelData.position = go.Point.stringify(myDiagram.position);
@@ -535,21 +528,37 @@
 
             var node_key = obj.part.adornedPart.data.key;
             var iframe = document.getElementById('iframeViz');
-            var filename = "./Data/out_" + node_key + ".jpg";
+            var filename = "./Data/out_" + node_key + ".json";
 
             console.log("visualizing: " + filename);
             visualizeFile(filename);
-
         };
 
         function visualizeFile(filepath) {
+            close_viz('edv_list_div')
             var extension = filepath.split('.').pop();
             if (extension == 'json') {
                 visualizeJson(filepath);
             } else if (extension == 'jpg' || extension == 'png') {
-                console.log("Ok")
                 visualizeImage(filepath);
+            } else if (extension == 'csv') {
+                open_viz('edv_list_div')
+                visualizeCsv(filepath)
             }
+        };
+
+        function visualizeCsv(filepath) {
+            $('#edv_list').html("");
+            console.log("visualizing: " + filepath);
+            $.get('/csvVizList',
+                {"pathCsv": filepath})
+                .done(function (response) {
+                    const l = response.list;
+                    for (const elem of l){
+                        var html = new EJS({url : '/edv_list_elem.ejs'}).render({'filepath': elem, 'prefix': filepath.replace('.csv', '') + '/'});
+                        $('#edv_list').append($(html));
+                    }
+                });
         };
 
         function visualizeImage(filepath) {
@@ -654,7 +663,7 @@
     var runCounter = [];
     var newId = false;
 
-    // saveModelVersions(); // Use this to reset hash table and model id's, preferrably destroy alll saved models before
+    // saveModelVersions(); // Use this to reset hash table and model id's, preferrably destroy all saved models before
 
     getModelVersions();
 
@@ -688,6 +697,7 @@
         modelJson = JSON.parse(modelJsonString);
         modelJson['modelId'] = modelId;
         modelJson['runNo'] = runNo;
+        console.log(modelJson);
         modelJsonString = JSON.stringify(modelJson);
         saveModel(modelJsonString);
 
@@ -768,9 +778,9 @@
 <div class="w3-top" style="z-index: 5">
     <div class="w3-bar w3-light-gray">
         <a class="w3-bar-item w3-green">Data Civilizer 2.0</a>
-        <a class="w3-bar-item w3-button" onclick="document.getElementById('header_01').scrollIntoView({behavior: 'smooth'});">Saved Pipelines</a>
-        <a class="w3-bar-item w3-button" onclick="document.getElementById('header_02').scrollIntoView({behavior: 'smooth'});">Pipeline editor</a>
-        <a class="w3-bar-item w3-button" onclick="document.getElementById('header_03').scrollIntoView({behavior: 'smooth'});">Visualize output</a>
+        <a class="w3-bar-item w3-button" onclick="open_viz('visualizer');document.getElementById('header_01').scrollIntoView({behavior: 'smooth'});">Saved Pipelines</a>
+        <a class="w3-bar-item w3-button" onclick="open_viz('editor');document.getElementById('header_02').scrollIntoView({behavior: 'smooth'});">Pipeline editor</a>
+        <a class="w3-bar-item w3-button" onclick="open_viz('output_viz');document.getElementById('header_03').scrollIntoView({behavior: 'smooth'});">Visualize output</a>
     </div>
 </div>
 
@@ -793,7 +803,6 @@
                     <button class="w3-button w3-block w3-left-align" onclick="toggle_viz('accordion_02');toggle_arrow('icon_accordion_02');">Metrics <i id="icon_accordion_02" class="fa fa-angle-down" style='font-size:20px'></i></button>
                     <div id="accordion_02" class="w3-container w3-bar-block w3-border w3-hide metrics" style="width: 100%; max-height: 150px; overflow-y: auto; padding: 0px;"></div>
                 </div>
-
                 <button class="w3-display-bottom w3-button w3-block w3-border" onclick="load_models()">Refresh</button>
             </div>
             <div class="w3-rest w3-center" style="height: 400px; overflow-y: auto;">
@@ -931,8 +940,16 @@
 </div>
 
 <div class="w3-container w3-center w3-margin w3-show" id="output_viz">
-    <div id="myDiv" class="dragscroll" style="overflow: hidden; border: solid 1px black; background-color: white; width: 100%; height: 600px">
-        <iframe name="myIframeName" id="iframeViz" width="0" height="0" scrolling="no" style="pointer-events: none; border: none;"></iframe>
+    <div class="w3-row" id="edv_div" style="height: 600px;">
+        <div class="w3-quarter w3-hide" id="edv_list_div" style="height: 600px; overflow-y: auto;">
+            <ul class="w3-ul w3-left w3-left-align" id="edv_list">
+            </ul>
+        </div>
+        <div class="w3-rest" id="edv_iframe_div">
+            <div class="dragscroll" id="myDiv" style="overflow: hidden; border: solid 1px black; background-color: white; width: 100%; height: 600px">
+                <iframe name="myIframeName" id="iframeViz" width="0" height="0" scrolling="no" style="pointer-events: none; border: none;"></iframe>
+            </div>
+        </div>
     </div>
 </div>
 
