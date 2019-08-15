@@ -16,6 +16,7 @@ const csv = require('csv-parser');
 const path_sort = require('path-sort');
 
 var dataVizPath = "";
+var setVizPicture = "";
 var running_models = [];
 var paused_models = [];
 var connection;
@@ -98,6 +99,15 @@ app.get('/csvVizList', function (request, response) {
       .on('end', () => {
         response.send({'list': path_sort(results)})
       });
+});
+
+app.get('/vizPicture', function (request, response) {
+    response.sendfile(path.resolve(setVizPicture));
+});
+
+app.get('/setImageViz', function (request, response) {
+    setVizPicture = request.query.pathJSON;
+    response.send("ok");
 });
 
 app.get('/lpf.js', function (request, response) {
