@@ -170,7 +170,7 @@
         }
     ],
     "modelId": 5,
-    "runNo": 177,
+    "runNo": 179,
     "parameters": {
         "path": "SampleData1.mat",
         "resample_frequency": 200,
@@ -406,6 +406,17 @@
                 "mod_filter": {
                     "filter_metric_1": 0.6,
                     "filter_metric_2": 0.3
+                },
+                "mod_montage": {
+                    "num_out_channels": 19
+                }
+            }
+        },
+        {
+            "runNo": 179,
+            "metrics": {
+                "mod_resample": {
+                    "sampling rate": 200
                 },
                 "mod_montage": {
                     "num_out_channels": 19

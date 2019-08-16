@@ -2,12 +2,17 @@
     "name": "Filter",
     "cmd": "mod_filter",
     "cmd_path": "mod_filter.py",
+    "splittable": true,
     "num_inputs": 1,
     "in_types": [".mat"],
     "num_outputs": 1,
     "out_types": [".mat"],
-    "viz": true,
-    "viz_type": ".json",
+    "viz": [
+        {
+            "type": "eeg_json",
+            "extension": ".json"
+        }
+    ],
     "num_parameters": 3,
     "parameters": [
         {

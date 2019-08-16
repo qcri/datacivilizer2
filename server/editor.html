@@ -18,6 +18,7 @@
     <script src="/debuggerUtils.js"></script>
     <script src="/trackingUtils.js"></script>
     <script src="/DataInspector.js"></script>
+    <script src="/Chart.js"></script>
     <script src="/ejs_production.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <script id="code">
@@ -52,7 +53,7 @@
         function iFrameImageParams() {
             var iframe = document.getElementById('iframeViz');
             var innerDoc = iframe.contentWindow.document;
-            var myRegexp = /.+\s(\d+)\s.\s(\d+)/;
+            var myRegexp = /.+\s.(\d+)\s?.\s?(\d+)./;
             var match = myRegexp.exec(innerDoc.title);
             document.getElementById('iframeViz').style.width = Number(match[1]);
             document.getElementById('iframeViz').style.height = Number(match[2]);
@@ -406,15 +407,15 @@
                             fill: "white",
                             cmd: obj.cmd
                         }
-                        if (obj.cmd != "mod_source") {
+                        if ('splittable' in obj) {
                             palette_elem['splits'] = "";
                         }
                         for (var i = 0; i < obj.parameters.length; i++) {
                             var param = obj.parameters[i];
                             palette_elem[param.name] = param.default_value;
                         }
-                        if ("color" in obj) {
-                            palette_elem["fill"] = obj.color;
+                        if ('color' in obj) {
+                            palette_elem['fill'] = obj.color;
                             contents.splice(0, 0, palette_elem);
                         } else {
                             contents.push(palette_elem);
@@ -542,22 +543,42 @@
             visualizeFile(filename);
         };
 
+        function visualizeObjList(vizObjList) {
+            close_viz('edv_list_div')
+            close_viz('graph_viz_div')
+            for (var viz_elem of vizObjList) {
+                viz_type = viz_elem.type;
+                viz_file = './Data/' + viz_elem.filename
+                if (viz_type == "image") {
+                    visualizeImage(viz_file);
+                } else if (viz_type == "eeg_json") {
+                    visualizeJson(viz_file);
+                } else if (viz_type == "pkl_dir") {
+                    visualizeCsv(viz_file);
+                } else if (viz_type == "graph_data") {
+                    visualizeNnPkl(viz_file);
+                }
+            }
+        };
+
         function visualizeFile(filepath) {
             close_viz('edv_list_div')
+            close_viz('graph_viz_div')
             var extension = filepath.split('.').pop();
             if (extension == 'json') {
                 visualizeJson(filepath);
             } else if (extension == 'jpg' || extension == 'png') {
                 visualizeImage(filepath);
             } else if (extension == 'csv') {
-                open_viz('edv_list_div')
                 visualizeCsv(filepath)
             }
         };
 
         function visualizeCsv(filepath) {
+            open_viz('edv_list_div')
             $('#edv_list').html("");
             console.log("visualizing: " + filepath);
+            console.log(filepath.replace('.csv', '') + '/');
             $.get('/csvVizList',
                 {"pathCsv": filepath})
                 .done(function (response) {
@@ -591,6 +612,47 @@
                     iframe.src = iframe.src;
                     setTimeout(iFrameJsonParams, 500);
                 });
+        };
+
+        function visualizeNnPkl(filepath) {
+            open_viz('graph_viz_div');
+            console.log("visualizing: " + filepath);
+            $.get('/pklGraphData',
+                {"pathPkl": filepath})
+                .done(function (response) {
+                    const labels = response.labels;
+                    const data = response.data;
+                    console.log(data);
+                    for (const elem of data) {
+                        createGraph(labels, elem);
+                    }
+                });
+        };
+
+        function createGraph(graph_labels, graph_data) {
+
+            var myLineChart = new Chart(graph_data.chartContainer, {
+                type: 'line',
+                data: {
+                    labels: graph_labels,
+                    datasets: [{ 
+                        data: graph_data.points,
+                        label: "",
+                        borderColor: "#3e95cd",
+                        fill: false
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: graph_data.title
+                    },
+                    legend: {
+                        display: false
+                    },
+                    maintainAspectRatio: false
+                }
+            });
         };
 
         function request_pipeline(p) {
@@ -912,26 +974,8 @@
                 </div>
             </div>
         </div>
-
         <br>
-
         <div class="w3-container w3-hide">
-            <!-- <div>
-                <button id="SaveButton" onclick="save()">Save</button>
-                <button onclick="load()">Load</button>
-                Diagram Model saved in JSON format:
-            </div>
-            <table>
-                <tr>
-                    <td>Filename to Save As:</td>
-                    <td>
-                        <input id="inputFileNameToSaveAs">
-                    </td>
-                    <td>
-                        <button onclick="saveTextAsFile()">Save Text to File</button>
-                    </td>
-                </tr>
-            </table> -->
             <textarea id="mySavedModel" style="width:100%;height:300px">
                 { "class": "go.GraphLinksModel",
                   "linkFromPortIdProperty": "fromPort",
@@ -960,8 +1004,27 @@
             </ul>
         </div>
         <div class="w3-rest" id="edv_iframe_div">
-            <div class="dragscroll" id="myDiv" style="overflow: hidden; border: solid 1px black; background-color: white; width: 100%; height: 600px">
+            <div class="w3-border w3-border-black dragscroll" id="myDiv" style="overflow: hidden; background-color: white; width: 100%; height: 600px">
                 <iframe name="myIframeName" id="iframeViz" width="0" height="0" scrolling="no" style="pointer-events: none; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="w3-container w3-border w3-border-black w3-hide" id="graph_viz_div" style="padding: 0px; width: 100%; height: 600px;">
+        <div class="w3-row" style="height: 50%;">
+            <div class="w3-half" style="height: 100%;">
+                <canvas id="myChart1" width="100%" height="100%"></canvas>
+            </div>
+            <div class="w3-half" style="height: 100%;">
+                <canvas id="myChart2" width="100%" height="100%"></canvas>
+            </div>
+        </div>
+        <div class="w3-row" style="height: 50%;">
+            <div class="w3-half" style="height: 100%;">
+                <canvas id="myChart3" width="100%" height="100%"></canvas>
+            </div>
+            <div class="w3-half" style="height: 100%;">
+                <canvas id="myChart4" width="100%" height="100%"></canvas>
             </div>
         </div>
     </div>
@@ -1019,12 +1082,19 @@
             <br>
             <div class="w3-container">
                 <div class="w3-bar">
-                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_A');document.getElementById('modal_02').style.display='none'">main_A</button>
+                    <!-- <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_A');document.getElementById('modal_02').style.display='none'">main_A</button>
                     <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_B');document.getElementById('modal_02').style.display='none'">main_B</button>
                     <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_C');document.getElementById('modal_02').style.display='none'">main_C</button>
                     <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_D');document.getElementById('modal_02').style.display='none'">main_D</button>
                     <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_E');document.getElementById('modal_02').style.display='none'">main_E</button>
-                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_F');document.getElementById('modal_02').style.display='none'">main_F</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_F');document.getElementById('modal_02').style.display='none'">main_F</button> -->
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('ml_nn_pipeline');document.getElementById('modal_02').style.display='none'">ML 1</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('ml_bcnn_pipeline');document.getElementById('modal_02').style.display='none'">ML 2</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('ml_fmnn_pipeline');document.getElementById('modal_02').style.display='none'">ML 3</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('ml_bcfmnn_pipeline');document.getElementById('modal_02').style.display='none'">ML 4</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('eeg_preprocessing_pipeline');document.getElementById('modal_02').style.display='none'">EEG processing (good)</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('eeg_processing_wrong_param_pipeline');document.getElementById('modal_02').style.display='none'">EEG preocessing (bad)</button>
+                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('spectrogram_pipeline');document.getElementById('modal_02').style.display='none'">Spectrogram</button>
                 </div>
             </div>
             <br>
@@ -1044,127 +1114,6 @@
         </div>
     </div>
 </div>
-
-
-<!-- <div class="global_div">
-    <div id="editor" style="float: left; width: 100%;">
-        <div style="width: 100%">
-            <div class="btn-group">
-                <h4>Load pre-defined pipelines</h4>
-                <button type="button" class="btn btn-default" onclick="request_pipeline('main_A')">main_A</button>
-                <button type="button" class="btn btn-default" onclick="request_pipeline('main_B')">main_B</button>
-                <button type="button" class="btn btn-default" onclick="request_pipeline('main_C')">main_C</button>
-                <button type="button" class="btn btn-default" onclick="request_pipeline('main_D')">main_D</button>
-                <button type="button" class="btn btn-default" onclick="request_pipeline('main_E')">main_E</button>
-                <button type="button" class="btn btn-default" onclick="request_pipeline('main_F')">main_F</button>
-                <button type="button" class="btn btn-success" onclick="send('no_split')">Execute no split</button>
-                <button type="button" class="btn btn-success" onclick="send('clean')">Execute clean</button>
-                <button type="button" class="btn btn-success" onclick="send('dirty')">Execute dirty</button>
-            </div>
-            <div>
-                <h4>Load pipeline from file</h4>
-                <div>
-                    <input type="file" id="input" class="form-control-file" onchange="handleFile(this.files)">
-                    <br>
-                    <button id="open_visualizer" type="button" class="btn btn-default" onclick="open_visualizer()" style="display: initial;">Open Visualizer</button>
-                    <button id="close_visualizer" type="button" class="btn btn-default" onclick="close_visualizer()" style="display: none;">Close Visualizer</button>
-                    <button id="open_debugger" type="button" class="btn btn-default" onclick="open_debugger()" style="display: initial;">Open Debugger</button>
-                    <button id="close_debugger" type="button" class="btn btn-default" onclick="close_debugger()" style="display: none;">Close Debugger</button>
-                </div>
-            </div>
-        </div>
-        <br>
-        <div id="tracking_info">
-            <div id="tracking_filter_form" class="tracking_filter_form">
-                <h2>Add or remove tracking filter</h2>
-                <div>Filter Type:</div>
-                <select id="tracking_filter_options" onchange="showAppropriateForm(this.value);">
-                    <option value="id">Id</option>
-                    <option value="id_range">Id range</option>
-                </select>
-                <div id="tracking_form_inputs">
-                    <input type="number" required name="tr_id" class="tracking_form_elem" style="display: inline-block;" placeholder="id"></input>
-                    <input type="number" required name="tr_id_start" class="tracking_form_elem" style="display: none;" placeholder="from (inclusive)"></input>
-                    <input type="number" required name="tr_id_end" class="tracking_form_elem" style="display: none;" placeholder="until (not inclusive)"></input>
-                </div>
-                <span onclick="newElement()" class="addBtn">Add</span>
-            </div>
-            <div>Tracking filters</div>
-            <ul id="tracking_filters">
-            </ul>
-        </div>
-        <br>
-        <div id="sample">
-            <div id="workBench" style="width: 100%; display: flex; justify-content: space-between">
-                <div id="myPaletteDiv"
-                     style="width: 20%; margin-right: 2px; background-color: white; border: solid 1px black"></div>
-                <div id="myDiagramDiv" style="flex-grow: 0; margin-right: 2px; height: 620px; width: 20%; border: solid 1px black"></div>
-                    <div id="myDiv" class="dragscroll" style="overflow: hidden; border: solid 1px black; background-color: white; width: 60%; height: 620px">
-                        <iframe name="myIframeName" id="iframeViz" width="0" height="0" scrolling="no" style="pointer-events: none; border: none;"></iframe>
-                    </div>
-            </div>
-            <span style="display: inline-block; vertical-align: top;">
-                    Selected Part:<br/>
-                    <div id="myInspectorDiv" class="inspector"> </div><br/>
-                </span>
-            <div>
-                <div>
-                    <button id="SaveButton" onclick="save()">Save</button>
-                    <button onclick="load()">Load</button>
-                    Diagram Model saved in JSON format:
-                </div>
-                <table>
-                    <tr>
-                        <td>Filename to Save As:</td>
-                        <td><input id="inputFileNameToSaveAs"></input></td>
-                        <td>
-                            <button onclick="saveTextAsFile()">Save Text to File</button>
-                        </td>
-                    </tr>
-                </table>
-                <textarea id="mySavedModel" style="width:100%;height:300px">
-        { "class": "go.GraphLinksModel",
-          "linkFromPortIdProperty": "fromPort",
-          "linkToPortIdProperty": "toPort",
-          "nodeDataArray": [
-         ],
-          "linkDataArray": [
-         ]}
-            </textarea>
-            </div>
-        </div>
-    </div>
-    <div id="visualizer" class="visualizer">
-        <div id="model_table" class="model_table">
-            <div class="models_headings">
-                <div class="model_heading heading_models">
-                    <button class="dropbtn" disabled="">Models</button>
-                </div>
-                <div class="model_heading heading_parameters dropdown">
-                    <div class="dropdown-container" style="width: 100%;">
-                        <button class="dropbtn">Parameter filter</button>
-                        <div class="parameters dropdown-content"></div>
-                    </div>
-                </div>
-                <div class="model_heading heading_parameters dropdown">
-                    <div class="dropdown-container" style="width: 100%;">
-                        <button class="dropbtn">Metrics filter</button>
-                        <div class="metrics dropdown-content"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="models_container">
-                <div id="models" class="models"></div>
-            </div>
-        </div>
-    </div>
-    <div id="debugger" class="debugger">
-        <div class="debugger_container">
-            <div id="debugger_scrollmenu" class="debugger_scrollmenu"></div>
-            <div id="debugger_models" class="debugger_models"></div>
-        </div>
-    </div>
-</div> -->
 </body>
 
 </html>

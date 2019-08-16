@@ -101,6 +101,26 @@ app.get('/csvVizList', function (request, response) {
       });
 });
 
+app.get('/pklGraphData', function (request, response) {
+    labels = []
+    chart1 = {'chartContainer': 'myChart1', 'title': 'Training loss', 'points': []}
+    chart2 = {'chartContainer': 'myChart2', 'title': 'Training accuracy', 'points': []}
+    chart3 = {'chartContainer': 'myChart3', 'title': 'Validation loss', 'points': []}
+    chart4 = {'chartContainer': 'myChart4', 'title': 'Validation accuracy', 'points': []}
+    fs.createReadStream(request.query.pathPkl)
+        .pipe(csv({'headers': false}))
+        .on('data', (data) => {
+            labels.push(data[0])
+            chart1.points.push(data[1])
+            chart2.points.push(data[2])
+            chart3.points.push(data[3])
+            chart4.points.push(data[4])
+        })
+        .on('end', () => {
+            response.send({'labels': labels, 'data': [chart1, chart2, chart3, chart4]})
+        });
+});
+
 app.get('/vizPicture', function (request, response) {
     response.sendfile(path.resolve(setVizPicture));
 });
@@ -140,6 +160,10 @@ app.get('/dragscroll.js', function (request, response) {
 
 app.get('/DataInspector.js', function (request, response) {
     response.sendfile(path.resolve('../extensions/DataInspector.js'));
+});
+
+app.get('/Chart.js', function (request, response) {
+    response.sendfile(path.resolve('../extensions/Chart.js'));
 });
 
 app.get('/DataInspector.css', function (request, response) {
@@ -274,7 +298,6 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
         var in_types = module_info.in_types;
         var num_outputs = module_info.num_outputs;
         var out_types = module_info.out_types;
-        var viz = module_info.viz;
         var viz_type = module_info.viz_type;
         var num_params = module_info.num_parameters;
         var params = module_info.parameters;
@@ -303,9 +326,12 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
             outputs.push(out_name);
         }
 
-        var viz_name = undefined;
-        if (viz) {
-            viz_name = "out_" + node_id + viz_type;
+        var viz = undefined;
+        if (module_info.viz) {
+            viz = module_info.viz;
+            for (var viz_elem of viz) {
+                viz_elem.filename = "viz_" + node_id + viz_elem.extension;
+            }
         }
 
         for (var i=0; i<num_params; i++) {
@@ -321,10 +347,15 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
             }
         }
 
-        if (node.splits != "") {
-            splits = node.splits.split(',').map(Number);
+        if ('splits' in node) {
+            if (node.splits != "") {
+                splits = node.splits.split(',').map(Number);
+            }
         }
         splits.push(100);
+
+        console.log("Viz:");
+        console.log(viz);
 
         run_info['pipeline'].push({
             'cmd_name': cmd_name,
@@ -336,8 +367,6 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
             'out_types': out_types,
             'outputs': outputs,
             'viz': viz,
-            'viz_name': viz_name,
-            'viz_type': viz_type,
             'num_params': num_params,
             'params': parameters,
             'splits': splits

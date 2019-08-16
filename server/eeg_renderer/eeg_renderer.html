@@ -53,7 +53,7 @@
                     }
                 }
                 for (var p = 0; p < numPoints; p++)
-                    curSegChn[p] = +curSegChn[p];
+                    curSegChn[p] = +curSegChn[p] || 0; // || 0 is used to transform NaNs into 0s
                 //curSegChn = lpf.smoothArray(curSegChn);
                 curSeg.push(curSegChn);
             }
@@ -88,7 +88,7 @@
         var maxV = Math.max.apply(null, flatterRaw);
         var minV = Math.min.apply(null, flatterRaw);*/
         
-        var minV = -50, maxV = 50;
+        var minV = -1, maxV = 1;
         var dataset = [];
         for (var k = 0; k < numChannels; k++) {
             var startingY = k * channelHeight;

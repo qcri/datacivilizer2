@@ -52,8 +52,9 @@ class Debugger(object):
             module_args = ['python', module_dic['cmd_path']]
             module_args.extend(module_dic['inputs'])
             module_args.extend(module_dic['outputs'])
-            if module_dic['viz']:
-                module_args.append(module_dic['viz_name'])
+            if 'viz' in module_dic:
+                for viz_elem in module_dic['viz']:
+                    module_args.append(viz_elem['filename'])
             module_args.extend(map(str,module_dic['params']))
             self.pipeline[i]['args'] = module_args
 
@@ -156,12 +157,11 @@ class Debugger(object):
                     out_filename = self.dirName + '/' + out_filename
                 new_out_files.append(out_filename)
                 args[2+num_in_files+j] = out_filename
-            if module_dic['viz']:
-                new_viz_name = self.dirName + '/' + module_dic['viz_name']
-                module_dic['viz_name'] = new_viz_name
-                args[2+num_in_files+num_out_files] = new_viz_name
-            else:
-                module_dic['viz_name'] = ""
+            if 'viz' in module_dic:
+                for j in range(len(module_dic['viz'])):
+                    new_viz_name = self.dirName + '/' + module_dic['viz'][j]['filename']
+                    module_dic['viz'][j]['filename'] = new_viz_name
+                    args[2+num_in_files+num_out_files + j] = new_viz_name
             tmp_file_name = './Data/' + self.dirName + '/' + 'tmp_' + str(tmp_counter) + '.json'
             tmp_counter += 1
             args.append(tmp_file_name)
@@ -207,12 +207,11 @@ class Debugger(object):
                     new_out_files.append(out_filename)
                     args[2+num_in_files+j] = out_filename
                 if module_dic['viz']:
-                    name, _, extension = module_dic['viz_name'].partition('.')
-                    new_viz_name = self.dirName + '/' + name + suffix + '.' + extension
-                    module_dic['viz_name'] = new_viz_name
-                    args[2+num_in_files+num_out_files] = new_viz_name
-                else:
-                    module_dic['viz_name'] = ""
+                    for j in range(len(module_dic['viz'])):
+                        name, _, extension = module_dic['viz'][j]['filename'].partition('.')
+                        new_viz_name = self.dirName + '/' + name + suffix + '.' + extension
+                        module_dic['viz'][j]['filename'] = new_viz_name
+                        args[2+num_in_files+num_out_files+j] = new_viz_name
                 tmp_file_name = './Data/' + self.dirName + '/' + 'tmp_' + str(tmp_counter) + '.json'
                 tmp_counter += 1
                 args.append(tmp_file_name)
@@ -312,15 +311,15 @@ class Debugger(object):
             os.remove(tmp_file_name)
         else:
             breakpoints = {}
-        self.send_split(module_name, split, run_dic['viz_name'], breakpoints)
+        self.send_split(module_name, split, run_dic.get('viz',[]), breakpoints)
 
-    def send_split(self, module_name, split, viz_file, breakpoints):
+    def send_split(self, module_name, split, viz, breakpoints):
         post_data = {
             'modelId': self.modelId,
             'runNo': self.runNo,
             'module_name': module_name,
             'split': split,
-            'viz_file': viz_file,
+            'viz': viz,
             'breakpoints': breakpoints
         }
         requests.post(url="http://localhost:8080/split", json=post_data)

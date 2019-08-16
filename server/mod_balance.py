@@ -150,7 +150,7 @@ def execute_service(in_path, out_path, viz_path):
 
     # For demo purposes, just copy precomputed output to the run directory
     precomp_out_path = 'main_D_outputs/out_-3.pkl'
-    precomp_viz_path = 'main_D_outputs/out_-3.jpg'
+    precomp_viz_path = 'main_D_outputs/viz_-3.jpg'
     copyfile('./Data/' + precomp_out_path, './Data/' + out_path)
     copyfile('./Data/' + precomp_viz_path, './Data/' + viz_path)
     return 

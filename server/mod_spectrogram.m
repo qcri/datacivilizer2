@@ -2,9 +2,9 @@
 % - compute multitaper spectrogram;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [] = mod_spectrogram(in_file, out_file_1, out_file_2, nw)
+function [] = mod_spectrogram(in_file, out_file, viz_file, nw)
 
-addpath([pwd, '/Callbacks/'])
+addpath([pwd, '/Callbacks/']);
 
 % Step1 - read data %
 tmp = load([pwd, '/Data/', in_file]);
@@ -25,16 +25,16 @@ params.Fs        = Fs;         % sampling rate %
 Sdata2 = cell2mat(flipud(Sdata(:, 2)));
 col = [-10 25];
 
-close all
+close all;
 f = figure('units','normalized','outerposition',[0 0 1 1]);
 subplot(6, 1, 1:5)
-colormap jet
+colormap jet;
 imagesc(stimes, sfreqs, pow2db(Sdata2), col);
 axis(gca,'xy');
-xlim([2500 3400])
-set(gca, 'xticklabels', [], 'yticklabels', [])
-box on
-saveas(f, [pwd, '/Data/', out_file_2]);
+xlim([2500 3400]);
+set(gca, 'xticklabels', [], 'yticklabels', []);
+box on;
+saveas(f, [pwd, '/Data/', viz_file]);
 
-save([pwd, '/Data/', out_file_1], 'Sdata', 'stimes', 'sfreqs')
+save([pwd, '/Data/', out_file], 'Sdata', 'stimes', 'sfreqs');
 end

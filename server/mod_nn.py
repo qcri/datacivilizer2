@@ -1,11 +1,11 @@
-# 这次测dirty + 无sample的
+import os
+import sys
+import pickle
+import argparse
 import matplotlib
 matplotlib.use('Agg')
+from shutil import copyfile
 import matplotlib.pyplot as plt
-import argparse
-import os
-import pickle
-import sys
 from timeit import default_timer as timer
 
 import torch
@@ -22,7 +22,6 @@ from utils.DenseNet import DenseNetClassifier
 from utils.Loss import WeightedKLDivWithLogitsLoss
 
 from tqdm import tqdm
-
 
 def run_nn(in_data_dir, index_file, out_path, run_dir, save_path_name='save', resume=None, batch_size=256, epochs=50, start_epoch=0, lr=1e-4, wd=1e-3, workers=12, no_cuda=True, seed=1):
 
@@ -187,9 +186,30 @@ def run_nn(in_data_dir, index_file, out_path, run_dir, save_path_name='save', re
     writer.export_scalars_to_json("./all_scalars.json")
     writer.close()
 
-def execute_service(in_data_dir, index_file, out_path):
-    print(in_data_dir, index_file)
+def execute_service(in_data_dir, index_file, matrix_img_file, graph_data_file):
+
+    # For demo purposes, just copy precomputed output to the run directory
+    model = matrix_img_file.partition('_')[0]
+    if model == "35":
+        print("ml_nn_pipeline")
+        precomp_matrix_img_path = 'main_D_outputs/ml1_viz_-2.png'
+        precomp_graph_data_path = 'main_D_outputs/ml1_viz_-2.csv'
+    elif model == "32":
+        print("ml_bcnn_pipeline")
+        precomp_matrix_img_path = 'main_D_outputs/ml2_viz_-2.png'
+        precomp_graph_data_path = 'main_D_outputs/ml2_viz_-2.csv'
+    elif model == "34":
+        print("ml_fmnn_pipeline")
+        precomp_matrix_img_path = 'main_D_outputs/ml3_viz_-2.png'
+        precomp_graph_data_path = 'main_D_outputs/ml3_viz_-2.csv'
+    else:
+        print("ml_bcfmnn_pipeline")
+        precomp_matrix_img_path = 'main_D_outputs/viz_-2.png'
+        precomp_graph_data_path = 'main_D_outputs/viz_-2.csv'
+    copyfile('./Data/' + precomp_matrix_img_path, './Data/' + matrix_img_file)
+    copyfile('./Data/' + precomp_graph_data_path, './Data/' + graph_data_file)
     return
+
     run_dir, _, _ = out_path.partition('/')
     run_nn(in_data_dir, index_file, out_path, run_dir)
 
@@ -197,6 +217,6 @@ if __name__ == '__main__':
     torch.multiprocessing.freeze_support()
 
     if (sys.argv[1].endswith('.pkl')):
-        execute_service(sys.argv[2], sys.argv[1], sys.argv[3])
+        execute_service(sys.argv[2], sys.argv[1], sys.argv[3], sys.argv[4])
     else:
-        execute_service(sys.argv[1], sys.argv[2], sys.argv[3])
+        execute_service(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

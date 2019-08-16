@@ -5,9 +5,18 @@
     "cmd_path": "mod_nn.py",
     "num_inputs": 2,
     "in_types": ["dir", ".pkl"],
-    "num_outputs": 1,
-    "out_types": [".npy"],
-    "viz": false,
+    "num_outputs": 0,
+    "out_types": [],
+    "viz": [
+        {
+            "type": "image",
+            "extension": ".png"
+        },
+        {
+            "type": "graph_data",
+            "extension": ".csv"
+        }
+    ],
     "num_parameters": 0,
     "parameters": []
 }

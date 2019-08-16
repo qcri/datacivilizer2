@@ -119,6 +119,7 @@ function remove_debugger_model(mrId, modelId, runNo) {
 
 function update_running_pipeline(split_data) {
     console.log("Updating model data");
+    console.log(split_data);
     const mrId = split_data.modelId.toString() + '_' + split_data.runNo.toString();
     var breakpoints = split_data.breakpoints;
     const breakpoint_entries = Object.entries(breakpoints);
@@ -138,7 +139,7 @@ function update_running_pipeline(split_data) {
             for (var i = modules.length - 1; i >= 0; i--) {
                 var _module = modules[i];
                 if (_module.name == split_data.module_name) {
-                    _module.split_outputs.push(split_data.viz_file);
+                    _module.split_outputs.push(split_data.viz);
                 }
             }
         }
@@ -194,10 +195,8 @@ function visualizeDebuggingOutput(modelId, runNo, module_name, splitNo) {
                 var _module = modules[i];
                 if (_module.name == module_name) {
                     if (_module.split_outputs.length > splitNo) {
-                        const viz_file = _module.split_outputs[splitNo]
-                        if (viz_file != undefined) {
-                            visualizeFile("./Data/" + viz_file);
-                        }
+                        const vizObjList = _module.split_outputs[splitNo]
+                        visualizeObjList(vizObjList);
                     }
                 }
             }

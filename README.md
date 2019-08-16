@@ -15,6 +15,7 @@ npm install express
 npm install topological-sort
 npm install csv-parser
 npm install path-sort
+npm install chart.js
 ```
 
 2. Python dependencies

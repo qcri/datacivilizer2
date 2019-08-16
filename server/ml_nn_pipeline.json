@@ -1,0 +1,89 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-407.796875 -289"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "dataset_index.pkl",
+            "key": -1,
+            "loc": "-16.796875 -81.40624999999989"
+        },
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "second_dataset_from_cpd_eeg_10s_split",
+            "key": -4,
+            "loc": "-155.796875 -82.40625"
+        },
+        {
+            "text": "Neural Net",
+            "figure": "RoundedRectangle",
+            "fill": "lightgray",
+            "cmd": "mod_nn",
+            "key": -2,
+            "loc": "-16.796875 3.59375"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -4,
+            "to": -2,
+            "fromPort": "",
+            "toPort": "L",
+            "points": [
+                -155.796875,
+                -62.40625,
+                -155.796875,
+                -52.40625,
+                -155.796875,
+                3.59375,
+                -121.296875,
+                3.59375,
+                -86.796875,
+                3.59375,
+                -76.796875,
+                3.59375
+            ]
+        },
+        {
+            "from": -1,
+            "to": -2,
+            "fromPort": "",
+            "toPort": "",
+            "points": [
+                -16.796875,
+                -61.40625,
+                -16.796875,
+                -51.40625,
+                -16.796875,
+                -38.90625,
+                -16.796875,
+                -38.90625,
+                -16.796875,
+                -26.40625,
+                -16.796875,
+                -16.40625
+            ]
+        }
+    ],
+    "modelId": 35,
+    "runNo": 1,
+    "parameters": {
+        "path": "second_dataset_from_cpd_eeg_10s_split"
+    },
+    "runs": [
+        {
+            "runNo": 1,
+            "metrics": {}
+        }
+    ]
+}

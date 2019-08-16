@@ -6,7 +6,6 @@
     "in_types": [".mat"],
     "num_outputs": 1,
     "out_types": [".jpg"],
-    "viz": false,
     "num_parameters": 1,
     "parameters": [
         {

@@ -1,0 +1,153 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-295.796875 -356"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "dataset_index.pkl",
+            "key": -1,
+            "loc": "-16.796875 -257.40625"
+        },
+        {
+            "text": "Balance",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_balance",
+            "key": -3,
+            "loc": "-16.796875 -173.40625"
+        },
+        {
+            "text": "Crop",
+            "figure": "RoundedRectangle",
+            "fill": "white",
+            "cmd": "mod_crop",
+            "key": -9,
+            "loc": "-16.796875 -81.40625"
+        },
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "second_dataset_from_cpd_eeg_10s_split",
+            "key": -4,
+            "loc": "-155.796875 -82.40625"
+        },
+        {
+            "text": "Neural Net",
+            "figure": "RoundedRectangle",
+            "fill": "lightgray",
+            "cmd": "mod_nn",
+            "key": -2,
+            "loc": "-16.796875 3.59375"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -1,
+            "to": -3,
+            "fromPort": "",
+            "toPort": "T",
+            "points": [
+                -16.796875,
+                -237.40625,
+                -16.796875,
+                -227.40625,
+                -16.796875,
+                -215.40625,
+                -16.796875,
+                -215.40625,
+                -16.796875,
+                -203.40625,
+                -16.796875,
+                -193.40625
+            ]
+        },
+        {
+            "from": -3,
+            "to": -9,
+            "fromPort": "",
+            "toPort": "",
+            "points": [
+                -16.796875,
+                -153.40625,
+                -16.796875,
+                -143.40625,
+                -16.796875,
+                -127.40625,
+                -16.796875,
+                -127.40625,
+                -16.796875,
+                -111.40625,
+                -16.796875,
+                -101.40625
+            ]
+        },
+        {
+            "from": -9,
+            "to": -2,
+            "fromPort": "",
+            "toPort": "",
+            "points": [
+                -16.796875,
+                -61.40625,
+                -16.796875,
+                -51.40625,
+                -16.796875,
+                -38.90625,
+                -16.796875,
+                -38.90625,
+                -16.796875,
+                -26.40625,
+                -16.796875,
+                -16.40625
+            ]
+        },
+        {
+            "from": -4,
+            "to": -2,
+            "fromPort": "",
+            "toPort": "L",
+            "points": [
+                -155.796875,
+                -62.40625,
+                -155.796875,
+                -52.40625,
+                -155.796875,
+                3.59375,
+                -121.296875,
+                3.59375,
+                -86.796875,
+                3.59375,
+                -76.796875,
+                3.59375
+            ]
+        }
+    ],
+    "modelId": 32,
+    "runNo": 3,
+    "parameters": {
+        "path": "second_dataset_from_cpd_eeg_10s_split"
+    },
+    "runs": [
+        {
+            "runNo": 1,
+            "metrics": {}
+        },
+        {
+            "runNo": 2,
+            "metrics": {}
+        },
+        {
+            "runNo": 3,
+            "metrics": {}
+        }
+    ]
+}

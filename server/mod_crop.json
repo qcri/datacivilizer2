@@ -6,8 +6,12 @@
     "in_types": [".pkl"],
     "num_outputs": 1,
     "out_types": [".pkl"],
-    "viz": true,
-    "viz_type": ".jpg",
+    "viz": [
+        {
+            "type": "image",
+            "extension": ".jpg"
+        }
+    ],
     "num_parameters": 0,
     "parameters": []
 }
