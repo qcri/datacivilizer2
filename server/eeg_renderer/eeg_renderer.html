@@ -11,7 +11,7 @@
 <script src="lpf.js"></script>
 <script>
 
-    var eegRendering = function (svg, data, width, height, params, magnitude, montage) {
+    var eegRendering = function (svg, data, trackedIds, width, height, params, magnitude, montage) {
 
         if (typeof magnitude != "number")
             magnitude = 1;
@@ -53,7 +53,7 @@
                     }
                 }
                 for (var p = 0; p < numPoints; p++)
-                    curSegChn[p] = +curSegChn[p] || 0; // || 0 is used to transform NaNs into 0s
+                    curSegChn[p] = +curSegChn[p];
                 //curSegChn = lpf.smoothArray(curSegChn);
                 curSeg.push(curSegChn);
             }
@@ -81,15 +81,7 @@
         var channelMargin = 5;
         // var minV = -500, maxV = 500;
         // todo this is the scale for the visualization
-
-        // This is not working
-        var flatRaw = [].concat(...raw);
-        var flatterRaw = [].concat(...flatRaw);
-        console.log("Max/min values:");
-        console.log(Math.max.apply(null, flatterRaw));
-        console.log(Math.min.apply(null, flatterRaw));
-        
-        var minV = -1, maxV = 1;
+        var minV = -50, maxV = 50;
         var dataset = [];
         for (var k = 0; k < numChannels; k++) {
             var startingY = k * channelHeight;
@@ -127,7 +119,7 @@
                 dataset.push(curSeg);
             }
         }
-        
+
         // console.log(data);
 
         // d3 line object
@@ -147,13 +139,23 @@
                 if (m1[i] < 0)
                     continue;
             for (var j = 0; j < segNum; j++) {
-                g.append('path')
-                    .attr('class', 'line')
-                    .attr('d', line(dataset[j + i * segNum]))
-                    .attr('fill', 'none')
-                    .attr('stroke-width', 1)
-                    .attr('stroke', 'black')
-                    .node().__data__ = data[j];
+                if (trackedIds.includes(j)) {
+                    g.append('path')
+                        .attr('class', 'line')
+                        .attr('d', line(dataset[j + i * segNum]))
+                        .attr('fill', 'none')
+                        .attr('stroke-width', 1)
+                        .attr('stroke', 'red')
+                        .node().__data__ = data[j];
+                } else {
+                    g.append('path')
+                        .attr('class', 'line')
+                        .attr('d', line(dataset[j + i * segNum]))
+                        .attr('fill', 'none')
+                        .attr('stroke-width', 1)
+                        .attr('stroke', 'black')
+                        .node().__data__ = data[j];
+                }
             }
         }
     };
@@ -197,34 +199,57 @@
         success: function (dataArray) {
             console.log("success iFrame");
             var data_series = dataArray;
+            var colorNodes = new Array();
 
-            // called pixelPerSeg from above
-            var pixelPerSeg = 250;
-            var perChannelHeight = 50;
-            var numChannels = (montage == 2 ? 24 : 23);
-            var width = pixelPerSeg * (data_series[1].length) + 100;
-            var height = perChannelHeight * numChannels;
-            var montage = 1;
+            $.ajax({
+                url: '/vizIdTracker',
+                type: 'GET',
+                success: function(trackedIdsArray) {
+                    var trackingFileIds = trackedIdsArray
+                    if (trackedIdsArray !== null) {
+                        var i = 0;
+                        for (var l = trackedIdsArray.length; i < l ;) {
+                            var lowEnd = trackedIdsArray[i];
+                            i = i + 1;
+                            var a = trackedIdsArray[i];
+                            var highEnd = lowEnd + a;
+                            i = i + 1;
+                            for (var c = lowEnd; c < highEnd; c++) {
+                                colorNodes.push(c);
+                            }
+                        }
+                    } else {
+                        null
+                    }
+                    // called pixelPerSeg from above
+                    var pixelPerSeg = 250;
+                    var perChannelHeight = 50;
+                    var numChannels = (montage == 2 ? 24 : 23);
+                    var width = pixelPerSeg * (data_series[1].length) + 100;
+                    var height = perChannelHeight * numChannels;
+                    var montage = 1;
 
-            localStorage.setItem("widthLocalStorage", width);
-            localStorage.setItem("heightLocalStorage", height);
+                    localStorage.setItem("widthLocalStorage", width);
+                    localStorage.setItem("heightLocalStorage", height);
 
-            // var montage = 3;
-            var outersvg = d3.select("#outersvg")
-                .attr("width", width)
-                .attr("height", height);
-            var eegsvg = outersvg.append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .attr("x", 50)
-                .attr("y", 0)
-                .attr("viewBox", viewBox + width + " " + height)
-                .style("display", "inline-block");
+                    // var montage = 3;
+                    var outersvg = d3.select("#outersvg")
+                        .attr("width", width)
+                        .attr("height", height);
+                    var eegsvg = outersvg.append("svg")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .attr("x", 50)
+                        .attr("y", 0)
+                        .attr("viewBox", viewBox + width + " " + height)
+                        .style("display", "inline-block");
 
-            if (data_series.length > 0) {
-                eegLabelRendering(outersvg, data_series[0], width, height, montage);
-                eegRendering(eegsvg, data_series[1], width, height, {}, 1.0, montage);
-            }
+                    if (data_series.length > 0) {
+                        eegLabelRendering(outersvg, data_series[0], width, height, montage);
+                        eegRendering(eegsvg, data_series[1], colorNodes, width, height, {}, 1.0, montage);
+                    }
+                }
+            });
         }
     });
 

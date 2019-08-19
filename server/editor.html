@@ -497,6 +497,22 @@
             }
             var filename = "./Data/" + viz_path;
             visualizeFile(filename);
+            visualizeTrackedFile('./Data/5_166/out_-9_100.json', 'mod_resample')
+        };
+
+        function visualizeTrackedFile(vizObjList, moduleName) {
+            $.get('/idTrackingModule',
+                {"moduleName" : moduleName})
+                .done(function (response) {
+                    viz_type = vizObjList[0].type;
+                    viz_file = './Data/' + vizObjList[0].filename;
+                    if (viz_type == "eeg_json") {
+                        visualizeJson(viz_file, 0);
+                    } else {
+                        console.log("Wrong Function");
+                    }
+                    // visualizeJson(vizObjList, 0)
+                });
         };
 
         function visualizeObjList(vizObjList) {
@@ -560,11 +576,11 @@
                 });
         };
 
-        function visualizeJson(filepath) {
+        function visualizeJson(filepath, colorIdBoolean = 1) {
             console.log("visualizing: " + filepath);
             var iframe = document.getElementById('iframeViz');
             $.get('/setViz',
-                {"pathJSON": filepath})
+            {"pathJSON": filepath, "visualizeColorIds": colorIdBoolean})
                 .done(function (response) {
                     iframe.setAttribute("src", "vizFrame");
                     iframe.src = iframe.src;
@@ -593,7 +609,7 @@
                 type: 'line',
                 data: {
                     labels: graph_labels,
-                    datasets: [{ 
+                    datasets: [{
                         data: graph_data.points,
                         label: "",
                         borderColor: "#3e95cd",
@@ -801,10 +817,10 @@
 
 </script>
 <style type="text/css" media="screen">
-    #debugger_scrollmenu::-webkit-scrollbar { 
+    #debugger_scrollmenu::-webkit-scrollbar {
         display: none;
     }
-    .ti::-webkit-scrollbar { 
+    .ti::-webkit-scrollbar {
         display: none;
     }
 </style>
@@ -909,16 +925,16 @@
                 <div class="w3-container">
                     <div class="w3-container w3-border-bottom">Add or remove tracking filter:</div>
                     <div class="w3-margin w3-row-padding">
-                        <div class="w3-quarter">Id filter</div>
+                        <div class="w3-panel w3-border-bottom w3-quarter">Id filter</div>
                         <div class="w3-quarter">
                             <input id="tracking_form_input_01" class="w3-input" type="number" min="0" placeholder="Id">
                         </div>
                         <div class="w3-quarter w3-right">
-                            <button class="w3-button w3-block" onclick="add_filter('id')">Add</button>
+                            <button class="w3-border-bottom w3-button w3-block" onclick="add_filter('id')">Add</button>
                         </div>
                     </div>
                     <div class="w3-margin w3-row-padding">
-                        <div class="w3-quarter">Id range filter</div>
+                        <div class="w3-panel w3-border-bottom w3-quarter">Id range filter</div>
                         <div class="w3-quarter">
                             <input id="tracking_form_input_02" class="w3-input" type="number" min="0" placeholder="From (inclusive)">
                         </div>
@@ -926,7 +942,7 @@
                             <input id="tracking_form_input_03" class="w3-input" type="number" min="0" placeholder="Until (not inclusive)">
                         </div>
                         <div class="w3-quarter w3-right">
-                            <button class="w3-button w3-block" onclick="add_filter('id_range')">Add</button>
+                            <button class="w3-border-bottom w3-button w3-block" onclick="add_filter('id_range')">Add</button>
                         </div>
                     </div>
                 </div>
@@ -993,7 +1009,7 @@
 <!-- Execute pipeline modal -->
 <div id="modal_01" class="w3-modal">
     <div class="w3-modal-content w3-animate-top">
-        <div class="w3-container w3-green"> 
+        <div class="w3-container w3-green">
             <h4>Execute pipeline<i onclick="document.getElementById('modal_01').style.display='none'" class="w3-button w3-right fa fa-times"></i></h4>
         </div>
         <div class="w3-container">
@@ -1031,7 +1047,7 @@
 <!-- Load pipeline modal -->
 <div id="modal_02" class="w3-modal">
     <div class="w3-modal-content w3-animate-top">
-        <div class="w3-container w3-green"> 
+        <div class="w3-container w3-green">
             <h4>Load pipeline pipeline<i onclick="document.getElementById('modal_02').style.display='none'" class="w3-button w3-right fa fa-times"></i></h4>
         </div>
         <div class="w3-container">
