@@ -12,6 +12,7 @@
             "fill": "lightgreen",
             "cmd": "mod_source",
             "path": "dataset_index.pkl",
+            "viz_path": "",
             "key": -1,
             "loc": "-16.796875 -81.40625000000006"
         },
@@ -21,6 +22,7 @@
             "fill": "lightgreen",
             "cmd": "mod_source",
             "path": "second_dataset_from_cpd_eeg_10s_split",
+            "viz_path": "",
             "key": -4,
             "loc": "-235.796875 -38.40625"
         },

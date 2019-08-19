@@ -277,22 +277,14 @@
                         }
                     }, {
                         contextMenu: // define a context menu for each node
-                            GOJS("ContextMenu", // that has one button
-                                // GOJS("ContextMenuButton",
-                                //     GOJS(go.TextBlock, "Download input"), {click: requestOutputFile}
-                                // ),
+                            GOJS("ContextMenu",
                                 GOJS("ContextMenuButton",
-                                    GOJS(go.TextBlock, "Download output"), {click: requestOutputFile}
-                                ),
-                                // GOJS("ContextMenuButton",
-                                //     GOJS(go.TextBlock, "Visualize input")
-                                // ),
-                                GOJS("ContextMenuButton",
+                                    new go.Binding("visible", "", function(o, e) {
+                                        return o.part.adornedPart.data.cmd === "mod_source";
+                                    }).ofObject(),
                                     GOJS(go.TextBlock, "Visualize output", {click: visualizeOutput})
                                 ),
-
-                                // more ContextMenuButtons would go here
-                            ) // end Adornment
+                            )
                     }
                 );
 
@@ -407,6 +399,9 @@
                             fill: "white",
                             cmd: obj.cmd
                         }
+                        if (obj.cmd == 'mod_source') {
+                            nodeTemplate = myDiagram.nodeTemplateMap
+                        }
                         if ('splittable' in obj) {
                             palette_elem['splits'] = "";
                         }
@@ -452,46 +447,7 @@
                                         GOJS(go.Shape, // the arrowhead
                                             {toArrow: "Standard", stroke: null})
                                     ),
-                                model: new go.GraphLinksModel(contents/*[ // specify the contents of the Palette
-                                    {
-                                        text: "Data source",
-                                        figure: "RoundedRectangle",
-                                        fill: "lightgreen",
-                                        cmd: "mod_source",
-                                        path: "SampleData1.mat",
-                                        splits: ""
-                                    },
-                                    {text: "Resample", figure: "RoundedRectangle", fill: "white", cmd: "mod_resample", resample_frequency: 200, splits: ""},
-                                    {text: "Filter", figure: "RoundedRectangle", fill: "white", cmd: "mod_filter", notch_frequency: 60, high_pass_frequency: 0.5, low_pass_frequency: 40, splits: ""},
-                                    {text: "Montage", figure: "RoundedRectangle", fill: "white", cmd: "mod_montage", montage_type: "monopolar", splits: ""},
-                                    {text: "Clip", figure: "RoundedRectangle", fill: "white", cmd: "mod_clip", splits: ""},
-                                    {text: "Spectogram", figure: "RoundedRectangle", fill: "white", cmd: "mod_spectrogram", nw: 2, splits: ""},
-                                    {
-                                        text: "EEG features",
-                                        figure: "RoundedRectangle",
-                                        fill: "white",
-                                        cmd: "mod_computeFeatures",
-                                        delta_low: 1,
-                                        delta_high: 4,
-                                        theta_low: 4,
-                                        theta_high: 8,
-                                        alpha_low: 8,
-                                        alpha_high: 12,
-                                        beta_low: 12,
-                                        beta_high: 18,
-                                        splits: ""
-                                    },
-                                    {text: "Change pts", figure: "RoundedRectangle", fill: "white", cmd: "mod_changePoints", threshold: 0.5, splits: ""},
-                                    {
-                                        text: "Binary seg",
-                                        figure: "RoundedRectangle",
-                                        fill: "white",
-                                        cmd: "mod_binarySegmentation",
-                                        splits: ""
-                                    },
-                                    {text: "BSP", figure: "RoundedRectangle", fill: "white", cmd: "mod_bsp", splits: ""},
-
-                                ]*/)
+                                model: new go.GraphLinksModel(contents)
                             });
                     myPalette.requestUpdate();
                 }
@@ -534,12 +490,12 @@
         };
 
         function visualizeOutput(e, obj) {
-            console.log(obj.part.adornedPart.data.key);
-            var node_key = obj.part.adornedPart.data.key;
-            var iframe = document.getElementById('iframeViz');
-            var filename = "./Data/out_" + node_key + ".json";
-
-            console.log("visualizing: " + filename);
+            console.log(obj.part.adornedPart.data.viz_path);
+            var viz_path = obj.part.adornedPart.data.viz_path;
+            if (viz_path == "") {
+                console.log("No viz path given")
+            }
+            var filename = "./Data/" + viz_path;
             visualizeFile(filename);
         };
 
@@ -562,20 +518,22 @@
         };
 
         function visualizeFile(filepath) {
-            close_viz('edv_list_div')
-            close_viz('graph_viz_div')
+            close_viz('edv_list_div');
+            close_viz('graph_viz_div');
             var extension = filepath.split('.').pop();
             if (extension == 'json') {
                 visualizeJson(filepath);
             } else if (extension == 'jpg' || extension == 'png') {
                 visualizeImage(filepath);
             } else if (extension == 'csv') {
-                visualizeCsv(filepath)
+                visualizeCsv(filepath);
+            } else {
+                console.log("Cannot visualize " + filepath);
             }
         };
 
         function visualizeCsv(filepath) {
-            open_viz('edv_list_div')
+            open_viz('edv_list_div');
             $('#edv_list').html("");
             console.log("visualizing: " + filepath);
             console.log(filepath.replace('.csv', '') + '/');

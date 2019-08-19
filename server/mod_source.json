@@ -7,6 +7,11 @@
             "name": "path",
             "type": "string",
             "default_value": ""
+        },
+        {
+            "name": "viz_path",
+            "type": "string",
+            "default_value": ""
         }
     ]
 }

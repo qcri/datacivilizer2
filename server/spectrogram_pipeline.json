@@ -12,6 +12,7 @@
             "fill": "lightgreen",
             "cmd": "mod_source",
             "path": "SampleData1.mat",
+            "viz_path": "",
             "key": -1,
             "loc": "-125.796875 -193.40625"
         },
