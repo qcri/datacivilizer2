@@ -110,7 +110,7 @@ function remove_debugger_model(mrId, modelId, runNo) {
         }
     });
     if (running_models.length > 0) {
-        var mrId = running_models[0].modelId + '_' + running_models[0].runNo;
+        var mrId = running_models[running_models.length-1].modelId + '_' + running_models[running_models.length-1].runNo;
         select_debugger_model(mrId);
     } else {
         close_debugger();

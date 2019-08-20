@@ -1,0 +1,386 @@
+﻿<!DOCTYPE html>
+<html style="height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <title>DC2 Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Copyright 1998-2019 by Northwoods Software Corporation. -->
+    <script src="/dragscroll.js"></script>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="/Chart.js"></script>
+    <script id="code">
+
+        var source = new EventSource('./registerDashboard');
+        var charts = [];
+        var modelsInCharts = [];
+        const colors = {0: '#ff6384', 3: '#36a2eb', 4: '#cc65fe', 5: '#ffce56'};
+        const modelLabels = {0: 'ML 4', 3: 'ML 1', 4: 'ML 2', 5: 'ML 3'};
+
+        source.onmessage = function (event) {
+            console.log(JSON.parse(event.data).data);
+        };
+
+        source.addEventListener('ps', (e) => {
+            console.log('Page switch');
+            console.log(JSON.parse(event.data));
+            location.assign(JSON.parse(event.data).html);
+        });
+
+        source.addEventListener('pr', () => {
+            console.log('Page reset');
+        });
+
+        source.addEventListener('update', (e) => {
+            console.log('Update');
+            var data = JSON.parse(e.data);
+            if (data.module_name == 'mod_balance') {
+                balanceUpdate(data);
+            } else if (data.module_name == 'mod_crop') {
+                cropUpdate(data);
+            } else if (data.module_name == 'mod_nn') {
+                nnUpdate(data);
+            }
+        });
+
+        function balanceUpdate(data) {
+            console.log(data);
+            var img_id = 'hist1';
+            var filepath = data.viz[0].filename;
+            visualizeImage(filepath, img_id);
+        };
+
+        function cropUpdate(data) {
+            console.log(data);
+            var img_id = 'hist2';
+            var filepath = data.viz[0].filename;
+            visualizeImage(filepath, img_id);
+        };
+
+        function nnUpdate(data) {
+            console.log(data);
+            const modelId = data.modelId;
+            const matrix_data = data.viz[0];
+            const chart_data = data.viz[1];
+
+            var img_id = 'matrix';
+            var matrix_filepath = matrix_data.filename;
+            visualizeImage(matrix_filepath, img_id);
+
+            const chart_filepath = chart_data.filename;
+            const index = modelsInCharts.indexOf(modelId);
+            if (index == -1) {
+                modelsInCharts.push(modelId);
+            }
+            addRunToCharts(index, chart_filepath, modelLabels[modelId], colors[modelId]);
+        };
+
+        function init() {
+            charts.push(createChart('myChart1', 'Training Loss'));
+            charts.push(createChart('myChart2', 'Training accuracy'));
+            charts.push(createChart('myChart3', 'Validation Loss'));
+            charts.push(createChart('myChart4', 'Validation accuracy'));
+        };
+
+        function createChart(container, title) {
+            var myLineChart = new Chart(container, {
+                type: 'line',
+                data: {
+                    datasets: []
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    /*legend: {
+                        display: false
+                    },*/
+                    maintainAspectRatio: false
+                }
+            });
+            return myLineChart
+        };
+
+        function addRunToCharts(index, filepath, label, color) {
+            $.get('/getChartData',
+                {"filepath": filepath})
+                .done(function (response) {
+                    const labels = response.labels;
+                    const data = response.data;
+                    for (var i = charts.length - 1; i >= 0; i--) {
+                        addChartData(charts[i], labels, index, data[i], label, color);
+                    }
+                });
+        };
+
+        function addChartData(chart, labels, index, data, label, color) {
+            if (!('labels' in chart.data) || chart.data.labels.length == 0) {
+                chart.data.labels = labels;
+            }
+            if (index == -1) {
+                chart.data.datasets.push({ 
+                    data: data.points,
+                    label: label,
+                    borderColor: color,
+                    fill: false,
+                    borderWidth: 1,
+                    pointRadius: 1,
+                    pointHoverRadius: 2
+                });
+            } else {
+                chart.data.datasets[index] = { 
+                    data: data.points,
+                    label: label,
+                    borderColor: color,
+                    fill: false,
+                    borderWidth: 1,
+                    pointRadius: 1,
+                    pointHoverRadius: 2
+                };
+            }
+            chart.update();
+        };
+
+        function iFrameJsonParams() {
+            var iFrameWidthString = localStorage.getItem("widthLocalStorage");
+            var iFrameHeightString = localStorage.getItem("heightLocalStorage");
+            var iFrameWidthNumber = Number(iFrameWidthString);
+            var iFrameHeightNumber = Number(iFrameHeightString) + 10;
+            document.getElementById('iframeViz').style.width = iFrameWidthNumber + 'px';
+            document.getElementById('iframeViz').style.height = iFrameHeightNumber + 'px';
+        };
+
+        function iFrameImageParams() {
+            var iframe = document.getElementById('iframeViz');
+            var innerDoc = iframe.contentWindow.document;
+            var myRegexp = /.+\s.(\d+)\s?.\s?(\d+)./;
+            var match = myRegexp.exec(innerDoc.title);
+            document.getElementById('iframeViz').style.width = Number(match[1]);
+            document.getElementById('iframeViz').style.height = Number(match[2]);
+        };
+
+        function visualizeOutput(e, obj) {
+            console.log(obj.part.adornedPart.data.viz_path);
+            var viz_path = obj.part.adornedPart.data.viz_path;
+            if (viz_path == "") {
+                console.log("No viz path given")
+            }
+            var filename = "./Data/" + viz_path;
+            visualizeFile(filename);
+        };
+
+        function visualizeObjList(vizObjList) {
+            close_viz('edv_list_div')
+            close_viz('graph_viz_div')
+            for (var viz_elem of vizObjList) {
+                viz_type = viz_elem.type;
+                viz_file = './Data/' + viz_elem.filename
+                if (viz_type == "image") {
+                    visualizeImage(viz_file);
+                } else if (viz_type == "eeg_json") {
+                    visualizeJson(viz_file);
+                } else if (viz_type == "pkl_dir") {
+                    visualizeCsv(viz_file);
+                } else if (viz_type == "graph_data") {
+                    visualizeNnPkl(viz_file);
+                }
+            }
+        };
+
+        function visualizeFile(filepath) {
+            close_viz('edv_list_div');
+            close_viz('graph_viz_div');
+            var extension = filepath.split('.').pop();
+            if (extension == 'json') {
+                visualizeJson(filepath);
+            } else if (extension == 'jpg' || extension == 'png') {
+                visualizeImage(filepath);
+            } else if (extension == 'csv') {
+                visualizeCsv(filepath);
+            } else {
+                console.log("Cannot visualize " + filepath);
+            }
+        };
+
+        function visualizeCsv(filepath) {
+            open_viz('edv_list_div');
+            $('#edv_list').html("");
+            console.log("visualizing: " + filepath);
+            console.log(filepath.replace('.csv', '') + '/');
+            $.get('/csvVizList',
+                {"pathCsv": filepath})
+                .done(function (response) {
+                    const l = response.list;
+                    for (const elem of l){
+                        var html = new EJS({url : '/edv_list_elem.ejs'}).render({'filepath': elem, 'prefix': filepath.replace('.csv', '') + '/'});
+                        $('#edv_list').append($(html));
+                    }
+                });
+        };
+
+        function visualizeImage(filepath, id) {
+            console.log("visualizing: " + filepath);
+            var i = document.getElementById(id);
+            $.get('/getImage',
+                {"filepath": filepath})
+                .done(function (response) {
+                    console.log("Setting img src");
+                    i.src = filepath;
+                });
+        };
+
+        function visualizeJson(filepath) {
+            console.log("visualizing: " + filepath);
+            var iframe = document.getElementById('iframeViz');
+            $.get('/setViz',
+                {"pathJSON": filepath})
+                .done(function (response) {
+                    iframe.setAttribute("src", "vizFrame");
+                    iframe.src = iframe.src;
+                    setTimeout(iFrameJsonParams, 500);
+                });
+        };
+
+        function visualizeNnPkl(filepath) {
+            open_viz('graph_viz_div');
+            console.log("visualizing: " + filepath);
+            $.get('/pklGraphData',
+                {"pathPkl": filepath})
+                .done(function (response) {
+                    const labels = response.labels;
+                    const data = response.data;
+                    console.log(data);
+                    for (const elem of data) {
+                        createGraph(labels, elem);
+                    }
+                });
+        };
+
+        function createGraph(graph_labels, graph_data) {
+
+            var myLineChart = new Chart(graph_data.chartContainer, {
+                type: 'line',
+                data: {
+                    labels: graph_labels,
+                    datasets: [{ 
+                        data: graph_data.points,
+                        label: "",
+                        borderColor: "#3e95cd",
+                        fill: false
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: graph_data.title
+                    },
+                    legend: {
+                        display: false
+                    },
+                    maintainAspectRatio: false
+                }
+            });
+        };
+
+        function open_viz(id) {
+            var x = document.getElementById(id);
+            if (x.className.indexOf("w3-show") == -1) {
+                x.className = x.className.replace(" w3-hide", " w3-show");
+            }
+        };
+
+        function close_viz(id) {
+            var x = document.getElementById(id);
+            if (x.className.indexOf("w3-hide") == -1) {
+                x.className = x.className.replace(" w3-show", " w3-hide");
+            }
+        };
+
+        function toggle_viz(id) {
+            var x = document.getElementById(id);
+            if (x.className.indexOf("w3-show") == -1) {
+                x.className = x.className.replace(" w3-hide", " w3-show");
+            } else {
+                x.className = x.className.replace(" w3-show", " w3-hide");
+            }
+        };
+
+        function toggle_arrow(id) {
+            var x = document.getElementById(id);
+            if (x.className.indexOf("fa-angle-up") == -1) {
+                x.className = x.className.replace(" fa-angle-down", " fa-angle-up");
+            } else {
+                x.className = x.className.replace(" fa-angle-up", " fa-angle-down");
+            }
+        };
+
+        function button() {
+            $.ajax({
+                url: '/testChart',
+                type: 'post',
+                success: function (data) {
+                    console.log("success!");
+                }
+            });
+        };
+    </script>
+</head>
+
+<body onload="init();" style="height: 100%;">
+
+<div style="height: 50%;">
+    <div class="w3-row-padding" style="height: 100%; padding-top: 16px;">
+        <div class="w3-half" style="height: 100%;">
+            <div class="w3-container w3-border" style="height: 100%; padding: 0px;">
+                <div class="w3-button" onclick="button();">Button</div>
+            </div>
+        </div>
+        <div class="w3-half" style="height: 100%;">
+            <div class="w3-container w3-border" style="height: 100%; padding: 0px;">
+                <div class="w3-row" style="height: 50%;">
+                    <div class="w3-half" style="height: 100%;">
+                        <canvas id="myChart1" width="100%" height="100%"></canvas>
+                    </div>
+                    <div class="w3-half" style="height: 100%;">
+                        <canvas id="myChart2" width="100%" height="100%"></canvas>
+                    </div>
+                </div>
+                <div class="w3-row" style="height: 50%;">
+                    <div class="w3-half" style="height: 100%;">
+                        <canvas id="myChart3" width="100%" height="100%"></canvas>
+                    </div>
+                    <div class="w3-half" style="height: 100%;">
+                        <canvas id="myChart4" width="100%" height="100%"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+</div>
+
+<div style="height: 50%;">
+    <div class="w3-row-padding" style="height: 100%; padding-top: 16px;  padding-bottom: 16px;">
+        <div class="w3-third" style="height: 100%;">
+            <div class="w3-container w3-border w3-display-container" style="height: 100%; padding: 0px;">
+                <img id="hist1" alt="Histogram 1" class="w3-image w3-display-middle">
+            </div>
+        </div>
+        <div class="w3-third" style="height: 100%;">
+            <div class="w3-container w3-border w3-display-container" style="height: 100%; padding: 0px;">
+                <img id="hist2" alt="Histogram 2" class="w3-image w3-display-middle">
+            </div>
+        </div>
+        <div class="w3-third" style="height: 100%;">
+            <div class="w3-container w3-border w3-display-container" style="height: 100%; padding: 0px;">
+                <img id="matrix" alt="Matrix" class="w3-image w3-display-middle">
+            </div>
+        </div>
+    </div>    
+</div>
+
+</body>
+
+</html>

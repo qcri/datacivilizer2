@@ -1,16 +1,9 @@
-import matlab.engine
 import sys
 import time
+import matlab.engine
+from shutil import copyfile
 from utils.dc import DCMetric, DC, BpOps
 from utils.mod_util import transform_to_tensor
-
-print("Starting matlab engine")
-start = time.time()
-
-eng = matlab.engine.start_matlab()
-
-end = time.time()
-print("Execution time: " + str(end - start))
 
 # Example of custom operator used for a breakpoint
 # def customOp(metric, constant1, constant2):
@@ -19,7 +12,25 @@ print("Execution time: " + str(end - start))
 
 def execute_service(in_path, out_path, viz_out_path):
 
+    model = out_path.partition('_')[0]
+    out_file = out_path.partition('/')[2]
+    viz_out_file = viz_out_path.partition('/')[2]
+    eeg_good_folder = "eeg_good_outputs"
+    eeg_bad_folder = "eeg_bad_outputs"
+    if model == "1":
+        print("eeg_good_pipeline")
+        copyfile('./Data/' + eeg_good_folder + '/' + out_file, './Data/' + out_path)
+        copyfile('./Data/' + eeg_good_folder + '/' + viz_out_file, './Data/' + viz_out_path)
+        return
+    elif model == "2":
+        print("eeg_bad_pipeline")
+        copyfile('./Data/' + eeg_bad_folder + '/' + out_file, './Data/' + out_path)
+        copyfile('./Data/' + eeg_bad_folder + '/' + viz_out_file, './Data/' + viz_out_path)
+        return
+
+    eng = matlab.engine.start_matlab()
     eng.mod_format(in_path, out_path, nargout=0)
+    eng.quit()
 
     file_in = "./Data/" + out_path + ".txt"
     file_out = "./Data/"+ viz_out_path
@@ -36,14 +47,7 @@ def execute_service(in_path, out_path, viz_out_path):
     # DC.register_breakpoint(BpOps.always_ge, f2_metric, 0)
     # DC.register_breakpoint(customOp, f1_metric, 1, 2)
 
-
-print("Executing function")
-start = time.time()
-
 execute_service(sys.argv[1], sys.argv[2], sys.argv[3])
-
-end = time.time()
-print("Execution time: " + str(end - start))
 
 # Use this if metrics and/or breakpoints were added
 # DC.end(sys.argv[-1])

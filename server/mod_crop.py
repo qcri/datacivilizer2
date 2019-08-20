@@ -117,8 +117,8 @@ def equal_tuple(a, b):
 def execute_service(in_path, out_path, viz_path):
 
     # For demo purposes, just copy precomputed output to the run directory
-    precomp_out_path = 'main_D_outputs/out_-9.pkl'
-    precomp_viz_path = 'main_D_outputs/viz_-9.jpg'
+    precomp_out_path = 'ml_outputs/out_-9.pkl'
+    precomp_viz_path = 'ml_outputs/viz_-9.jpg'
     copyfile('./Data/' + precomp_out_path, './Data/' + out_path)
     copyfile('./Data/' + precomp_viz_path, './Data/' + viz_path)
     return 

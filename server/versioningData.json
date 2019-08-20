@@ -1,10 +1,13 @@
 {
     "maxSize": 1000,
-    "maxModelId": 3,
+    "maxModelId": 6,
     "runCounter": [
-        3,
-        1,
-        1
+        44,
+        9,
+        6,
+        10,
+        2,
+        8
     ],
     "hashTable": [
         null,
@@ -204,7 +207,7 @@
         null,
         null,
         null,
-        null,
+        4,
         null,
         null,
         null,
@@ -525,7 +528,7 @@
         null,
         null,
         null,
-        null,
+        5,
         null,
         null,
         null,
@@ -660,7 +663,7 @@
         null,
         null,
         null,
-        null,
+        3,
         null,
         null,
         null,

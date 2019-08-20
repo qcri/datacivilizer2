@@ -1,0 +1,128 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-407.796875 -289"
+    },
+    "nodeDataArray": [
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "dataset_index.pkl",
+            "viz_path": "",
+            "key": -1,
+            "loc": "-16.796875 -81.40624999999989"
+        },
+        {
+            "text": "Data source",
+            "figure": "RoundedRectangle",
+            "fill": "lightgreen",
+            "cmd": "mod_source",
+            "path": "second_dataset_from_cpd_eeg_10s_split",
+            "viz_path": "",
+            "key": -4,
+            "loc": "-155.796875 -82.40625"
+        },
+        {
+            "text": "Neural Net",
+            "figure": "RoundedRectangle",
+            "fill": "lightgray",
+            "cmd": "mod_nn",
+            "key": -2,
+            "loc": "-16.796875 3.59375"
+        }
+    ],
+    "linkDataArray": [
+        {
+            "from": -4,
+            "to": -2,
+            "fromPort": "",
+            "toPort": "L",
+            "points": [
+                -155.796875,
+                -62.40625,
+                -155.796875,
+                -52.40625,
+                -155.796875,
+                3.59375,
+                -121.296875,
+                3.59375,
+                -86.796875,
+                3.59375,
+                -76.796875,
+                3.59375
+            ]
+        },
+        {
+            "from": -1,
+            "to": -2,
+            "fromPort": "",
+            "toPort": "",
+            "points": [
+                -16.796875,
+                -61.40625,
+                -16.796875,
+                -51.40625,
+                -16.796875,
+                -38.90625,
+                -16.796875,
+                -38.90625,
+                -16.796875,
+                -26.40625,
+                -16.796875,
+                -16.40625
+            ]
+        }
+    ],
+    "modelId": 3,
+    "runNo": 10,
+    "parameters": {
+        "path": "second_dataset_from_cpd_eeg_10s_split",
+        "viz_path": ""
+    },
+    "runs": [
+        {
+            "runNo": 1,
+            "metrics": {}
+        },
+        {
+            "runNo": 2,
+            "metrics": {}
+        },
+        {
+            "runNo": 3,
+            "metrics": {}
+        },
+        {
+            "runNo": 4,
+            "metrics": {}
+        },
+        {
+            "runNo": 5,
+            "metrics": {}
+        },
+        {
+            "runNo": 6,
+            "metrics": {}
+        },
+        {
+            "runNo": 7,
+            "metrics": {}
+        },
+        {
+            "runNo": 8,
+            "metrics": {}
+        },
+        {
+            "runNo": 9,
+            "metrics": {}
+        },
+        {
+            "runNo": 10,
+            "metrics": {}
+        }
+    ]
+}

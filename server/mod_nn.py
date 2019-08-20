@@ -190,22 +190,24 @@ def execute_service(in_data_dir, index_file, matrix_img_file, graph_data_file):
 
     # For demo purposes, just copy precomputed output to the run directory
     model = matrix_img_file.partition('_')[0]
-    if model == "35":
+    print(type(model))
+    print(model)
+    if model == "3":
         print("ml_nn_pipeline")
-        precomp_matrix_img_path = 'main_D_outputs/ml1_viz_-2.png'
-        precomp_graph_data_path = 'main_D_outputs/ml1_viz_-2.csv'
-    elif model == "32":
+        precomp_matrix_img_path = 'ml_outputs/ml1_viz_-2.png'
+        precomp_graph_data_path = 'ml_outputs/ml1_viz_-2.csv'
+    elif model == "4":
         print("ml_bcnn_pipeline")
-        precomp_matrix_img_path = 'main_D_outputs/ml2_viz_-2.png'
-        precomp_graph_data_path = 'main_D_outputs/ml2_viz_-2.csv'
-    elif model == "34":
+        precomp_matrix_img_path = 'ml_outputs/ml2_viz_-2.png'
+        precomp_graph_data_path = 'ml_outputs/ml2_viz_-2.csv'
+    elif model == "5":
         print("ml_fmnn_pipeline")
-        precomp_matrix_img_path = 'main_D_outputs/ml3_viz_-2.png'
-        precomp_graph_data_path = 'main_D_outputs/ml3_viz_-2.csv'
+        precomp_matrix_img_path = 'ml_outputs/ml3_viz_-2.png'
+        precomp_graph_data_path = 'ml_outputs/ml3_viz_-2.csv'
     else:
         print("ml_bcfmnn_pipeline")
-        precomp_matrix_img_path = 'main_D_outputs/viz_-2.png'
-        precomp_graph_data_path = 'main_D_outputs/viz_-2.csv'
+        precomp_matrix_img_path = 'ml_outputs/viz_-2.png'
+        precomp_graph_data_path = 'ml_outputs/viz_-2.csv'
     copyfile('./Data/' + precomp_matrix_img_path, './Data/' + matrix_img_file)
     copyfile('./Data/' + precomp_graph_data_path, './Data/' + graph_data_file)
     return

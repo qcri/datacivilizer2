@@ -572,11 +572,11 @@
                 });
         };
 
-        function visualizeNnPkl(filepath) {
+        function visualizeNnCsv(filepath) {
             open_viz('graph_viz_div');
             console.log("visualizing: " + filepath);
-            $.get('/pklGraphData',
-                {"pathPkl": filepath})
+            $.get('/csvGraphData',
+                {"pathcsv": filepath})
                 .done(function (response) {
                     const labels = response.labels;
                     const data = response.data;
@@ -867,7 +867,6 @@
                 <div class="w3-col w3-light-gray" id="diagram" style="width: 80%;">
                     <button class="w3-button w3-block w3-border w3-border-green w3-hover-border-gray w3-green" onclick="document.getElementById('modal_01').style.display='block'">Execute Pipeline</button>
                     <div class="w3-border" id="myDiagramDiv" style="height: 600px;"></div>
-                    <!-- <button class="w3-button w3-block w3-border">Save pipeline to file</button> -->
                 </div>
 
                 <div class="w3-col debugger w3-hide" id="debugger" style="width: 40%; height: 600px;">

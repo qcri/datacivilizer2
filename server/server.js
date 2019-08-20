@@ -9,6 +9,7 @@
 
 var express = require('express');
 var app = express();
+var request = require('request');
 var path = require('path');
 var fs = require('fs');
 const { execSync, spawn } = require('child_process');
@@ -20,7 +21,6 @@ var setVizPicture = "";
 var running_models = [];
 var paused_models = [];
 var connection;
-
 
 var Connection = (function () {
     function Connection(res) {
@@ -101,13 +101,13 @@ app.get('/csvVizList', function (request, response) {
       });
 });
 
-app.get('/pklGraphData', function (request, response) {
+app.get('/csvGraphData', function (request, response) {
     labels = []
     chart1 = {'chartContainer': 'myChart1', 'title': 'Training loss', 'points': []}
     chart2 = {'chartContainer': 'myChart2', 'title': 'Training accuracy', 'points': []}
     chart3 = {'chartContainer': 'myChart3', 'title': 'Validation loss', 'points': []}
     chart4 = {'chartContainer': 'myChart4', 'title': 'Validation accuracy', 'points': []}
-    fs.createReadStream(request.query.pathPkl)
+    fs.createReadStream(request.query.pathCsv)
         .pipe(csv({'headers': false}))
         .on('data', (data) => {
             labels.push(data[0])
@@ -477,6 +477,8 @@ app.post('/run', function (request, response) {
     const debugger_type = request.body.debugger_type;
     const tracking_filters = request.body.tracking_filters;
 
+    startNewRun(modelId, runNo);
+
     // get parameters for run
     var sortOp = get_sortOp(pipeline);
     const sorted = sortOp.sort();
@@ -576,6 +578,7 @@ app.get('/get_status', function (request, response) {
 
 app.post('/split', function (request, response) {
 
+    sendDashboardUpdate(request.body);
     connection.sendSplitUpdate(request.body);
     response.end();
 });
@@ -754,6 +757,32 @@ app.get('/download_output', function (request, response) {
     // We replaced all the event handlers with a simple call to readStream.pipe()
     readStream.pipe(response);
 });
+
+function startNewRun(modelId, runNo) {
+
+    request.post(
+        'http://localhost:9131/startNewRun',
+        { json: { modelId: modelId, runNo: runNo } },
+        function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log(body);
+            }
+        }
+    );
+};
+
+function sendDashboardUpdate(data) {
+
+    request.post(
+        'http://localhost:9131/updatePage',
+        { json: { data: data } },
+        function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log(body);
+            }
+        }
+    );
+};
 
 var server = app.listen(8080, function () {
     var host = server.address().address

@@ -170,7 +170,7 @@
         }
     ],
     "modelId": 1,
-    "runNo": 1,
+    "runNo": 9,
     "parameters": {
         "path": "SampleData1.mat",
         "viz_path": "",
@@ -183,6 +183,36 @@
     "runs": [
         {
             "runNo": 1,
+            "metrics": {
+                "mod_resample": {
+                    "sampling rate": 200
+                },
+                "mod_montage": {
+                    "num_out_channels": 19
+                }
+            }
+        },
+        {
+            "runNo": 4,
+            "metrics": {
+                "mod_resample": {
+                    "sampling rate": 200
+                },
+                "mod_montage": {
+                    "num_out_channels": 19
+                }
+            }
+        },
+        {
+            "runNo": 5,
+            "metrics": {}
+        },
+        {
+            "runNo": 8,
+            "metrics": {}
+        },
+        {
+            "runNo": 9,
             "metrics": {
                 "mod_resample": {
                     "sampling rate": 200
