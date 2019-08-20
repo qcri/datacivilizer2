@@ -93,6 +93,7 @@ app.get('/setViz', function (request, response) {
     } else {
         pklFileBoolean = false;
     response.send("ok");
+    }
 });
 
 app.get('/vizData', function (request, response) {
