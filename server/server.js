@@ -19,7 +19,7 @@ var dataVizPath = "";
 var trackingModuleName = "";
 var colorVizTracker = "";
 var setVizPicture = "";
-var pklFileBoolean = "",
+var pklFileBoolean = "";
 var running_models = [];
 var paused_models = [];
 var connection;
