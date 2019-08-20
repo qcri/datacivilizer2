@@ -196,7 +196,11 @@ function visualizeDebuggingOutput(modelId, runNo, module_name, splitNo) {
                 if (_module.name == module_name) {
                     if (_module.split_outputs.length > splitNo) {
                         const vizObjList = _module.split_outputs[splitNo]
-                        visualizeObjList(vizObjList);
+                        if (splitNo == 100 && model.tracking) {
+                            visualizeTrackedFile(vizObjList, module_name);
+                        } else {
+                            visualizeObjList(vizObjList);
+                        }
                     }
                 }
             }

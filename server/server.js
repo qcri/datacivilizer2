@@ -17,7 +17,10 @@ const csv = require('csv-parser');
 const path_sort = require('path-sort');
 
 var dataVizPath = "";
+var trackingModuleName = "";
+var colorVizTracker = "";
 var setVizPicture = "";
+var pklFileBoolean = "";
 var running_models = [];
 var paused_models = [];
 var connection;
@@ -70,18 +73,27 @@ app.get('/', function (request, response) {
     response.sendfile(path.resolve('./editor.html'));
 });
 
+app.get('/idTrackingModule', function (request, response) {
+  trackingModuleName = request.query.moduleName;
+  response.send("ok");
+});
+
 app.get('/vizFrame', function (request, response) {
     response.sendfile(path.resolve('./eeg_renderer/eeg_renderer.html'));
 });
 
 app.get('/setViz', function (request, response) {
     filepath = request.query.pathJSON;
+    colorVizTracker = request.query.visualizeColorIds;
     dataVizPath = filepath;
     if (filepath.endsWith('.pkl')) {
+        pklFileBoolean = true;
         dataVizPath = "./Data/plk_viz.json";
         execSync('python utils/pklToJson.py ' + filepath + ' ' + dataVizPath, {stdio: 'inherit'});
-    }
+    } else {
+        pklFileBoolean = false;
     response.send("ok");
+    }
 });
 
 app.get('/vizData', function (request, response) {
@@ -89,6 +101,32 @@ app.get('/vizData', function (request, response) {
     var data_series = JSON.parse(rawdata);
     console.log("data")
     response.send(data_series)
+});
+
+app.get('/pklFileOrNot', function (request, response) {
+    response.send(pklFileBoolean);
+});
+    
+app.get('/vizIdTracker', function (request, response) {
+    if (colorVizTracker == 0) {
+        var trackingFilePath = dataVizPath.substring(0, dataVizPath.lastIndexOf('/')) + '/tracking_file.json';
+        if (trackingFilePath) {
+            var trackingFileArray = fs.readFileSync(trackingFilePath);
+            var trackingFileParse = JSON.parse(trackingFileArray);
+            var moduleName = trackingFileParse[trackingModuleName];
+            var moduleElements;
+            var trackingFileIds = new Array();
+            for (moduleElements of moduleName) {
+                trackingFileIds.push(moduleElements['start_id']);
+                trackingFileIds.push(moduleElements['num_segments']);
+            }
+            response.send(trackingFileIds);
+        } else {
+          response.send('ok');
+        }
+    } else if (colorVizTracker == 1) {
+        response.send('ok');
+    }
 });
 
 app.get('/csvVizList', function (request, response) {
@@ -716,7 +754,7 @@ app.get('/models', function(request, response) {
 
     var dir_name = './saved_models/';
     fs.readdirSync(dir_name).forEach(handle_model_file);
-    
+
     function handle_model_file(file_name) {
         const pathname = dir_name + file_name;
         var obj = JSON.parse(fs.readFileSync(pathname, 'utf8'));

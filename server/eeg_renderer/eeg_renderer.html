@@ -11,7 +11,7 @@
 <script src="lpf.js"></script>
 <script>
 
-    var eegRendering = function (svg, data, width, height, params, magnitude, montage) {
+    var eegRendering = function (svg, data, trackedIds, pklBoolean, width, height, params, magnitude, montage) {
 
         if (typeof magnitude != "number")
             magnitude = 1;
@@ -89,7 +89,11 @@
         console.log(Math.max.apply(null, flatterRaw));
         console.log(Math.min.apply(null, flatterRaw));*/
         
-        var minV = -1, maxV = 1;
+        if (pklBoolean == true) {
+            var minV = -1, maxV = 1;
+        } else if (pklBoolean == false) {
+           var minV = -50, maxV = 50;
+        }
         var dataset = [];
         for (var k = 0; k < numChannels; k++) {
             var startingY = k * channelHeight;
@@ -127,7 +131,7 @@
                 dataset.push(curSeg);
             }
         }
-        
+
         // console.log(data);
 
         // d3 line object
@@ -147,13 +151,23 @@
                 if (m1[i] < 0)
                     continue;
             for (var j = 0; j < segNum; j++) {
-                g.append('path')
-                    .attr('class', 'line')
-                    .attr('d', line(dataset[j + i * segNum]))
-                    .attr('fill', 'none')
-                    .attr('stroke-width', 1)
-                    .attr('stroke', 'black')
-                    .node().__data__ = data[j];
+                if (trackedIds.includes(j)) {
+                    g.append('path')
+                        .attr('class', 'line')
+                        .attr('d', line(dataset[j + i * segNum]))
+                        .attr('fill', 'none')
+                        .attr('stroke-width', 1)
+                        .attr('stroke', 'red')
+                        .node().__data__ = data[j];
+                } else {
+                    g.append('path')
+                        .attr('class', 'line')
+                        .attr('d', line(dataset[j + i * segNum]))
+                        .attr('fill', 'none')
+                        .attr('stroke-width', 1)
+                        .attr('stroke', 'black')
+                        .node().__data__ = data[j];
+                }
             }
         }
     };
@@ -195,9 +209,8 @@
         data: {"pathJSON": "empty_field"},
         dataType: 'json',
         success: function (dataArray) {
-            console.log("success iFrame");
             var data_series = dataArray;
-
+            console.log('success iframe');
             // called pixelPerSeg from above
             var pixelPerSeg = 250;
             var perChannelHeight = 50;
@@ -221,10 +234,43 @@
                 .attr("viewBox", viewBox + width + " " + height)
                 .style("display", "inline-block");
 
-            if (data_series.length > 0) {
-                eegLabelRendering(outersvg, data_series[0], width, height, montage);
-                eegRendering(eegsvg, data_series[1], width, height, {}, 1.0, montage);
-            }
+            var colorNodes = new Array();
+
+            $.ajax({
+                url: '/vizIdTracker',
+                type: 'GET',
+                success: function(trackedIdsArray) {
+                    var trackingFileIds = trackedIdsArray
+                    if (trackedIdsArray !== null) {
+                        var i = 0;
+                        for (var l = trackedIdsArray.length; i < l ;) {
+                            var lowEnd = trackedIdsArray[i];
+                            i = i + 1;
+                            var a = trackedIdsArray[i];
+                            var highEnd = lowEnd + a;
+                            i = i + 1;
+                            for (var c = lowEnd; c < highEnd; c++) {
+                                colorNodes.push(c);
+                            }
+                        }
+                    } else {
+                        null
+                    }
+
+                    $.ajax({
+                        url: '/pklFileOrNot',
+                        type: 'GET',
+                        success: function(pklBoolean) {
+                            var pklFileBoolean = pklBoolean;
+                            
+                            if (data_series.length > 0) {
+                                eegLabelRendering(outersvg, data_series[0], width, height, montage);
+                                eegRendering(eegsvg, data_series[1], colorNodes, pklBoolean, width, height, {}, 1.0, montage);
+                            }
+                        }
+                    });
+                }
+            });
         }
     });
 
