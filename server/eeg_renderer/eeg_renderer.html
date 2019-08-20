@@ -11,7 +11,7 @@
 <script src="lpf.js"></script>
 <script>
 
-    var eegRendering = function (svg, data, trackedIds, width, height, params, magnitude, montage) {
+    var eegRendering = function (svg, data, trackedIds, pklBoolean, width, height, params, magnitude, montage) {
 
         if (typeof magnitude != "number")
             magnitude = 1;
@@ -79,20 +79,23 @@
         var pixelPerSeg = 250;
         var channelHeight = height / numChannels;
         var channelMargin = 5;
-        // var minV = -500, maxV = 500;
-        // todo this is the scale for the visualization
+//         var minV = -500, maxV = 500;
+//         todo this is the scale for the visualization
         
-        // This is not working
-        var flatRaw = [].concat(...raw);
-        var flatterRaw = [].concat(...flatRaw);
-        console.log("Max/min values:");
-        console.log(Math.max.apply(null, flatterRaw));
-        console.log(Math.min.apply(null, flatterRaw));
-        
-        var minV = -1, maxV = 1;
+//         This is not working
+//         var flatRaw = [].concat(...raw);
+//         var flatterRaw = [].concat(...flatRaw);
+//         console.log("Max/min values:");
+//         console.log(Math.max.apply(null, flatterRaw));
+//         console.log(Math.min.apply(null, flatterRaw));
+        if (pklBoolean == true) {
+            var minV = -1, maxV = 1;
+        } else if (pklBoolean == false) {
+           var minV = -50, maxV = 50;
+        }
         var dataset = [];
         for (var k = 0; k < numChannels; k++) {
-            var startingY = k * channelHeight;
+            var startingY = k * cannelHeight;
             for (var i = 0; i < segNum; i++) {
                 var curSeg = [];
                 var curSegChn = [];
@@ -205,8 +208,31 @@
         data: {"pathJSON": "empty_field"},
         dataType: 'json',
         success: function (dataArray) {
-            console.log("success iFrame");
             var data_series = dataArray;
+            console.log('success iframe');
+            // called pixelPerSeg from above
+            var pixelPerSeg = 250;
+            var perChannelHeight = 50;
+            var numChannels = (montage == 2 ? 24 : 23);
+            var width = pixelPerSeg * (data_series[1].length) + 100;
+            var height = perChannelHeight * numChannels;
+            var montage = 1;
+
+            localStorage.setItem("widthLocalStorage", width);
+            localStorage.setItem("heightLocalStorage", height);
+
+            // var montage = 3;
+            var outersvg = d3.select("#outersvg")
+                .attr("width", width)
+                .attr("height", height);
+            var eegsvg = outersvg.append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("x", 50)
+                .attr("y", 0)
+                .attr("viewBox", viewBox + width + " " + height)
+                .style("display", "inline-block");
+
             var colorNodes = new Array();
 
             $.ajax({
@@ -229,33 +255,19 @@
                     } else {
                         null
                     }
-                    // called pixelPerSeg from above
-                    var pixelPerSeg = 250;
-                    var perChannelHeight = 50;
-                    var numChannels = (montage == 2 ? 24 : 23);
-                    var width = pixelPerSeg * (data_series[1].length) + 100;
-                    var height = perChannelHeight * numChannels;
-                    var montage = 1;
 
-                    localStorage.setItem("widthLocalStorage", width);
-                    localStorage.setItem("heightLocalStorage", height);
-
-                    // var montage = 3;
-                    var outersvg = d3.select("#outersvg")
-                        .attr("width", width)
-                        .attr("height", height);
-                    var eegsvg = outersvg.append("svg")
-                        .attr("width", width)
-                        .attr("height", height)
-                        .attr("x", 50)
-                        .attr("y", 0)
-                        .attr("viewBox", viewBox + width + " " + height)
-                        .style("display", "inline-block");
-
-                    if (data_series.length > 0) {
-                        eegLabelRendering(outersvg, data_series[0], width, height, montage);
-                        eegRendering(eegsvg, data_series[1], colorNodes, width, height, {}, 1.0, montage);
-                    }
+                    $.ajax({
+                        url: '/pklFileOrNot',
+                        type: 'GET',
+                        success: function(pklBoolean) {
+                            var pklFileBoolean = pklBoolean;
+                            
+                            if (data_series.length > 0) {
+                                eegLabelRendering(outersvg, data_series[0], width, height, montage);
+                                eegRendering(eegsvg, data_series[1], colorNodes, pklBoolean, width, height, {}, 1.0, montage);
+                            }
+                        }
+                    });
                 }
             });
         }
