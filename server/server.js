@@ -19,6 +19,7 @@ var dataVizPath = "";
 var trackingModuleName = "";
 var colorVizTracker = "";
 var setVizPicture = "";
+var pklFileBoolean = "",
 var running_models = [];
 var paused_models = [];
 var connection;
@@ -86,9 +87,11 @@ app.get('/setViz', function (request, response) {
     colorVizTracker = request.query.visualizeColorIds;
     dataVizPath = filepath;
     if (filepath.endsWith('.pkl')) {
+        pklFileBoolean = true;
         dataVizPath = "./Data/plk_viz.json";
         execSync('python utils/pklToJson.py ' + filepath + ' ' + dataVizPath, {stdio: 'inherit'});
-    }
+    } else {
+        pklFileBoolean = false;
     response.send("ok");
 });
 
@@ -99,6 +102,10 @@ app.get('/vizData', function (request, response) {
     response.send(data_series)
 });
 
+app.get('/pklFileOrNot', function (request, response) {
+    response.send(pklFileBoolean);
+});
+    
 app.get('/vizIdTracker', function (request, response) {
     if (colorVizTracker == 0) {
         var trackingFilePath = dataVizPath.substring(0, dataVizPath.lastIndexOf('/')) + '/tracking_file.json';
