@@ -26,7 +26,16 @@
 
         source.addEventListener('pr', () => {
             console.log('Page reset');
+            resetPage();
         });
+
+        function resetPage() {
+            document.getElementById('iFrame1').src = "";
+             document.getElementById('iFrame2').src = "";
+             document.getElementById('iFrame3').src = "";
+             document.getElementById('iFrame4').src = "";
+             document.getElementById('iFrame5').src = "";
+        };
 
         source.addEventListener('update', (e) => {
             console.log('Update');
