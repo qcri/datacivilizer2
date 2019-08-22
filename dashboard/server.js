@@ -115,7 +115,7 @@ app.post('/startNewRun', function (request, response) {
     var new_type = '';
     if (current_modelId == 3 || current_modelId == 5 || current_modelId == 4 || current_modelId == 0) {
         new_type = 'ml';
-    } else if (modelId == 1 || modelId == 2) {
+    } else if (current_modelId == 1 || current_modelId == 2) {
         new_type = 'cleaning';
     }
 
