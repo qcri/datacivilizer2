@@ -12,6 +12,7 @@ app.use(express.static(process.env.PWD + '/public'));
 var path = require('path');
 var fs = require('fs');
 const csv = require('csv-parser');
+const { execSync } = require('child_process');
 
 var image_path = "";
 var current_page_type;
@@ -62,16 +63,20 @@ app.get('/registerDashboard', function(req,res) {
 
 app.use(express.json());
 
+app.get('/', function (request, response) {
+    response.sendfile(path.resolve('./base_dashboard.html'));
+});
+
 app.get('/ml_dashboard.html', function (request, response) {
     response.sendfile(path.resolve('./ml_dashboard.html'));
 });
 
 app.get('/cleaning_dashboard.html', function (request, response) {
-    response.sendfile(path.resolve('./cleaning_dashboard.html'));
+    response.sendfile(path.resolve('./base_dashboard.html'));
 });
 
-app.get('/', function (request, response) {
-    response.sendfile(path.resolve('./base_dashboard.html'));
+app.get('/kyrix.js', function (request, response) {
+    response.sendfile(path.resolve('./kyrix.js'));
 });
 
 app.get('/Chart.js', function (request, response) {
@@ -108,7 +113,7 @@ app.post('/startNewRun', function (request, response) {
 
     // Verify model Id's before running
     var new_type = '';
-    if (current_modelId == 3 || current_modelId == 5 || current_modelId == 5 || current_modelId == 0) {
+    if (current_modelId == 3 || current_modelId == 5 || current_modelId == 4 || current_modelId == 0) {
         new_type = 'ml';
     } else if (modelId == 1 || modelId == 2) {
         new_type = 'cleaning';
@@ -140,7 +145,13 @@ app.post('/updatePage', function (request, response) {
     };
 });
 
-app.get('/getChartData', function (request, response) {
+app.get('/getBarChartData', function (request, response) {
+    var data = JSON.parse(fs.readFileSync('../server/Data/' + request.query.filepath));
+    console.log(data);
+    response.send({'data': data.accuracy});
+});
+
+app.get('/getLineChartData', function (request, response) {
     labels = [];
     chart1 = {'points': []};
     chart2 = {'points': []};
@@ -166,9 +177,7 @@ app.get('/getImage', function (request, response) {
     if (!fs.existsSync(path.dirname(out_path))){
         fs.mkdirSync(path.dirname(out_path));
     }
-    var inStr = fs.createReadStream(in_path);
-    var outStr = fs.createWriteStream(out_path);
-    inStr.pipe(outStr);
+    execSync('python copyFile.py ' + in_path + ' ' + out_path, {stdio: 'inherit'});
     response.end();
 });
 

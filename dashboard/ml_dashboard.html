@@ -8,13 +8,20 @@
     <script src="/dragscroll.js"></script>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gpu.js@2.0.0-rc.19/dist/gpu-browser.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/jquery.validate.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Source Serif Pro" rel="stylesheet"/>
     <script src="/Chart.js"></script>
+    <script src="/kyrix.js"></script>
     <script id="code">
 
         var source = new EventSource('./registerDashboard');
         var charts = [];
+        var barChart;
         var modelsInCharts = [];
         const colors = {0: '#ff6384', 3: '#36a2eb', 4: '#cc65fe', 5: '#ffce56'};
         const modelLabels = {0: 'ML 4', 3: 'ML 1', 4: 'ML 2', 5: 'ML 3'};
@@ -29,9 +36,23 @@
             location.assign(JSON.parse(event.data).html);
         });
 
-        source.addEventListener('pr', () => {
+        source.addEventListener('pr', (e) => {
             console.log('Page reset');
+            console.log(JSON.parse(event.data));
+            const modelId = JSON.parse(event.data);
+            resetPage(modelId);
         });
+
+        function resetPage(modelId) {
+            document.getElementById('hist1').src = '';
+            document.getElementById('hist2').src = '';
+            document.getElementById('matrix').src = '';
+            const index = modelsInCharts.indexOf(modelId);
+            if (index != -1) {
+                modelsInCharts.splice(index, 1);
+                removeRunFromBarChart(index);
+            }
+        };
 
         source.addEventListener('update', (e) => {
             console.log('Update');
@@ -63,28 +84,103 @@
             console.log(data);
             const modelId = data.modelId;
             const matrix_data = data.viz[0];
-            const chart_data = data.viz[1];
+            const line_chart_data = data.viz[1];
+            const bar_chart_data = data.viz[2];
 
             var img_id = 'matrix';
             var matrix_filepath = matrix_data.filename;
             visualizeImage(matrix_filepath, img_id);
 
-            const chart_filepath = chart_data.filename;
+            const chart_filepath = line_chart_data.filename;
             const index = modelsInCharts.indexOf(modelId);
             if (index == -1) {
                 modelsInCharts.push(modelId);
             }
-            addRunToCharts(index, chart_filepath, modelLabels[modelId], colors[modelId]);
+            addRunToLineCharts(index, chart_filepath, modelLabels[modelId], colors[modelId]);
+
+            const bar_chart_filepath = bar_chart_data.filename;
+            addRunToBarChart(index, bar_chart_filepath, modelLabels[modelId], colors[modelId]);
         };
 
         function init() {
-            charts.push(createChart('myChart1', 'Training Loss'));
-            charts.push(createChart('myChart2', 'Training accuracy'));
-            charts.push(createChart('myChart3', 'Validation Loss'));
-            charts.push(createChart('myChart4', 'Validation accuracy'));
+            barChart = createBarChart('myBarChart', 'Validation accuracy');
+
+            var scatterplot_container = document.getElementById('scatterplot_container');
+            var scatterplot_div = kyrix.initializeApp("http://35.221.59.77:8000/").node();
+            scatterplot_div.className += " w3-display-middle";
+            scatterplot_container.appendChild(scatterplot_div);
+            resize_svg();
+
+            charts.push(createLineChart('myChart1', 'Training Loss'));
+            charts.push(createLineChart('myChart2', 'Training accuracy'));
+            charts.push(createLineChart('myChart3', 'Validation Loss'));
+            charts.push(createLineChart('myChart4', 'Validation accuracy'));
         };
 
-        function createChart(container, title) {
+        function createBarChart(container, title) {
+            var myBarChart = new Chart(container, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'validation accuracy',
+                        data: [],
+                        backgroundColor: [],
+                    }]
+                },
+                options: {
+                    legend: { 
+                        display: false,
+                    },
+                    maintainAspectRatio: false,
+                    title: {
+                        display: false,
+                        fontSize: 16,
+                        text: title
+                    },
+                    scales: {
+                        barPercentage: 0.6,
+                        yAxes: [{
+                            ticks: {
+                                suggestedMin: 40,
+                                suggestedMax: 60,
+                            }
+                        }],
+                        xAxes: [{
+                            barPercentage: 0.6
+                        }]
+                    }
+                }
+            });
+            return myBarChart
+        };
+
+        function addRunToBarChart(index, filepath, label, color) {
+            $.get('/getBarChartData',
+                {"filepath": filepath})
+                .done(function (response) {
+                    const data = response.data;
+                    if (index == -1) {
+                        barChart.data.labels.push(label);
+                        barChart.data.datasets[0].data.push(data);
+                        barChart.data.datasets[0].backgroundColor.push(color);
+                    } else {
+                        barChart.data.labels[index] = label;
+                        barChart.data.datasets[0].data[index] = data;
+                        barChart.data.datasets[0].backgroundColor[index] = color;
+                    }
+                    barChart.update();
+                });
+        };
+
+        function removeRunFromBarChart(index) {
+            barChart.data.labels.splice(index, 1);
+            barChart.data.datasets[0].data.splice(index, 1);
+            barChart.data.datasets[0].backgroundColor.splice(index, 1);
+            barChart.update();
+        };
+
+        function createLineChart(container, title) {
             var myLineChart = new Chart(container, {
                 type: 'line',
                 data: {
@@ -95,28 +191,25 @@
                         display: true,
                         text: title
                     },
-                    /*legend: {
-                        display: false
-                    },*/
                     maintainAspectRatio: false
                 }
             });
             return myLineChart
         };
 
-        function addRunToCharts(index, filepath, label, color) {
-            $.get('/getChartData',
+        function addRunToLineCharts(index, filepath, label, color) {
+            $.get('/getLineChartData',
                 {"filepath": filepath})
                 .done(function (response) {
                     const labels = response.labels;
                     const data = response.data;
                     for (var i = charts.length - 1; i >= 0; i--) {
-                        addChartData(charts[i], labels, index, data[i], label, color);
+                        addLineChartData(charts[i], labels, index, data[i], label, color);
                     }
                 });
         };
 
-        function addChartData(chart, labels, index, data, label, color) {
+        function addLineChartData(chart, labels, index, data, label, color) {
             if (!('labels' in chart.data) || chart.data.labels.length == 0) {
                 chart.data.labels = labels;
             }
@@ -144,83 +237,6 @@
             chart.update();
         };
 
-        function iFrameJsonParams() {
-            var iFrameWidthString = localStorage.getItem("widthLocalStorage");
-            var iFrameHeightString = localStorage.getItem("heightLocalStorage");
-            var iFrameWidthNumber = Number(iFrameWidthString);
-            var iFrameHeightNumber = Number(iFrameHeightString) + 10;
-            document.getElementById('iframeViz').style.width = iFrameWidthNumber + 'px';
-            document.getElementById('iframeViz').style.height = iFrameHeightNumber + 'px';
-        };
-
-        function iFrameImageParams() {
-            var iframe = document.getElementById('iframeViz');
-            var innerDoc = iframe.contentWindow.document;
-            var myRegexp = /.+\s.(\d+)\s?.\s?(\d+)./;
-            var match = myRegexp.exec(innerDoc.title);
-            document.getElementById('iframeViz').style.width = Number(match[1]);
-            document.getElementById('iframeViz').style.height = Number(match[2]);
-        };
-
-        function visualizeOutput(e, obj) {
-            console.log(obj.part.adornedPart.data.viz_path);
-            var viz_path = obj.part.adornedPart.data.viz_path;
-            if (viz_path == "") {
-                console.log("No viz path given")
-            }
-            var filename = "./Data/" + viz_path;
-            visualizeFile(filename);
-        };
-
-        function visualizeObjList(vizObjList) {
-            close_viz('edv_list_div')
-            close_viz('graph_viz_div')
-            for (var viz_elem of vizObjList) {
-                viz_type = viz_elem.type;
-                viz_file = './Data/' + viz_elem.filename
-                if (viz_type == "image") {
-                    visualizeImage(viz_file);
-                } else if (viz_type == "eeg_json") {
-                    visualizeJson(viz_file);
-                } else if (viz_type == "pkl_dir") {
-                    visualizeCsv(viz_file);
-                } else if (viz_type == "graph_data") {
-                    visualizeNnPkl(viz_file);
-                }
-            }
-        };
-
-        function visualizeFile(filepath) {
-            close_viz('edv_list_div');
-            close_viz('graph_viz_div');
-            var extension = filepath.split('.').pop();
-            if (extension == 'json') {
-                visualizeJson(filepath);
-            } else if (extension == 'jpg' || extension == 'png') {
-                visualizeImage(filepath);
-            } else if (extension == 'csv') {
-                visualizeCsv(filepath);
-            } else {
-                console.log("Cannot visualize " + filepath);
-            }
-        };
-
-        function visualizeCsv(filepath) {
-            open_viz('edv_list_div');
-            $('#edv_list').html("");
-            console.log("visualizing: " + filepath);
-            console.log(filepath.replace('.csv', '') + '/');
-            $.get('/csvVizList',
-                {"pathCsv": filepath})
-                .done(function (response) {
-                    const l = response.list;
-                    for (const elem of l){
-                        var html = new EJS({url : '/edv_list_elem.ejs'}).render({'filepath': elem, 'prefix': filepath.replace('.csv', '') + '/'});
-                        $('#edv_list').append($(html));
-                    }
-                });
-        };
-
         function visualizeImage(filepath, id) {
             console.log("visualizing: " + filepath);
             var i = document.getElementById(id);
@@ -232,114 +248,32 @@
                 });
         };
 
-        function visualizeJson(filepath) {
-            console.log("visualizing: " + filepath);
-            var iframe = document.getElementById('iframeViz');
-            $.get('/setViz',
-                {"pathJSON": filepath})
-                .done(function (response) {
-                    iframe.setAttribute("src", "vizFrame");
-                    iframe.src = iframe.src;
-                    setTimeout(iFrameJsonParams, 500);
-                });
-        };
-
-        function visualizeNnPkl(filepath) {
-            open_viz('graph_viz_div');
-            console.log("visualizing: " + filepath);
-            $.get('/pklGraphData',
-                {"pathPkl": filepath})
-                .done(function (response) {
-                    const labels = response.labels;
-                    const data = response.data;
-                    console.log(data);
-                    for (const elem of data) {
-                        createGraph(labels, elem);
-                    }
-                });
-        };
-
-        function createGraph(graph_labels, graph_data) {
-
-            var myLineChart = new Chart(graph_data.chartContainer, {
-                type: 'line',
-                data: {
-                    labels: graph_labels,
-                    datasets: [{ 
-                        data: graph_data.points,
-                        label: "",
-                        borderColor: "#3e95cd",
-                        fill: false
-                    }]
-                },
-                options: {
-                    title: {
-                        display: true,
-                        text: graph_data.title
-                    },
-                    legend: {
-                        display: false
-                    },
-                    maintainAspectRatio: false
-                }
-            });
-        };
-
-        function open_viz(id) {
-            var x = document.getElementById(id);
-            if (x.className.indexOf("w3-show") == -1) {
-                x.className = x.className.replace(" w3-hide", " w3-show");
-            }
-        };
-
-        function close_viz(id) {
-            var x = document.getElementById(id);
-            if (x.className.indexOf("w3-hide") == -1) {
-                x.className = x.className.replace(" w3-show", " w3-hide");
-            }
-        };
-
-        function toggle_viz(id) {
-            var x = document.getElementById(id);
-            if (x.className.indexOf("w3-show") == -1) {
-                x.className = x.className.replace(" w3-hide", " w3-show");
-            } else {
-                x.className = x.className.replace(" w3-show", " w3-hide");
-            }
-        };
-
-        function toggle_arrow(id) {
-            var x = document.getElementById(id);
-            if (x.className.indexOf("fa-angle-up") == -1) {
-                x.className = x.className.replace(" fa-angle-down", " fa-angle-up");
-            } else {
-                x.className = x.className.replace(" fa-angle-up", " fa-angle-down");
-            }
-        };
-
-        function button() {
-            $.ajax({
-                url: '/testChart',
-                type: 'post',
-                success: function (data) {
-                    console.log("success!");
-                }
-            });
+        function resize_svg() {
+            var container = document.getElementById("scatterplot_container");
+            var bbox = container.getBoundingClientRect();
+            var h = bbox.height;
+            var w = bbox.width;
+            var size = Math.min(h,w);
+            var div = container.firstElementChild
+            var svg = div.firstElementChild;
+            div.setAttribute('style', 'width: ' + size + 'px; height: ' + size + 'px;');
+            svg.setAttribute('viewBox', '0 0 ' + 1100*1100/size + ' ' + 1100*1100/size);
         };
     </script>
 </head>
 
-<body onload="init();" style="height: 100%;">
+<body onload="init();" onresize="resize_svg();" style="height: 100%;">
 
 <div style="height: 50%;">
     <div class="w3-row-padding" style="height: 100%; padding-top: 16px;">
-        <div class="w3-half" style="height: 100%;">
-            <div class="w3-container w3-border" style="height: 100%; padding: 0px;">
-                <div class="w3-button" onclick="button();">Button</div>
+        <div class="w3-third" style="height: 100%;">
+            <div class="w3-container w3-center"><b>Training segments</b></div>
+            <div class="w3-container w3-border w3-display-container" id="scatterplot_container" style="height: calc(100% - 19px); padding: 0px; overflow: hidden;">
             </div>
         </div>
-        <div class="w3-half" style="height: 100%;">
-            <div class="w3-container w3-border" style="height: 100%; padding: 0px;">
+        <div class="w3-third" style="height: 100%;">
+            <div class="w3-container w3-center"><b>Wrongly classified testing segments</b></div>
+            <div class="w3-container w3-border w3-display-container" style="height: calc(100% - 19px); padding: 0px; overflow: hidden;">
                 <div class="w3-row" style="height: 50%;">
                     <div class="w3-half" style="height: 100%;">
                         <canvas id="myChart1" width="100%" height="100%"></canvas>
@@ -358,24 +292,35 @@
                 </div>
             </div>
         </div>
+        <div class="w3-third" style="height: 100%;">
+            <div class="w3-container w3-center"><b>Validation accuracy</b></div>
+            <div class="w3-container w3-border w3-display-container" style="height: calc(100% - 19px); padding: 0px; overflow: hidden;">
+                <div class="w3-display-bottommiddle" style="width: 100%; height: 95%;">
+                    <canvas id="myBarChart" width="100%" height="100%"></canvas>
+                </div>
+            </div>
+        </div>
     </div>    
 </div>
 
 <div style="height: 50%;">
     <div class="w3-row-padding" style="height: 100%; padding-top: 16px;  padding-bottom: 16px;">
         <div class="w3-third" style="height: 100%;">
-            <div class="w3-container w3-border w3-display-container" style="height: 100%; padding: 0px;">
-                <img id="hist1" alt="Histogram 1" class="w3-image w3-display-middle">
+            <div class="w3-container w3-center"><b>Balance histogram</b></div>
+            <div class="w3-container w3-border w3-display-container" style="height: calc(100% - 19px); padding: 0px; overflow: hidden;">
+                <img id="hist1" class="w3-image w3-display-middle" style="max-width: calc(100% - 4px);">
             </div>
         </div>
         <div class="w3-third" style="height: 100%;">
-            <div class="w3-container w3-border w3-display-container" style="height: 100%; padding: 0px;">
-                <img id="hist2" alt="Histogram 2" class="w3-image w3-display-middle">
+            <div class="w3-container w3-center"><b>Crop histogram</b></div>
+            <div class="w3-container w3-border w3-display-container" style="height: calc(100% - 19px); padding: 0px; overflow: hidden;">
+                <img id="hist2" class="w3-image w3-display-middle" style="max-width: calc(100% - 4px);">
             </div>
         </div>
         <div class="w3-third" style="height: 100%;">
-            <div class="w3-container w3-border w3-display-container" style="height: 100%; padding: 0px;">
-                <img id="matrix" alt="Matrix" class="w3-image w3-display-middle">
+            <div class="w3-container w3-center"><b>Confusion matrix</b></div>
+            <div class="w3-container w3-border w3-display-container" style="height: calc(100% - 19px); padding: 0px; overflow: hidden;">
+                <img id="matrix" class="w3-image w3-display-middle" style="max-width: calc(100% - 4px);">
             </div>
         </div>
     </div>    

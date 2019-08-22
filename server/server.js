@@ -92,8 +92,8 @@ app.get('/setViz', function (request, response) {
         execSync('python utils/pklToJson.py ' + filepath + ' ' + dataVizPath, {stdio: 'inherit'});
     } else {
         pklFileBoolean = false;
-    response.send("ok");
     }
+    response.send("ok");
 });
 
 app.get('/vizData', function (request, response) {

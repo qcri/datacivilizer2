@@ -528,7 +528,7 @@
                 } else if (viz_type == "pkl_dir") {
                     visualizeCsv(viz_file);
                 } else if (viz_type == "graph_data") {
-                    visualizeNnPkl(viz_file);
+                    visualizeNnCsv(viz_file);
                 }
             }
         };
@@ -592,7 +592,7 @@
             open_viz('graph_viz_div');
             console.log("visualizing: " + filepath);
             $.get('/csvGraphData',
-                {"pathcsv": filepath})
+                {"pathCsv": filepath})
                 .done(function (response) {
                     const labels = response.labels;
                     const data = response.data;

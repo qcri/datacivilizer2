@@ -186,7 +186,7 @@ def run_nn(in_data_dir, index_file, out_path, run_dir, save_path_name='save', re
     writer.export_scalars_to_json("./all_scalars.json")
     writer.close()
 
-def execute_service(in_data_dir, index_file, matrix_img_file, graph_data_file):
+def execute_service(in_data_dir, index_file, matrix_img_file, graph_data_file, histogram_data_file):
 
     # For demo purposes, just copy precomputed output to the run directory
     model = matrix_img_file.partition('_')[0]
@@ -196,20 +196,25 @@ def execute_service(in_data_dir, index_file, matrix_img_file, graph_data_file):
         print("ml_nn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/ml1_viz_-2.png'
         precomp_graph_data_path = 'ml_outputs/ml1_viz_-2.csv'
+        precomp_hist_data_path = 'ml_outputs/ml1_viz_-2.json'
     elif model == "4":
         print("ml_bcnn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/ml2_viz_-2.png'
         precomp_graph_data_path = 'ml_outputs/ml2_viz_-2.csv'
+        precomp_hist_data_path = 'ml_outputs/ml2_viz_-2.json'
     elif model == "5":
         print("ml_fmnn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/ml3_viz_-2.png'
         precomp_graph_data_path = 'ml_outputs/ml3_viz_-2.csv'
+        precomp_hist_data_path = 'ml_outputs/ml3_viz_-2.json'
     else:
         print("ml_bcfmnn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/viz_-2.png'
         precomp_graph_data_path = 'ml_outputs/viz_-2.csv'
+        precomp_hist_data_path = 'ml_outputs/viz_-2.json'
     copyfile('./Data/' + precomp_matrix_img_path, './Data/' + matrix_img_file)
     copyfile('./Data/' + precomp_graph_data_path, './Data/' + graph_data_file)
+    copyfile('./Data/' + precomp_hist_data_path, './Data/' + histogram_data_file)
     return
 
     run_dir, _, _ = out_path.partition('/')
@@ -219,6 +224,6 @@ if __name__ == '__main__':
     torch.multiprocessing.freeze_support()
 
     if (sys.argv[1].endswith('.pkl')):
-        execute_service(sys.argv[2], sys.argv[1], sys.argv[3], sys.argv[4])
+        execute_service(sys.argv[2], sys.argv[1], sys.argv[3], sys.argv[4], sys.argv[5])
     else:
-        execute_service(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        execute_service(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])

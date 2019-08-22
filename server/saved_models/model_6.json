@@ -1,0 +1,19 @@
+{
+    "class": "GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "modelData": {
+        "position": "-433.5 -299"
+    },
+    "nodeDataArray": [],
+    "linkDataArray": [],
+    "modelId": 6,
+    "runNo": 1,
+    "parameters": {},
+    "runs": [
+        {
+            "runNo": 1,
+            "metrics": {}
+        }
+    ]
+}

@@ -15,6 +15,10 @@
         {
             "type": "graph_data",
             "extension": ".csv"
+        },
+        {
+            "type": "histogram_data",
+            "extension": ".json"
         }
     ],
     "num_parameters": 0,
