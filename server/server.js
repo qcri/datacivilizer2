@@ -302,7 +302,7 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
         'runNo': runNo,
         'debugger_type': debugger_type,
         'metric_file': "metric_temp.json",
-        'max_processes': 2,
+        'max_processes': 1,
         'pipeline': []
     }
 

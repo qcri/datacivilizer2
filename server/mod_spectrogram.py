@@ -1,4 +1,5 @@
 import sys
+import time
 import matlab.engine
 from shutil import copyfile
 
@@ -14,6 +15,7 @@ def execute_service(in_path, out_path, viz_out_path, nw=2):
         print("spectrogram")
         copyfile('./Data/spectrogram_outputs/' + out_file, './Data/' + out_path)
         copyfile('./Data/spectrogram_outputs/' + viz_out_file, './Data/' + viz_out_path)
+        time.sleep(1)
         return
 
     # TODO: get args from JSON

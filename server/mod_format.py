@@ -21,11 +21,13 @@ def execute_service(in_path, out_path, viz_out_path):
         print("eeg_good_pipeline")
         copyfile('./Data/' + eeg_good_folder + '/' + out_file, './Data/' + out_path)
         copyfile('./Data/' + eeg_good_folder + '/' + viz_out_file, './Data/' + viz_out_path)
+        time.sleep(3)
         return
     elif model == "2":
         print("eeg_bad_pipeline")
         copyfile('./Data/' + eeg_bad_folder + '/' + out_file, './Data/' + out_path)
         copyfile('./Data/' + eeg_bad_folder + '/' + viz_out_file, './Data/' + viz_out_path)
+        time.sleep(3)
         return
 
     eng = matlab.engine.start_matlab()
