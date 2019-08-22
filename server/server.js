@@ -69,10 +69,12 @@ app.get('/registerEditor', function(req,res){
 const {TopologicalSort} = require('topological-sort');
 app.use(express.json());
 
+//
 app.get('/', function (request, response) {
     response.sendfile(path.resolve('./editor.html'));
 });
 
+// eeg data visualization
 app.get('/idTrackingModule', function (request, response) {
   trackingModuleName = request.query.moduleName;
   response.send("ok");
@@ -106,7 +108,7 @@ app.get('/vizData', function (request, response) {
 app.get('/pklFileOrNot', function (request, response) {
     response.send(pklFileBoolean);
 });
-    
+
 app.get('/vizIdTracker', function (request, response) {
     if (colorVizTracker == 0) {
         var trackingFilePath = dataVizPath.substring(0, dataVizPath.lastIndexOf('/')) + '/tracking_file.json';
@@ -129,6 +131,7 @@ app.get('/vizIdTracker', function (request, response) {
     }
 });
 
+// csv visualization
 app.get('/csvVizList', function (request, response) {
     results = []
     fs.createReadStream(request.query.pathCsv)
@@ -159,6 +162,7 @@ app.get('/csvGraphData', function (request, response) {
         });
 });
 
+// image visualization
 app.get('/vizPicture', function (request, response) {
     response.sendfile(path.resolve(setVizPicture));
 });

@@ -41,6 +41,7 @@
             finish_running_pipeline(JSON.parse(event.data));
         });
 
+        // dynamically changing iframe size
         function iFrameJsonParams() {
             var iFrameWidthString = localStorage.getItem("widthLocalStorage");
             var iFrameHeightString = localStorage.getItem("heightLocalStorage");
@@ -489,6 +490,8 @@
             window.location = window.location.href + "download_output?" + node_key; //add "download..." to the URL (get)
         };
 
+
+        // all visualization functions 
         function visualizeOutput(e, obj) {
             console.log(obj.part.adornedPart.data.viz_path);
             var viz_path = obj.part.adornedPart.data.viz_path;
@@ -497,7 +500,6 @@
             }
             var filename = "./Data/" + viz_path;
             visualizeFile(filename);
-            //visualizeTrackedFile('./Data/5_166/out_-9_100.json', 'mod_resample')
         };
 
         function visualizeTrackedFile(vizObjList, moduleName) {
@@ -511,7 +513,6 @@
                     } else {
                         console.log("Wrong Function");
                     }
-                    // visualizeJson(vizObjList, 0)
                 });
         };
 

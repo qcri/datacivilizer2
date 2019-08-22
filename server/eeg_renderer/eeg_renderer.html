@@ -82,13 +82,7 @@
         // var minV = -500, maxV = 500;
         // todo this is the scale for the visualization
 
-        // This is not working
-        /*var flatRaw = [].concat(...raw);
-        var flatterRaw = [].concat(...flatRaw);
-        console.log("Max/min values:");
-        console.log(Math.max.apply(null, flatterRaw));
-        console.log(Math.min.apply(null, flatterRaw));*/
-        
+        // change visualization scaling for pkl files
         if (pklBoolean == true) {
             var minV = -1, maxV = 1;
         } else if (pklBoolean == false) {
@@ -200,6 +194,7 @@
             });
     };
 
+    // get Data
     $.ajax({
         url: '/vizData',
         type: 'GET',
@@ -236,6 +231,7 @@
 
             var colorNodes = new Array();
 
+            // get tracked Ids
             $.ajax({
                 url: '/vizIdTracker',
                 type: 'GET',
@@ -257,12 +253,13 @@
                         null
                     }
 
+                    // if file is pkl
                     $.ajax({
                         url: '/pklFileOrNot',
                         type: 'GET',
                         success: function(pklBoolean) {
                             var pklFileBoolean = pklBoolean;
-                            
+
                             if (data_series.length > 0) {
                                 eegLabelRendering(outersvg, data_series[0], width, height, montage);
                                 eegRendering(eegsvg, data_series[1], colorNodes, pklBoolean, width, height, {}, 1.0, montage);
