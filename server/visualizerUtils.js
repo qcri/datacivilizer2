@@ -21,6 +21,7 @@ function load_models() {
 
 function set_parameter_filter() {
     $('.parameters').html("");
+    filter_parameters = [];
     var parameters = [];
     var _module;
     var num_parameters;
@@ -37,6 +38,7 @@ function set_parameter_filter() {
 
 function set_metric_filter() {
     $('.metrics').html("");
+    filter_metrics = [];
     var metrics = [];
     var model;
     var runs;
