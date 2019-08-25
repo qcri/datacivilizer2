@@ -12,6 +12,7 @@ app.use(express.static(process.env.PWD + '/public'));
 var path = require('path');
 var fs = require('fs');
 const csv = require('csv-parser');
+const { execSync } = require('child_process');
 
 var image_path = "";
 var dataVizPath = "";
@@ -74,6 +75,10 @@ app.get('/cleaning_dashboard.html', function (request, response) {
 
 app.get('/', function (request, response) {
     response.sendfile(path.resolve('./base_dashboard.html'));
+});
+
+app.get('/kyrix.js', function (request, response) {
+    response.sendfile(path.resolve('./kyrix.js'));
 });
 
 app.get('/lpf.js', function (request, response) {

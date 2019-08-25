@@ -195,22 +195,22 @@ def execute_service(in_data_dir, index_file, matrix_img_file, graph_data_file, h
     if model == "3":
         print("ml_nn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/ml1_viz_-2.png'
-        precomp_graph_data_path = 'ml_outputs/ml1_viz_-2.csv'
+        precomp_graph_data_path = 'ml_outputs/ml1_viz_-2_new.csv'
         precomp_hist_data_path = 'ml_outputs/ml1_viz_-2.json'
     elif model == "4":
         print("ml_bcnn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/ml2_viz_-2.png'
-        precomp_graph_data_path = 'ml_outputs/ml2_viz_-2.csv'
+        precomp_graph_data_path = 'ml_outputs/ml2_viz_-2_new.csv'
         precomp_hist_data_path = 'ml_outputs/ml2_viz_-2.json'
     elif model == "5":
         print("ml_fmnn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/ml3_viz_-2.png'
-        precomp_graph_data_path = 'ml_outputs/ml3_viz_-2.csv'
+        precomp_graph_data_path = 'ml_outputs/ml3_viz_-2_new.csv'
         precomp_hist_data_path = 'ml_outputs/ml3_viz_-2.json'
     else:
         print("ml_bcfmnn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/viz_-2.png'
-        precomp_graph_data_path = 'ml_outputs/viz_-2.csv'
+        precomp_graph_data_path = 'ml_outputs/viz_-2_new.csv'
         precomp_hist_data_path = 'ml_outputs/viz_-2.json'
     copyfile('./Data/' + precomp_matrix_img_path, './Data/' + matrix_img_file)
     copyfile('./Data/' + precomp_graph_data_path, './Data/' + graph_data_file)

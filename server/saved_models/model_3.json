@@ -78,7 +78,7 @@
         }
     ],
     "modelId": 3,
-    "runNo": 32,
+    "runNo": 39,
     "parameters": {
         "path": "second_dataset_from_cpd_eeg_10s_split",
         "viz_path": ""
@@ -262,6 +262,34 @@
         },
         {
             "runNo": 32,
+            "metrics": {}
+        },
+        {
+            "runNo": 33,
+            "metrics": {}
+        },
+        {
+            "runNo": 34,
+            "metrics": {}
+        },
+        {
+            "runNo": 35,
+            "metrics": {}
+        },
+        {
+            "runNo": 36,
+            "metrics": {}
+        },
+        {
+            "runNo": 37,
+            "metrics": {}
+        },
+        {
+            "runNo": 38,
+            "metrics": {}
+        },
+        {
+            "runNo": 39,
             "metrics": {}
         }
     ]

@@ -51,6 +51,7 @@
             if (index != -1) {
                 modelsInCharts.splice(index, 1);
                 removeRunFromBarChart(index);
+                removeRunFromLineChart(index);
             }
         };
 
@@ -237,6 +238,13 @@
             chart.update();
         };
 
+        function removeRunFromLineChart(index) {
+            for (var i = charts.length - 1; i >= 0; i--) {
+                charts[i].data.datasets.splice(index, 1);
+                charts[i].update();
+            }
+        };
+
         function visualizeImage(filepath, id) {
             console.log("visualizing: " + filepath);
             var i = document.getElementById(id);
@@ -300,7 +308,7 @@
                 </div>
             </div>
         </div>
-    </div>    
+    </div>
 </div>
 
 <div style="height: 50%;">
