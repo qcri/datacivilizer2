@@ -7,7 +7,9 @@
     "chart.js": "^2.8.0",
     "express": "^4.17.0",
     "request": "^2.88.0",
-    "topological-sort": "^0.3.0"
+    "topological-sort": "^0.3.0",
+    "csv-parser": "^2.3.0",
+    "path-sort": "^0.1.0"
   },
   "devDependencies": {},
   "scripts": {
@@ -16,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elkindi/dc2.git"
+    "url": "git+https://github.com/qcri/datacivilizer2.git"
   },
   "keywords": [
     "data",
@@ -28,7 +30,7 @@
   "author": "elkindi rezig",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/elkindi/dc2/issues"
+    "url": "https://github.com/qcri/datacivilizer2/issues"
   },
-  "homepage": "https://github.com/elkindi/dc2#readme"
+  "homepage": "https://github.com/qcri/datacivilizer2#readme"
 }

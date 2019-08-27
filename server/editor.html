@@ -1,4 +1,4 @@
-﻿OCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -14,7 +14,9 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel='stylesheet' href='/DataInspector.css'/>
-    <script src="/visualizerUtils.js"></script>
+    <script src="/versioningUtils.js"></script>
+    <script src="/vizUtils.js"></script>
+    <script src="/modelsvisualizerUtils.js"></script>
     <script src="/debuggerUtils.js"></script>
     <script src="/trackingUtils.js"></script>
     <script src="/DataInspector.js"></script>
@@ -56,8 +58,8 @@
             var innerDoc = iframe.contentWindow.document;
             var myRegexp = /.+\s.(\d+)\s?.\s?(\d+)./;
             var match = myRegexp.exec(innerDoc.title);
-            document.getElementById('iframeViz').style.width = Number(match[1]);
-            document.getElementById('iframeViz').style.height = Number(match[2]);
+            document.getElementById('iframeViz').style.width = Number(match[1]) + 'px';
+            document.getElementById('iframeViz').style.height = Number(match[2]) + 'px';
         };
 
         var running_models = []
@@ -109,19 +111,6 @@
                     });
 
             myDiagram.allowTextEdit = false;
-
-
-            // when the document is modified, add a "*" to the title and enable the "Save" button
-            myDiagram.addDiagramListener("Modified", function (e) {
-                var button = document.getElementById("SaveButton");
-                if (button) button.disabled = !myDiagram.isModified;
-                var idx = document.title.indexOf("*");
-                if (myDiagram.isModified) {
-                    if (idx < 0) document.title += "*";
-                } else {
-                    if (idx >= 0) document.title = document.title.substr(0, idx);
-                }
-            });
 
             // Define a function for creating a "port" that is normally transparent.
             // The "name" is used as the GraphObject.portId, the "spot" is used to control how links connect
@@ -231,7 +220,6 @@
                     })
                 );
 
-
             myDiagram.nodeTemplate =
                 GOJS(go.Node, "Spot", {locationSpot: go.Spot.Center},
                     new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify), {
@@ -289,13 +277,6 @@
                     }
                 );
 
-
-            myDiagram.add(
-                GOJS(go.Part,
-                    GOJS(go.Picture, "fig.png", {background: "gray", width: 50, height: 50})
-                ));
-
-
             function showSmallPorts(node, show) {
                 node.ports.each(function (port) {
                     if (port.portId !== "") { // don't change the default port, which is the big shape
@@ -344,42 +325,17 @@
                 );
 
             var inspector = new Inspector('myInspectorDiv', myDiagram, {
-                // allows for multiple nodes to be inspected at once
                 multipleSelection: false,
-                // max number of node properties will be shown when multiple selection is true
                 showSize: 1,
-                // when multipleSelection is true, when showAllProperties is true it takes the union of properties
-                // otherwise it takes the intersection of properties
                 showAllProperties: false,
-                // uncomment this line to only inspect the named properties below instead of all properties on each object:
                 includesOwnProperties: true,
                 properties: {
                     "text": {show: false},
-                    // key would be automatically added for nodes, but we want to declare it read-only also:
                     "key": {show: false},
                     "figure": {show: false},
                     "loc": {show: false},
                     "fill": {show: false},
                     "cmd": {readOnly: true}
-                    //"key": { readOnly: true, show: Inspector.showIfPresent },
-                    // color would be automatically added for nodes, but we want to declare it a color also:
-                    //"color": { show: Inspector.showIfPresent, type: 'color' },
-                    // Comments and LinkComments are not in any node or link data (yet), so we add them here:
-                    //"arg0": { show: Inspector.showIfNode }
-                    //"LinkComments": { show: Inspector.showIfLink },
-                    //"isGroup": { readOnly: true, show: Inspector.showIfPresent },
-                    //"flag": { show: Inspector.showIfNode, type: 'checkbox' },
-                    // "state": {
-                    //   show: Inspector.showIfNode,
-                    //   type: "select",
-                    //   choices: function(node, propName) {
-                    //     if (Array.isArray(node.data.choices)) return node.data.choices;
-                    //     return ["one", "two", "three", "four", "five"];
-                    //   }
-                    // },
-                    // "choices": { show: false },  // must not be shown at all
-                    // // an example of specifying the <input> type
-                    // "password": { show: Inspector.showIfPresent, type: 'password' }
                 }
             });
 
@@ -484,16 +440,8 @@
             if (pos) myDiagram.initialPosition = go.Point.parse(pos);
         };
 
-        function requestOutputFile(e, obj) {
-            console.log(obj.part.adornedPart.data.key);
-            var node_key = obj.part.adornedPart.data.key;
-            window.location = window.location.href + "download_output?" + node_key; //add "download..." to the URL (get)
-        };
-
-
         // all visualization functions 
         function visualizeOutput(e, obj) {
-            console.log(obj.part.adornedPart.data.viz_path);
             var viz_path = obj.part.adornedPart.data.viz_path;
             if (viz_path == "") {
                 console.log("No viz path given")
@@ -502,137 +450,9 @@
             visualizeFile(filename);
         };
 
-        function visualizeTrackedFile(vizObjList, moduleName) {
-            $.get('/idTrackingModule',
-                {"moduleName" : moduleName})
-                .done(function (response) {
-                    viz_type = vizObjList[0].type;
-                    viz_file = './Data/' + vizObjList[0].filename;
-                    if (viz_type == "eeg_json") {
-                        visualizeJson(viz_file, 0);
-                    } else {
-                        console.log("Wrong Function");
-                    }
-                });
-        };
-
-        function visualizeObjList(vizObjList) {
-            close_viz('edv_list_div')
-            close_viz('graph_viz_div')
-            for (var viz_elem of vizObjList) {
-                viz_type = viz_elem.type;
-                viz_file = './Data/' + viz_elem.filename
-                if (viz_type == "image") {
-                    visualizeImage(viz_file);
-                } else if (viz_type == "eeg_json") {
-                    visualizeJson(viz_file);
-                } else if (viz_type == "pkl_dir") {
-                    visualizeCsv(viz_file);
-                } else if (viz_type == "graph_data") {
-                    visualizeNnCsv(viz_file);
-                }
-            }
-        };
-
-        function visualizeFile(filepath) {
-            close_viz('edv_list_div');
-            close_viz('graph_viz_div');
-            var extension = filepath.split('.').pop();
-            if (extension == 'json') {
-                visualizeJson(filepath);
-            } else if (extension == 'jpg' || extension == 'png') {
-                visualizeImage(filepath);
-            } else if (extension == 'csv') {
-                visualizeCsv(filepath);
-            } else {
-                console.log("Cannot visualize " + filepath);
-            }
-        };
-
-        function visualizeCsv(filepath) {
-            open_viz('edv_list_div');
-            $('#edv_list').html("");
-            console.log("visualizing: " + filepath);
-            console.log(filepath.replace('.csv', '') + '/');
-            $.get('/csvVizList',
-                {"pathCsv": filepath})
-                .done(function (response) {
-                    const l = response.list;
-                    for (const elem of l){
-                        var html = new EJS({url : '/edv_list_elem.ejs'}).render({'filepath': elem, 'prefix': filepath.replace('.csv', '') + '/'});
-                        $('#edv_list').append($(html));
-                    }
-                });
-        };
-
-        function visualizeImage(filepath) {
-            console.log("visualizing: " + filepath);
-            var iframe = document.getElementById('iframeViz');
-            $.get('/setImageViz',
-                {"pathJSON": filepath})
-                .done(function (response) {
-                    iframe.setAttribute("src", "vizPicture");
-                    iframe.src = iframe.src;
-                    setTimeout(iFrameImageParams, 500);
-                });
-        };
-
-        function visualizeJson(filepath, colorIdBoolean = 1) {
-            console.log("visualizing: " + filepath);
-            var iframe = document.getElementById('iframeViz');
-            $.get('/setViz',
-            {"pathJSON": filepath, "visualizeColorIds": colorIdBoolean})
-                .done(function (response) {
-                    iframe.setAttribute("src", "vizFrame");
-                    iframe.src = iframe.src;
-                    setTimeout(iFrameJsonParams, 500);
-                });
-        };
-
-        function visualizeNnCsv(filepath) {
-            open_viz('graph_viz_div');
-            console.log("visualizing: " + filepath);
-            $.get('/csvGraphData',
-                {"pathCsv": filepath})
-                .done(function (response) {
-                    const labels = response.labels;
-                    const data = response.data;
-                    console.log(data);
-                    for (const elem of data) {
-                        createGraph(labels, elem);
-                    }
-                });
-        };
-
-        function createGraph(graph_labels, graph_data) {
-
-            var myLineChart = new Chart(graph_data.chartContainer, {
-                type: 'line',
-                data: {
-                    labels: graph_labels,
-                    datasets: [{
-                        data: graph_data.points,
-                        label: "",
-                        borderColor: "#3e95cd",
-                        fill: false
-                    }]
-                },
-                options: {
-                    title: {
-                        display: true,
-                        text: graph_data.title
-                    },
-                    legend: {
-                        display: false
-                    },
-                    maintainAspectRatio: false
-                }
-            });
-        };
-
         function request_pipeline(p) {
 
-            console.log(p);
+            console.log("Requesting pipeline " + p);
 
             $.ajax({
                 url: '/request_pipeline',
@@ -648,63 +468,10 @@
                 }
             });
         };
-
-        function open_viz(id) {
-            var x = document.getElementById(id);
-            if (x.className.indexOf("w3-show") == -1) {
-                x.className = x.className.replace(" w3-hide", " w3-show");
-            }
-        };
-
-        function close_viz(id) {
-            var x = document.getElementById(id);
-            if (x.className.indexOf("w3-hide") == -1) {
-                x.className = x.className.replace(" w3-show", " w3-hide");
-            }
-        };
-
-        function toggle_viz(id) {
-            var x = document.getElementById(id);
-            if (x.className.indexOf("w3-show") == -1) {
-                x.className = x.className.replace(" w3-hide", " w3-show");
-            } else {
-                x.className = x.className.replace(" w3-show", " w3-hide");
-            }
-        };
-
-        function toggle_arrow(id) {
-            var x = document.getElementById(id);
-            if (x.className.indexOf("fa-angle-up") == -1) {
-                x.className = x.className.replace(" fa-angle-down", " fa-angle-up");
-            } else {
-                x.className = x.className.replace(" fa-angle-up", " fa-angle-down");
-            }
-        };
-
-        function open_debugger() {
-            var _debugger = document.getElementById('debugger');
-            if (_debugger.className.indexOf("w3-show") == -1) {
-                _debugger.className = _debugger.className.replace(" w3-hide", " w3-show");
-            }
-            var _diagram = document.getElementById("diagram");
-            _diagram.style.width = "40%";
-            myDiagram.requestUpdate();
-        };
-
-        function close_debugger() {
-            var _debugger = document.getElementById('debugger');
-            if (_debugger.className.indexOf("w3-hide") == -1) {
-                _debugger.className = _debugger.className.replace(" w3-show", " w3-hide");
-            }
-            var _diagram = document.getElementById("diagram");
-            _diagram.style.width = "80%";
-            myDiagram.requestUpdate();
-        };
     </script>
 </head>
 
 <body onload="init()">
-<script src="/versioningUtils.js"></script>
 <script type="text/javascript">
 
     var maxModelId = 0;
@@ -723,7 +490,6 @@
         var debugger_type = document.querySelector('input[name="debug_type"]:checked').value;
 
         saveDiagramProperties();
-        console.log(myDiagram.model.toJson());
         modelJsonString = myDiagram.model.toJson();
 
         modelHash = getHash(modelJsonString, maxSize);
@@ -741,14 +507,10 @@
         }
 
         saveModelVersions();
-        console.log(modelHash);
-        console.log(modelId);
-        console.log(runNo);
 
         modelJson = JSON.parse(modelJsonString);
         modelJson['modelId'] = modelId;
         modelJson['runNo'] = runNo;
-        console.log(modelJson);
         modelJsonString = JSON.stringify(modelJson);
         saveModel(modelJsonString);
 
@@ -777,7 +539,6 @@
 <script>
     function handleFile(files) {
         const numFiles = files.length;
-        console.log(numFiles);
 
         var fr = new FileReader();
         fr.onload = function (e) {
@@ -826,6 +587,7 @@
     }
 </style>
 
+<!-- Menu bar -->
 <div class="w3-top" style="z-index: 5">
     <div class="w3-bar w3-light-gray">
         <a class="w3-bar-item w3-green">Data Civilizer 2.0</a>
@@ -838,11 +600,13 @@
 <hr id="header_01">
 <br>
 
+<!-- Saved pipelines header -->
 <div class="w3-container">
     <button class="w3-button w3-block" onclick="toggle_viz('visualizer'); toggle_arrow('icon_models');"><b>Saved Pipelines</b><i id="icon_models" class="w3-right fa fa-angle-up" style='font-size:20px'></i></button>
 </div>
 <br>
 
+<!-- Saved pipelines section -->
 <div class="w3-container w3-show" id="visualizer">
     <div class="w3-container">
         <div class="w3-row">
@@ -866,11 +630,13 @@
 <hr id="header_02">
 <br>
 
+<!-- Pipeline editor header -->
 <div class="w3-container">
     <button class="w3-button w3-block" onclick="toggle_viz('editor'); toggle_arrow('icon_editor');"><b>Pipeline editor</b><i id="icon_editor" class="w3-right fa fa-angle-up" style='font-size:20px'></i></button>
 </div>
 <br>
 
+<!-- Pipeline editor section -->
 <div class="w3-container w3-show" id="editor">
     <div id="sample">
         <div class="w3-container">
@@ -967,10 +733,12 @@
 <hr id="header_03">
 <br>
 
+<!-- Vizualize output header -->
 <div class="w3-container">
     <button class="w3-button w3-block" onclick="toggle_viz('output_viz'); toggle_arrow('icon_viz');"><b>Visualize output</b><i id="icon_viz" class="w3-right fa fa-angle-up" style='font-size:20px'></i></button>
 </div>
 
+<!-- Vizualize output section -->
 <div class="w3-container w3-center w3-margin w3-show" id="output_viz">
     <div class="w3-row" id="edv_div" style="height: 600px;">
         <div class="w3-quarter w3-hide" id="edv_list_div" style="height: 600px; overflow-y: auto;">
@@ -1056,12 +824,6 @@
             <br>
             <div class="w3-container">
                 <div class="w3-bar">
-                    <!-- <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_A');document.getElementById('modal_02').style.display='none'">main_A</button>
-                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_B');document.getElementById('modal_02').style.display='none'">main_B</button>
-                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_C');document.getElementById('modal_02').style.display='none'">main_C</button>
-                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_D');document.getElementById('modal_02').style.display='none'">main_D</button>
-                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_E');document.getElementById('modal_02').style.display='none'">main_E</button>
-                    <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('main_F');document.getElementById('modal_02').style.display='none'">main_F</button> -->
                     <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('ml_nn_pipeline');document.getElementById('modal_02').style.display='none'">ML 1</button>
                     <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('ml_bcnn_pipeline');document.getElementById('modal_02').style.display='none'">ML 2</button>
                     <button class="w3-bar-item w3-button w3-border" onclick="request_pipeline('ml_fmnn_pipeline');document.getElementById('modal_02').style.display='none'">ML 3</button>

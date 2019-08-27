@@ -1,3 +1,0 @@
-Toolboxes needed:
-- curve fitting toolbox
-- wavelet toolbox

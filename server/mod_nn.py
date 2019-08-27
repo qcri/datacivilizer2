@@ -190,19 +190,17 @@ def execute_service(in_data_dir, index_file, matrix_img_file, graph_data_file, h
 
     # For demo purposes, just copy precomputed output to the run directory
     model = matrix_img_file.partition('_')[0]
-    print(type(model))
-    print(model)
-    if model == "3":
+    if model == "0":
         print("ml_nn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/ml1_viz_-2.png'
         precomp_graph_data_path = 'ml_outputs/ml1_viz_-2_new.csv'
         precomp_hist_data_path = 'ml_outputs/ml1_viz_-2.json'
-    elif model == "4":
+    elif model == "1":
         print("ml_bcnn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/ml2_viz_-2.png'
         precomp_graph_data_path = 'ml_outputs/ml2_viz_-2_new.csv'
         precomp_hist_data_path = 'ml_outputs/ml2_viz_-2.json'
-    elif model == "5":
+    elif model == "2":
         print("ml_fmnn_pipeline")
         precomp_matrix_img_path = 'ml_outputs/ml3_viz_-2.png'
         precomp_graph_data_path = 'ml_outputs/ml3_viz_-2_new.csv'

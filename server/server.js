@@ -16,6 +16,7 @@ const { execSync, spawn } = require('child_process');
 const csv = require('csv-parser');
 const path_sort = require('path-sort');
 
+const VERSIONING_DATA_FILE = "versioningData.json";
 var dataVizPath = "";
 var trackingModuleName = "";
 var colorVizTracker = "";
@@ -74,6 +75,92 @@ app.get('/', function (request, response) {
     response.sendfile(path.resolve('./editor.html'));
 });
 
+app.get('/lpf.js', function (request, response) {
+    response.sendfile(path.resolve('./eeg_renderer/lpf.js'));
+});
+
+app.get('/go.js', function (request, response) {
+    response.sendfile(path.resolve('../release/go.js'));
+});
+
+app.get('/Figures.js', function (request, response) {
+    response.sendfile(path.resolve('../extensions/Figures.js'));
+});
+
+app.get('/dragscroll.js', function (request, response) {
+    response.sendfile(path.resolve('../extensions/dragscroll.js'));
+});
+
+app.get('/DataInspector.js', function (request, response) {
+    response.sendfile(path.resolve('../extensions/DataInspector.js'));
+});
+
+app.get('/Chart.js', function (request, response) {
+    response.sendfile(path.resolve('../extensions/Chart.js'));
+});
+
+app.get('/DataInspector.css', function (request, response) {
+    response.sendfile(path.resolve('../extensions/DataInspector.css'));
+});
+
+app.get('/versioningUtils.js', function (request, response) {
+    response.sendfile(path.resolve('./jsUtils/versioningUtils.js'));
+});
+
+app.get('/vizUtils.js', function (request, response) {
+    response.sendfile(path.resolve('./jsUtils/vizUtils.js'));
+});
+
+app.get('/modelsvisualizerUtils.js', function (request, response) {
+    response.sendfile(path.resolve('./jsUtils/modelsvisualizerUtils.js'));
+});
+
+app.get('/debuggerUtils.js', function (request, response) {
+    response.sendfile(path.resolve('./jsUtils/debuggerUtils.js'));
+});
+
+app.get('/trackingUtils.js', function (request, response) {
+    response.sendfile(path.resolve('./jsUtils/trackingUtils.js'));
+});
+
+app.get('/ejs_production.js', function (request, response) {
+    response.sendfile(path.resolve('../extensions/ejs_production.js'));
+});
+
+app.get('/model.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/model.ejs'));
+});
+
+app.get('/parameters.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/parameters.ejs'));
+});
+
+app.get('/metrics.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/metrics.ejs'));
+});
+
+app.get('/debugger_tab.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/debugger_tab.ejs'));
+});
+
+app.get('/debugger_model.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/debugger_model.ejs'));
+});
+
+app.get('/tracked_id_range.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/tracked_id_range.ejs'));
+});
+
+app.get('/tracking_filter.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/tracking_filter.ejs'));
+});
+
+app.get('/edv_list_elem.ejs', function (request, response) {
+    response.sendfile(path.resolve('./ejs/edv_list_elem.ejs'));
+});
+
+/* Data visualization */
+
 // eeg data visualization
 app.get('/idTrackingModule', function (request, response) {
   trackingModuleName = request.query.moduleName;
@@ -101,7 +188,6 @@ app.get('/setViz', function (request, response) {
 app.get('/vizData', function (request, response) {
     var rawdata = fs.readFileSync(dataVizPath);
     var data_series = JSON.parse(rawdata);
-    console.log("data")
     response.send(data_series)
 });
 
@@ -172,115 +258,15 @@ app.get('/setImageViz', function (request, response) {
     response.send("ok");
 });
 
-app.get('/lpf.js', function (request, response) {
-    response.sendfile(path.resolve('./eeg_renderer/lpf.js'));
-});
-
-// app.get('/data1.js', function (request, response) {
-//     response.sendfile(path.resolve('./eeg_renderer/data1.js'));
-// });
-
-app.get('/data3.js', function (request, response) {
-    response.sendfile(path.resolve('./eeg_renderer/data3.js'));
-});
-
-app.get('/data_from_file', function (request, response) {
-    response.sendfile(path.resolve('./Data/data_json_new.json'));
-});
-
-app.get('/go.js', function (request, response) {
-    response.sendfile(path.resolve('../release/go.js'));
-});
-
-app.get('/Figures.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/Figures.js'));
-});
-
-app.get('/dragscroll.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/dragscroll.js'));
-});
-
-app.get('/DataInspector.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/DataInspector.js'));
-});
-
-app.get('/Chart.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/Chart.js'));
-});
-
-app.get('/DataInspector.css', function (request, response) {
-    response.sendfile(path.resolve('../extensions/DataInspector.css'));
-});
-
-app.get('/versioningUtils.js', function (request, response) {
-    response.sendfile(path.resolve('./versioningUtils.js'));
-});
-
-app.get('/visualizerUtils.js', function (request, response) {
-    response.sendfile(path.resolve('./visualizerUtils.js'));
-});
-
-app.get('/debuggerUtils.js', function (request, response) {
-    response.sendfile(path.resolve('./debuggerUtils.js'));
-});
-
-app.get('/trackingUtils.js', function (request, response) {
-    response.sendfile(path.resolve('./trackingUtils.js'));
-});
-
-app.get('/ejs_production.js', function (request, response) {
-    response.sendfile(path.resolve('./ejs_production.js'));
-});
-
-app.get('/model.ejs', function (request, response) {
-    response.sendfile(path.resolve('./ejs/model.ejs'));
-});
-
-app.get('/parameters.ejs', function (request, response) {
-    response.sendfile(path.resolve('./ejs/parameters.ejs'));
-});
-
-app.get('/metrics.ejs', function (request, response) {
-    response.sendfile(path.resolve('./ejs/metrics.ejs'));
-});
-
-app.get('/debugger_tab.ejs', function (request, response) {
-    response.sendfile(path.resolve('./ejs/debugger_tab.ejs'));
-});
-
-app.get('/debugger_model.ejs', function (request, response) {
-    response.sendfile(path.resolve('./ejs/debugger_model.ejs'));
-});
-
-app.get('/tracked_id_range.ejs', function (request, response) {
-    response.sendfile(path.resolve('./ejs/tracked_id_range.ejs'));
-});
-
-app.get('/tracking_filter.ejs', function (request, response) {
-    response.sendfile(path.resolve('./ejs/tracking_filter.ejs'));
-});
-
-app.get('/edv_list_elem.ejs', function (request, response) {
-    response.sendfile(path.resolve('./ejs/edv_list_elem.ejs'));
-});
-
-app.get('/visualizer.css', function (request, response) {
-    response.sendfile(path.resolve('./css/visualizer.css'));
-});
-
-app.get('/debugger.css', function (request, response) {
-    response.sendfile(path.resolve('./css/debugger.css'));
-});
-
-app.get('/Data/out_-1.jpg', function (request, response) {
-    response.sendfile(path.resolve('./Data/out_-1.jpg'));
-});
-
 /**
  * Runs a DC2 pipeline
  * args
- @pipeline (Map): maps node id to its JSON description. Assumes the nodes are sorted in toplogical order
+ @modelId
+ @runNo
+ @pipeline_map (Map): maps node id to its JSON description. Assumes the nodes are sorted in toplogical order
  @in_map (Map): maps input dependencies for each node id
+ @debugger_type: no_split, clean or dirty
+ @tracking_filters
  * process
  * 1/ loop through nodes in the graph
  * 2/ call the corresponding python script depending on the value of cmd attribute
@@ -396,9 +382,6 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
         }
         splits.push(100);
 
-        console.log("Viz:");
-        console.log(viz);
-
         run_info['pipeline'].push({
             'cmd_name': cmd_name,
             'cmd_path': cmd_path,
@@ -512,7 +495,6 @@ app.post('/run', function (request, response) {
     console.log("running pipeline requested");
     console.log(request.body);
 
-    //parse JSON file
     var pipeline = request.body.pipeline;
     const modelId = pipeline.modelId;
     const runNo = pipeline.runNo;
@@ -556,6 +538,7 @@ app.post('/run', function (request, response) {
             });
         }
     }
+    console.log("Model debug info");
     console.log(model_debug_info);
     response.send(JSON.stringify(model_debug_info));
 });
@@ -649,6 +632,7 @@ app.post('/finish_run', function (request, response) {
     /*var tracking_file_name = obj.tracking_file_name;*/
 
     var metrics = JSON.parse(fs.readFileSync(metric_file_name, 'utf8'));
+    console.log("Metrics")
     console.log(metrics);
     fs.unlinkSync(metric_file_name);
 
@@ -664,9 +648,9 @@ function remove_dir(dir_name, is_first=true) {
     try {
         fs.readdirSync(dir_name).forEach(function(filename, index){
             var curPath = path.join(dir_name, filename)
-            if (fs.lstatSync(curPath).isDirectory()) { // recurse
+            if (fs.lstatSync(curPath).isDirectory()) {
                 remove_dir(curPath, false);
-            } else { // delete file
+            } else {
                 fs.unlinkSync(curPath);
             }
         });
@@ -721,14 +705,14 @@ app.post('/saveModelVersions', function (request, response) {
 
     console.log("saving versioning data");
     var obj = JSON.stringify(request.body, null, 4);
-    fs.writeFileSync("versioningData.json", obj, 'utf8');
+    fs.writeFileSync(VERSIONING_DATA_FILE, obj, 'utf8');
     response.end();
 });
 
 app.get('/getModelVersions', function (request, response) {
 
     console.log("loading versioning data");
-    response.sendfile(path.resolve("versioningData.json"));
+    response.sendfile(path.resolve(VERSIONING_DATA_FILE));
 });
 
 function get_modules_info() {
@@ -778,27 +762,7 @@ app.get('/request_pipeline', function (request, response) {
     response.sendfile(path.resolve(keys[0]) + '.json');
 });
 
-app.get('/fig.png', function (request, response) {
-
-    response.sendfile(path.resolve('fig.png'));
-});
-
-app.get('/download_output', function (request, response) {
-
-    var obj = JSON.stringify(request.query);
-    var jss = JSON.parse(obj);
-    var keys = Object.keys(jss);
-    var file_name = path.resolve("Data/out_" + Object.keys(jss)[0]) + ".mat";
-    var stats = fs.statSync(file_name)
-    response.writeHead(200, {
-        'Content-Type': 'application/x-binary',
-        'Content-Length': stats["size"],
-        'Content-Disposition': 'attachment; filename= out_' + Object.keys(jss)[0] + '.mat'
-    });
-    var readStream = fs.createReadStream(file_name);
-    // We replaced all the event handlers with a simple call to readStream.pipe()
-    readStream.pipe(response);
-});
+/* Dashboard communication functions */
 
 function startNewRun(modelId, runNo) {
 

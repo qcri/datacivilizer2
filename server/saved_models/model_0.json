@@ -3,7 +3,7 @@
     "linkFromPortIdProperty": "fromPort",
     "linkToPortIdProperty": "toPort",
     "modelData": {
-        "position": "-329.796875 -298"
+        "position": "-407.796875 -289"
     },
     "nodeDataArray": [
         {
@@ -14,23 +14,7 @@
             "path": "dataset_index.pkl",
             "viz_path": "",
             "key": -1,
-            "loc": "-16.796875 -257.40625"
-        },
-        {
-            "text": "Balance",
-            "figure": "RoundedRectangle",
-            "fill": "white",
-            "cmd": "mod_balance",
-            "key": -3,
-            "loc": "-16.796875 -173.40625"
-        },
-        {
-            "text": "Crop",
-            "figure": "RoundedRectangle",
-            "fill": "white",
-            "cmd": "mod_crop",
-            "key": -9,
-            "loc": "-16.796875 -81.40625"
+            "loc": "-16.796875 -81.40624999999989"
         },
         {
             "text": "Data source",
@@ -40,15 +24,7 @@
             "path": "second_dataset_from_cpd_eeg_10s_split",
             "viz_path": "",
             "key": -4,
-            "loc": "-235.796875 -38.40625"
-        },
-        {
-            "text": "FlipMontage",
-            "figure": "RoundedRectangle",
-            "fill": "white",
-            "cmd": "mod_flip_montage",
-            "key": -11,
-            "loc": "-126.796875 45.59375"
+            "loc": "-155.796875 -82.40625"
         },
         {
             "text": "Neural Net",
@@ -56,529 +32,55 @@
             "fill": "lightgray",
             "cmd": "mod_nn",
             "key": -2,
-            "loc": "-16.796875 117.59375"
+            "loc": "-16.796875 3.59375"
         }
     ],
     "linkDataArray": [
         {
-            "from": -1,
-            "to": -3,
-            "fromPort": "",
-            "toPort": "T",
-            "points": [
-                -16.796875,
-                -237.40625,
-                -16.796875,
-                -227.40625,
-                -16.796875,
-                -215.40625,
-                -16.796875,
-                -215.40625,
-                -16.796875,
-                -203.40625,
-                -16.796875,
-                -193.40625
-            ]
-        },
-        {
-            "from": -3,
-            "to": -9,
-            "fromPort": "",
-            "toPort": "",
-            "points": [
-                -16.796875,
-                -153.40625,
-                -16.796875,
-                -143.40625,
-                -16.796875,
-                -127.40625,
-                -16.796875,
-                -127.40625,
-                -16.796875,
-                -111.40625,
-                -16.796875,
-                -101.40625
-            ]
-        },
-        {
-            "from": -9,
-            "to": -2,
-            "fromPort": "",
-            "toPort": "",
-            "points": [
-                -16.796875,
-                -61.40625,
-                -16.796875,
-                -51.40625,
-                -16.796875,
-                18.09375,
-                -16.796875,
-                18.09375,
-                -16.796875,
-                87.59375,
-                -16.796875,
-                97.59375
-            ]
-        },
-        {
-            "from": -11,
-            "to": -2,
-            "fromPort": "",
-            "toPort": "L",
-            "points": [
-                -126.796875,
-                65.59375,
-                -126.796875,
-                75.59375,
-                -126.796875,
-                117.59375,
-                -106.796875,
-                117.59375,
-                -86.796875,
-                117.59375,
-                -76.796875,
-                117.59375
-            ]
-        },
-        {
-            "from": -9,
-            "to": -11,
-            "fromPort": "",
-            "toPort": "T",
-            "points": [
-                -16.796875,
-                -61.40625,
-                -16.796875,
-                -51.40625,
-                -16.796875,
-                -17.90625,
-                -126.796875,
-                -17.90625,
-                -126.796875,
-                15.59375,
-                -126.796875,
-                25.59375
-            ]
-        },
-        {
             "from": -4,
-            "to": -11,
+            "to": -2,
             "fromPort": "",
             "toPort": "L",
             "points": [
-                -235.796875,
-                -18.40625,
-                -235.796875,
-                -8.40625,
-                -235.796875,
-                45.59375,
-                -216.296875,
-                45.59375,
-                -196.796875,
-                45.59375,
-                -186.796875,
-                45.59375
+                -155.796875,
+                -62.40625,
+                -155.796875,
+                -52.40625,
+                -155.796875,
+                3.59375,
+                -121.296875,
+                3.59375,
+                -86.796875,
+                3.59375,
+                -76.796875,
+                3.59375
+            ]
+        },
+        {
+            "from": -1,
+            "to": -2,
+            "fromPort": "",
+            "toPort": "",
+            "points": [
+                -16.796875,
+                -61.40625,
+                -16.796875,
+                -51.40625,
+                -16.796875,
+                -38.90625,
+                -16.796875,
+                -38.90625,
+                -16.796875,
+                -26.40625,
+                -16.796875,
+                -16.40625
             ]
         }
     ],
     "modelId": 0,
-    "runNo": 87,
+    "runNo": 1,
     "parameters": {
         "path": "second_dataset_from_cpd_eeg_10s_split",
         "viz_path": ""
-    },
-    "runs": [
-        {
-            "runNo": 1,
-            "metrics": {}
-        },
-        {
-            "runNo": 2,
-            "metrics": {}
-        },
-        {
-            "runNo": 3,
-            "metrics": {}
-        },
-        {
-            "runNo": 4,
-            "metrics": {}
-        },
-        {
-            "runNo": 5,
-            "metrics": {}
-        },
-        {
-            "runNo": 7,
-            "metrics": {}
-        },
-        {
-            "runNo": 8,
-            "metrics": {}
-        },
-        {
-            "runNo": 9,
-            "metrics": {}
-        },
-        {
-            "runNo": 10,
-            "metrics": {}
-        },
-        {
-            "runNo": 11,
-            "metrics": {}
-        },
-        {
-            "runNo": 13,
-            "metrics": {}
-        },
-        {
-            "runNo": 14,
-            "metrics": {}
-        },
-        {
-            "runNo": 15,
-            "metrics": {}
-        },
-        {
-            "runNo": 16,
-            "metrics": {}
-        },
-        {
-            "runNo": 17,
-            "metrics": {}
-        },
-        {
-            "runNo": 18,
-            "metrics": {}
-        },
-        {
-            "runNo": 19,
-            "metrics": {}
-        },
-        {
-            "runNo": 20,
-            "metrics": {}
-        },
-        {
-            "runNo": 21,
-            "metrics": {}
-        },
-        {
-            "runNo": 22,
-            "metrics": {}
-        },
-        {
-            "runNo": 23,
-            "metrics": {}
-        },
-        {
-            "runNo": 24,
-            "metrics": {}
-        },
-        {
-            "runNo": 25,
-            "metrics": {}
-        },
-        {
-            "runNo": 26,
-            "metrics": {}
-        },
-        {
-            "runNo": 27,
-            "metrics": {}
-        },
-        {
-            "runNo": 28,
-            "metrics": {}
-        },
-        {
-            "runNo": 29,
-            "metrics": {}
-        },
-        {
-            "runNo": 30,
-            "metrics": {}
-        },
-        {
-            "runNo": 31,
-            "metrics": {}
-        },
-        {
-            "runNo": 32,
-            "metrics": {}
-        },
-        {
-            "runNo": 33,
-            "metrics": {}
-        },
-        {
-            "runNo": 34,
-            "metrics": {}
-        },
-        {
-            "runNo": 36,
-            "metrics": {}
-        },
-        {
-            "runNo": 37,
-            "metrics": {}
-        },
-        {
-            "runNo": 38,
-            "metrics": {}
-        },
-        {
-            "runNo": 39,
-            "metrics": {}
-        },
-        {
-            "runNo": 40,
-            "metrics": {}
-        },
-        {
-            "runNo": 41,
-            "metrics": {}
-        },
-        {
-            "runNo": 42,
-            "metrics": {}
-        },
-        {
-            "runNo": 43,
-            "metrics": {}
-        },
-        {
-            "runNo": 44,
-            "metrics": {}
-        },
-        {
-            "runNo": 45,
-            "metrics": {}
-        },
-        {
-            "runNo": 46,
-            "metrics": {}
-        },
-        {
-            "runNo": 47,
-            "metrics": {}
-        },
-        {
-            "runNo": 48,
-            "metrics": {}
-        },
-        {
-            "runNo": 49,
-            "metrics": {}
-        },
-        {
-            "runNo": 50,
-            "metrics": {}
-        },
-        {
-            "runNo": 51,
-            "metrics": {}
-        },
-        {
-            "runNo": 52,
-            "metrics": {}
-        },
-        {
-            "runNo": 53,
-            "metrics": {}
-        },
-        {
-            "runNo": 54,
-            "metrics": {}
-        },
-        {
-            "runNo": 55,
-            "metrics": {}
-        },
-        {
-            "runNo": 56,
-            "metrics": {}
-        },
-        {
-            "runNo": 57,
-            "metrics": {}
-        },
-        {
-            "runNo": 58,
-            "metrics": {}
-        },
-        {
-            "runNo": 59,
-            "metrics": {}
-        },
-        {
-            "runNo": 60,
-            "metrics": {}
-        },
-        {
-            "runNo": 61,
-            "metrics": {}
-        },
-        {
-            "runNo": 62,
-            "metrics": {}
-        },
-        {
-            "runNo": 63,
-            "metrics": {}
-        },
-        {
-            "runNo": 64,
-            "metrics": {}
-        },
-        {
-            "runNo": 65,
-            "metrics": {}
-        },
-        {
-            "runNo": 66,
-            "metrics": {}
-        },
-        {
-            "runNo": 67,
-            "metrics": {}
-        },
-        {
-            "runNo": 68,
-            "metrics": {}
-        },
-        {
-            "runNo": 69,
-            "metrics": {}
-        },
-        {
-            "runNo": 70,
-            "metrics": {}
-        },
-        {
-            "runNo": 71,
-            "metrics": {}
-        },
-        {
-            "runNo": 58,
-            "metrics": {}
-        },
-        {
-            "runNo": 59,
-            "metrics": {}
-        },
-        {
-            "runNo": 60,
-            "metrics": {}
-        },
-        {
-            "runNo": 61,
-            "metrics": {}
-        },
-        {
-            "runNo": 62,
-            "metrics": {}
-        },
-        {
-            "runNo": 63,
-            "metrics": {}
-        },
-        {
-            "runNo": 64,
-            "metrics": {}
-        },
-        {
-            "runNo": 65,
-            "metrics": {}
-        },
-        {
-            "runNo": 66,
-            "metrics": {}
-        },
-        {
-            "runNo": 67,
-            "metrics": {}
-        },
-        {
-            "runNo": 68,
-            "metrics": {}
-        },
-        {
-            "runNo": 69,
-            "metrics": {}
-        },
-        {
-            "runNo": 70,
-            "metrics": {}
-        },
-        {
-            "runNo": 71,
-            "metrics": {}
-        },
-        {
-            "runNo": 72,
-            "metrics": {}
-        },
-        {
-            "runNo": 73,
-            "metrics": {}
-        },
-        {
-            "runNo": 74,
-            "metrics": {}
-        },
-        {
-            "runNo": 75,
-            "metrics": {}
-        },
-        {
-            "runNo": 76,
-            "metrics": {}
-        },
-        {
-            "runNo": 77,
-            "metrics": {}
-        },
-        {
-            "runNo": 78,
-            "metrics": {}
-        },
-        {
-            "runNo": 79,
-            "metrics": {}
-        },
-        {
-            "runNo": 80,
-            "metrics": {}
-        },
-        {
-            "runNo": 81,
-            "metrics": {}
-        },
-        {
-            "runNo": 82,
-            "metrics": {}
-        },
-        {
-            "runNo": 83,
-            "metrics": {}
-        },
-        {
-            "runNo": 84,
-            "metrics": {}
-        },
-        {
-            "runNo": 85,
-            "metrics": {}
-        },
-        {
-            "runNo": 86,
-            "metrics": {}
-        },
-        {
-            "runNo": 87,
-            "metrics": {}
-        }
-    ]
+    }
 }
