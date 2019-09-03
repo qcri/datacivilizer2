@@ -49,7 +49,7 @@ class Debugger(object):
     def prepare_modules(self):
         for i in range(self.num_modules):
             module_dic = self.pipeline[i]
-            module_args = ['python', module_dic['cmd_path']]
+            module_args = ['python3', module_dic['cmd_path']]
             module_args.extend(module_dic['inputs'])
             module_args.extend(module_dic['outputs'])
             if 'viz' in module_dic:

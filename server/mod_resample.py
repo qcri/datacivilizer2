@@ -18,14 +18,14 @@ def execute_service(in_path, out_path, viz_out_path, resample_freq=200):
     viz_out_file = viz_out_path.partition('/')[2]
     eeg_good_folder = "eeg_good_outputs"
     eeg_bad_folder = "eeg_bad_outputs"
-    if model == "1":
+    if model == "4":
         print("eeg_good_pipeline")
         fs.setValues([200, 200])
         copyfile('./Data/' + eeg_good_folder + '/' + out_file, './Data/' + out_path)
         copyfile('./Data/' + eeg_good_folder + '/' + viz_out_file, './Data/' + viz_out_path)
         time.sleep(3)
         return
-    elif model == "2":
+    elif model == "5":
         print("eeg_bad_pipeline")
         fs.setValues([200, 50])
         copyfile('./Data/' + eeg_bad_folder + '/' + out_file, './Data/' + out_path)

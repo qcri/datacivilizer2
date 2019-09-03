@@ -80,27 +80,31 @@ app.get('/lpf.js', function (request, response) {
 });
 
 app.get('/go.js', function (request, response) {
-    response.sendfile(path.resolve('../release/go.js'));
+    response.sendfile(path.resolve('./release/go.js'));
 });
 
 app.get('/Figures.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/Figures.js'));
+    response.sendfile(path.resolve('./extensions/Figures.js'));
 });
 
 app.get('/dragscroll.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/dragscroll.js'));
+    response.sendfile(path.resolve('./extensions/dragscroll.js'));
 });
 
 app.get('/DataInspector.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/DataInspector.js'));
+    response.sendfile(path.resolve('./extensions/DataInspector.js'));
 });
 
 app.get('/Chart.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/Chart.js'));
+    response.sendfile(path.resolve('./extensions/Chart.js'));
 });
 
 app.get('/DataInspector.css', function (request, response) {
-    response.sendfile(path.resolve('../extensions/DataInspector.css'));
+    response.sendfile(path.resolve('./extensions/DataInspector.css'));
+});
+
+app.get('/ejs_production.js', function (request, response) {
+    response.sendfile(path.resolve('./extensions/ejs_production.js'));
 });
 
 app.get('/versioningUtils.js', function (request, response) {
@@ -121,10 +125,6 @@ app.get('/debuggerUtils.js', function (request, response) {
 
 app.get('/trackingUtils.js', function (request, response) {
     response.sendfile(path.resolve('./jsUtils/trackingUtils.js'));
-});
-
-app.get('/ejs_production.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/ejs_production.js'));
 });
 
 app.get('/model.ejs', function (request, response) {
@@ -178,7 +178,7 @@ app.get('/setViz', function (request, response) {
     if (filepath.endsWith('.pkl')) {
         pklFileBoolean = true;
         dataVizPath = "./Data/plk_viz.json";
-        execSync('python utils/pklToJson.py ' + filepath + ' ' + dataVizPath, {stdio: 'inherit'});
+        execSync('python3 utils/pklToJson.py ' + filepath + ' ' + dataVizPath, {stdio: 'inherit'});
     } else {
         pklFileBoolean = false;
     }
@@ -415,7 +415,7 @@ function run_pipeline(modelId, runNo, pipeline_map, in_map, debugger_type, track
     tracking_obj = JSON.stringify(tracking_info, null, 4);
     fs.writeFileSync('./Data/' + dirName + '/' + run_info_filename, run_obj, 'utf8');
     fs.writeFileSync('./Data/' + dirName + '/' + tracking_info_filename, tracking_obj, 'utf8');
-    var child = spawn('python ' + args.join(' '), {'shell': true, 'stdio': 'inherit'});
+    var child = spawn('python3 ' + args.join(' '), {'shell': true, 'stdio': 'inherit'});
     running_models.push(modelId.toString() + '_' + runNo.toString());
 };
 

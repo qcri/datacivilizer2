@@ -10,7 +10,7 @@ def execute_service(in_path, out_path, viz_out_path, notch_freq=60.0, high_pass_
     out_file = out_path.partition('/')[2]
     viz_out_file = viz_out_path.partition('/')[2]
     eeg_good_folder = "eeg_good_outputs"
-    if model == "1":
+    if model == "4":
         print("eeg_good_pipeline")
         copyfile('./Data/' + eeg_good_folder + '/' + out_file, './Data/' + out_path)
         copyfile('./Data/' + eeg_good_folder + '/' + viz_out_file, './Data/' + viz_out_path)

@@ -43,7 +43,7 @@ def transform_to_tensor(file_in, file_out, point_end):
         index += 1
         tensor_final.append(pp)
 
-    tensor_small = tensor_final[:point_end]
+    tensor_small = tensor_final[:]
 
     final_stuct.append(tensor_small)
 

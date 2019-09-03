@@ -85,16 +85,12 @@ app.get('/lpf.js', function (request, response) {
     response.sendfile(path.resolve('../server/eeg_renderer/lpf.js'));
 });
 
-app.get('/data3.js', function (request, response) {
-    response.sendfile(path.resolve('../server/eeg_renderer/data3.js'));
-});
-
 app.get('/Chart.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/Chart.js'));
+    response.sendfile(path.resolve('../server/extensions/Chart.js'));
 });
 
 app.get('/dragscroll.js', function (request, response) {
-    response.sendfile(path.resolve('../extensions/dragscroll.js'));
+    response.sendfile(path.resolve('../server/extensions/dragscroll.js'));
 });
 
 app.post('/startNewRun', function (request, response) {

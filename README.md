@@ -6,6 +6,31 @@
 git clone --recursive https://github.com/qcri/datacivilizer2.git
 ```
 
+### Run the Node.js server on Docker
+
+1. Build the image
+```
+cd server/
+docker build -t dc2 .
+```
+
+2. Start a container from the image
+```
+docker run -p 8080:8080 -d dc2
+```
+
+3. Start a container from the image with the segment data folder attached
+```
+docker run -p 8080:8080 <path_to_segment_data_folder>:/usr/src/app/Data/second_dataset_from_cpd_eeg_10s_split -d dc2
+```
+
+4. Stop the container
+```
+docker stop <containerID>
+```
+
+### Or
+
 ### Install the dependencies
 
 1. Node.js dependencies
@@ -20,10 +45,12 @@ npm install request
 
 2. Python dependencies
 ```
+pip install matplotlib
 pip install tensorboardX
 pip install torch
 pip install hdf5storage
 pip install tqdm
+pip install requests
 ```
 
 3. You need to have a working version of Matlab (tested with R2019a and R2018).

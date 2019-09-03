@@ -23,7 +23,7 @@ def execute_service(in_path, out_path, viz_out_path, montage_type="monopolar"):
     out_file = out_path.partition('/')[2]
     viz_out_file = viz_out_path.partition('/')[2]
     eeg_good_folder = "eeg_good_outputs"
-    if model == "1":
+    if model == "4":
         print("eeg_good_pipeline")
         num_channels.setValue(19);
         copyfile('./Data/' + eeg_good_folder + '/' + out_file, './Data/' + out_path)
